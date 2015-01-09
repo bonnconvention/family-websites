@@ -1,10 +1,10 @@
 {
     "db" : {
-        "host": "db",
+        "host": "localhost",
         "username" : "root",
         "password" : "root",
         "port": 3306,
-        "database" : "osha",
+        "database" : "cms",
         "root_username": "root",
         "root_password": "root"
     },
@@ -13,7 +13,7 @@
         "password": "admin",
         "email": "account@example.com"
     },
-    "uri": "http://osha.localhost",
+    "uri": "http://cms.localhost",
     "solr_server": {
         "name": "Apache Solr server",
         "enabled": 1,
@@ -21,7 +21,7 @@
         "scheme": "http",
         "host": "127.0.0.1",
         "port": 8080,
-        "path": "/solr/osha",
+        "path": "/solr/cms",
         "http_user": "",
         "http_password": "",
         "excerpt": 1,

@@ -3,9 +3,9 @@
 $aliases['cms.prod'] = array(
   'uri' => 'set-ip-from-local',
   'db-allows-remote' => TRUE,
-  'remote-host' => 'osha-corp-staging03.mainstrat.com',
+  'remote-host' => 'please-fill-in-local-aliases',
   'remote-user' => 'root',
-  'root' => '/var/local/cms/project/docroot',
+  'root' => 'please-fill-in-local-aliases',
   'path-aliases' => array(
     '%files' => 'sites/default/files',
   ),
