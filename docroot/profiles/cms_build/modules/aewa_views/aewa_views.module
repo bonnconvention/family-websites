@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the AEWA Views feature.
+ */
+
+include_once 'aewa_views.features.inc';

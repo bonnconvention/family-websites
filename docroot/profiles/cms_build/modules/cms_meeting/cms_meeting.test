@@ -1,0 +1,367 @@
+<?php
+
+class CMSMeetingWebTestCase extends CMSWebTestCase {
+
+    static function getInfo() {
+        return array(
+            'name' => 'CMS Meeting',
+            'description' => 'Verify functionality of CMS Meeting',
+            'group' => 'CMS Tests'
+        );
+    }
+
+
+    function setUp() {
+        parent::setUp('uuid', 'taxonomy', 'taxonomy_access_fix' ,'meeting'
+                ,'country', 'species','publication', 'legal_instrument' 
+            );
+        self::$bundle = CMSMeeting::$bundle;
+    }
+
+    function test_security_role_anonymous() {
+        $node = CMSMeeting::node_create('test_meeting');
+
+        $this->try_anonymous_role($node->nid, 'test_meeting', 'meeting/listing', 'node/add/meeting');
+        $this->ensure_access_denied_for_vocabulary(VOC_MEETING_KIND, 'anonymous');
+        $this->ensure_access_denied_for_vocabulary(VOC_MEETING_STATUS, 'anonymous');
+        $this->ensure_access_denied_for_vocabulary(VOC_MEETING_TYPE, 'anonymous');
+    }
+
+    function test_security_role_authenticated() {
+        $node = CMSMeeting::node_create('test_meeting');
+
+        $this->try_authenticated_role($node->nid, 'test_meeting', 'meeting/listing', 'node/add/meeting');
+        $this->ensure_access_denied_for_vocabulary(VOC_MEETING_KIND, self::$role_authenticated);
+        $this->ensure_access_denied_for_vocabulary(VOC_MEETING_STATUS, self::$role_authenticated);
+        $this->ensure_access_denied_for_vocabulary(VOC_MEETING_TYPE, self::$role_authenticated);
+    }
+
+    function test_security_role_manager() {
+        $agreement = CMSUtils::vocabulary_get_or_create_term('agreement', VOC_INSTRUMENT_STATUS);
+        $instrument = CMSLegalInstrument::node_create('TEST', 'test_instrument', $agreement->tid, '2011-12-22');
+        $type = CMSUtils::vocabulary_get_or_create_term('type1', VOC_MEETING_TYPE);
+
+        $add = array(
+            'title' => 'test_meeting',
+            'field_instrument[und]' => $instrument->nid,
+            'field_meeting_type[und]' => $type->tid,
+            'field_meeting_start[und][0][value][date]' => '4 Apr 2013',
+            'field_meeting_start[und][0][value][time]' => '14:00'
+        );
+
+        $this->try_manager_role(ROLE_MANAGE_MEETINGS, $add, 'meeting/listing', 'node/add/meeting');
+        $this->ensure_access_for_vocabulary(VOC_MEETING_TYPE, ROLE_MANAGE_MEETINGS, 2);
+        $this->ensure_access_for_vocabulary(VOC_MEETING_KIND, ROLE_MANAGE_MEETINGS, 3);
+        $this->ensure_access_for_vocabulary(VOC_MEETING_STATUS, ROLE_MANAGE_MEETINGS, 4);
+
+    }
+
+    function test_security_role_administrator() {
+        $agreement = CMSUtils::vocabulary_get_or_create_term('agreement', VOC_INSTRUMENT_STATUS);
+        $instrument = CMSLegalInstrument::node_create('TEST', 'test_instrument', $agreement->tid, '2011-12-22');
+        $type = CMSUtils::vocabulary_get_or_create_term('type1', VOC_MEETING_TYPE);
+
+        $add = array(
+            'title' => 'test_meeting',
+            'field_instrument[und]' => $instrument->nid,
+            'field_meeting_type[und]' => $type->tid,
+            'field_meeting_start[und][0][value][date]' => '4 Apr 2013',
+            'field_meeting_start[und][0][value][time]' => '14:00'
+        );
+
+        $this->try_administrator_role($add, 'meeting/listing', 'node/add/meeting');
+        $this->ensure_access_for_vocabulary(VOC_MEETING_KIND, self::$role_administrator, 3);
+        $this->ensure_access_for_vocabulary(VOC_MEETING_STATUS, self::$role_administrator, 4);
+        $this->ensure_access_for_vocabulary(VOC_MEETING_TYPE, self::$role_administrator, 5);
+    }
+
+    function test_node_to_array() {
+        $node = CMSMeeting::node_create('test_meeting');
+
+        $mou = CMSUtils::vocabulary_get_or_create_term('MOU', VOC_INSTRUMENT_STATUS);
+        CMSLegalInstrument::node_create('INSTRUMENT 1', 'INSTRUMENT FULL', $mou->tid, '1999-03-23');
+        Country::node_create('Romania', 'RO');
+        $image_path = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'test' . DIRECTORY_SEPARATOR . 'me.jpg';
+        $d1 = CMSDocument::node_create('DOCUMENT1');
+        $d2 = CMSDocument::node_create('DOCUMENT2');
+
+        $s1 = CMSSpecies::node_create('species1');
+        $pub1 = CMSPublication::node_create('publication1');
+
+        $data = array(
+            'uuid' => 'UUID-MEETING-1',
+            'field_meeting_abbreviation' => 'Meeting abbreviation',
+            'body' => 'Meeting description',
+            'field_meeting_start' => '1999-04-12 13:45:44',
+            'field_meeting_reg_deadline' => '1999-04-10 12:22:33',
+            'field_meeting_end' => '1999-04-15 17:44:55',
+            'field_instrument' => 'INSTRUMENT 1',
+            'field_meeting_type' => 'COP',
+            'field_meeting_kind' => 'KIND',
+            'field_meeting_status' => 'Status',
+            'field_meeting_city' => 'Bangalore',
+            'field_meeting_location' => 'Rathaus',
+            'field_country' => 'RO',
+            'field_meeting_organizer' => 'Organizer',
+            'field_meeting_coorganizer' => 'Coorganizer',
+            'field_meeting_languages' => array('Romanian', 'Bulgarian'),
+            'field_meeting_latitude' => '-12.12345678',
+            'field_meeting_longitude' => '-123.1234567',
+            'field_meeting_image' => array(
+                array(
+                    'path' => $image_path
+                )
+            ),
+            'field_meeting_document' => array($d1->nid, $d2->nid)
+        );
+        $node->uuid = $data['uuid'];
+        CMSBase::set_field_single_value($node, 'field_meeting_abbreviation', $data);
+        CMSBase::set_field_single_value($node, 'body', $data);
+        CMSBase::set_field_single_value($node, 'field_meeting_start', $data);
+        CMSBase::set_field_single_value($node, 'field_meeting_reg_deadline', $data);
+        CMSBase::set_field_single_value($node, 'field_meeting_end', $data);
+        CMSBase::set_field_instrument($node, 'field_instrument', $data);
+        CMSBase::set_field_taxonomic_term($node, 'field_meeting_type', VOC_MEETING_TYPE, $data);
+        CMSBase::set_field_taxonomic_term($node, 'field_meeting_kind', VOC_MEETING_KIND, $data);
+        CMSBase::set_field_taxonomic_term($node, 'field_meeting_status', VOC_MEETING_STATUS, $data);
+        CMSBase::set_field_single_value($node, 'field_meeting_city', $data);
+        CMSBase::set_field_single_value($node, 'field_meeting_location', $data);
+        CMSBase::set_field_country($node, 'field_country', $data);
+        CMSBase::import_field_files($node, 'field_meeting_image', $data, 'meeting');
+        CMSBase::set_field_single_value($node, 'field_meeting_organizer', $data);
+        CMSBase::set_field_single_value($node, 'field_meeting_coorganizer', $data);
+        CMSBase::set_field_taxonomic_terms($node, 'field_meeting_languages', VOC_LANGUAGES, $data);
+        CMSBase::set_field_single_value($node, 'field_meeting_latitude', $data);
+        CMSBase::set_field_single_value($node, 'field_meeting_longitude', $data);
+        CMSBase::set_field_list_target_id($node, 'field_meeting_document', $data);
+
+        CMSBase::set_field_list_target_id($node, 'field_meeting_species',
+            array('field_meeting_species' => array($s1->nid)));
+        CMSBase::set_field_list_target_id($node, 'field_meeting_publication',
+            array('field_meeting_publication' => array($pub1->nid)));
+
+        node_save($node);
+
+        $node = node_load($node->nid);
+        $subject = CMSMeeting::node_to_array($node, '/tmp');
+        $this->assertEqual('test_meeting', $node->title);
+        $this->assertEqual($data['uuid'], $node->uuid);
+        $this->assertEqual($data['field_meeting_abbreviation'], $subject['field_meeting_abbreviation']);
+        $this->assertEqual($data['body'], $subject['body']);
+        $this->assertEqual($data['field_meeting_start'], $subject['field_meeting_start']);
+        $this->assertEqual($data['field_meeting_reg_deadline'], $subject['field_meeting_reg_deadline']);
+        $this->assertEqual($data['field_meeting_end'], $subject['field_meeting_end']);
+        $this->assertEqual($data['field_instrument'], $subject['field_instrument']);
+        $this->assertEqual($data['field_meeting_type'], $subject['field_meeting_type']);
+        $this->assertEqual($data['field_meeting_kind'], $subject['field_meeting_kind']);
+        $this->assertEqual($data['field_meeting_status'], $subject['field_meeting_status']);
+        $this->assertEqual($data['field_meeting_city'], $subject['field_meeting_city']);
+        $this->assertEqual($data['field_meeting_location'], $subject['field_meeting_location']);
+        $this->assertEqual($data['field_country'], $subject['field_country']);
+        $this->assertEqual($data['field_meeting_organizer'], $subject['field_meeting_organizer']);
+        $this->assertEqual($data['field_meeting_coorganizer'], $subject['field_meeting_coorganizer']);
+        $this->assertEqual($data['field_meeting_latitude'], $subject['field_meeting_latitude']);
+        $this->assertEqual($data['field_meeting_longitude'], $subject['field_meeting_longitude']);
+        $this->assertEqual(array($d1->uuid, $d2->uuid), $subject['field_meeting_document']);
+        $this->assertEqual(
+            array(
+                array(
+                    'path' => 'meeting/test-meeting/field_meeting_image/me.jpg',
+                    'description' => '',
+                    'md5' => '19a7a79f2d03d10740d6bc704f5ec7ab'
+                )
+            ),
+            $subject['field_meeting_image']
+        );
+
+        // Test related content
+        $this->assertEqual(array($s1->uuid), $subject['field_meeting_species']);
+        $this->assertEqual(array($pub1->uuid), $subject['field_meeting_publication']);
+
+        exec('rm -rf /tmp/test');
+    }
+
+
+    function test_node_from_array() {
+        $mou = CMSUtils::vocabulary_get_or_create_term('MOU', VOC_INSTRUMENT_STATUS);
+        CMSLegalInstrument::node_create('INSTRUMENT 1', 'INSTRUMENT FULL', $mou->tid, '1999-03-23');
+        Country::node_create('Romania', 'RO');
+        $image_path = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'test' . DIRECTORY_SEPARATOR . 'me.jpg';
+        $d1 = CMSDocument::node_create('DOCUMENT1');
+        $d2 = CMSDocument::node_create('DOCUMENT2');
+
+        $s1 = CMSSpecies::node_create('species1');
+        $pub1 = CMSPublication::node_create('publication1');
+
+        $data = array(
+            'title' => 'test_meeting',
+            'uuid' => 'UUID-MEETING-1',
+            'field_meeting_abbreviation' => 'Meeting abbreviation',
+            'body' => 'Meeting description',
+            'field_meeting_start' => '1999-04-12 13:45:44',
+            'field_meeting_reg_deadline' => '1999-04-10 12:22:33',
+            'field_meeting_end' => '1999-04-15 17:44:55',
+            'field_instrument' => 'INSTRUMENT 1',
+            'field_meeting_type' => 'COP',
+            'field_meeting_kind' => 'KIND',
+            'field_meeting_status' => 'Status',
+            'field_meeting_city' => 'Bangalore',
+            'field_meeting_location' => 'Rathaus',
+            'field_country' => 'Romania',
+            'field_meeting_organizer' => 'Organizer',
+            'field_meeting_coorganizer' => 'Coorganizer',
+            'field_meeting_languages' => array('Romanian', 'Bulgarian'),
+            'field_meeting_latitude' => '-12.1234567',
+            'field_meeting_longitude' => '-123.1234567',
+            'field_meeting_image' => array(
+                array(
+                    'path' => $image_path
+                )
+            ),
+            'field_meeting_document' => array($d1->uuid, $d2->uuid)
+        );
+        $data['field_meeting_species'] = array($s1->uuid);
+        $data['field_meeting_publication'] = array($pub1->uuid);
+
+        $node = CMSMeeting::node_from_array($data);
+        $node = node_load($node->nid);
+
+        $this->assertEqual($data['title'], $node->title);
+        $this->assertEqual($data['uuid'], $node->uuid);
+        $this->assertEqual($data['field_meeting_abbreviation'], CMSBase::get_field_single_value($node, 'field_meeting_abbreviation'));
+        $this->assertEqual($data['body'], CMSBase::get_field_single_value($node, 'body'));
+        $this->assertEqual($data['field_meeting_start'], CMSBase::get_field_single_value($node, 'field_meeting_start'));
+        $this->assertEqual($data['field_meeting_reg_deadline'], CMSBase::get_field_single_value($node, 'field_meeting_reg_deadline'));
+        $this->assertEqual($data['field_meeting_end'], CMSBase::get_field_single_value($node, 'field_meeting_end'));
+        $this->assertEqual(1, CMSBase::get_field_single_target_id($node, 'field_instrument'));
+        $this->assertEqual($data['field_meeting_type'], CMSBase::get_field_taxonomic_term_name($node, 'field_meeting_type', VOC_MEETING_TYPE));
+        $this->assertEqual($data['field_meeting_kind'],  CMSBase::get_field_taxonomic_term_name($node, 'field_meeting_kind', VOC_MEETING_TYPE));
+        $this->assertEqual($data['field_meeting_status'],  CMSBase::get_field_taxonomic_term_name($node, 'field_meeting_status', VOC_MEETING_TYPE));
+        $this->assertEqual($data['field_meeting_city'], CMSBase::get_field_single_value($node, 'field_meeting_city'));
+        $this->assertEqual($data['field_meeting_location'], CMSBase::get_field_single_value($node, 'field_meeting_location'));
+        $this->assertEqual('RO', CMSBase::get_field_country_code($node, 'field_country'));
+        $this->assertEqual($data['field_meeting_organizer'], CMSBase::get_field_single_value($node, 'field_meeting_organizer'));
+        $this->assertEqual($data['field_meeting_coorganizer'], CMSBase::get_field_single_value($node, 'field_meeting_coorganizer'));
+        $this->assertEqual($data['field_meeting_languages'], CMSBase::get_field_taxonomic_terms_names($node, 'field_meeting_languages', VOC_LANGUAGES));
+        $this->assertEqual($data['field_meeting_latitude'], CMSBase::get_field_single_value($node, 'field_meeting_latitude'));
+        $this->assertEqual($data['field_meeting_longitude'], CMSBase::get_field_single_value($node, 'field_meeting_longitude'));
+
+        $tmp = CMSBase::get_field_list_target_id($node, 'field_meeting_document');
+        $this->assertTrue(in_array($d1->nid, $tmp));
+        $this->assertTrue(in_array($d2->nid, $tmp));
+
+        $image = $node->field_meeting_image[$node->language][0];
+        $this->assertEqual('me.jpg', $image['filename']);
+
+        // Test related content
+        $this->assertEqual(array($s1->uuid), CMSBase::get_entity_reference_by_uuid($node, 'field_meeting_species'));
+        $this->assertEqual(array($pub1->uuid), CMSBase::get_entity_reference_by_uuid($node, 'field_meeting_publication'));
+
+        exec('rm -rf /tmp/test');
+    }
+
+
+    function test_node_from_array_update() {
+        $node = CMSMeeting::node_create('TEST');
+        $node = node_load($node->nid);
+        $this->assertEqual('TEST', $node->title);
+
+        $reference = CMSMeeting::node_from_array(array('title' => 'NEW TITLE'), '', $node);
+        $reference = node_load($reference->nid);
+        $this->assertEqual($node->nid, $reference->nid);
+        $this->assertEqual('NEW TITLE', $reference->title);
+    }
+
+
+    function test_node_create() {
+        $node = CMSMeeting::node_create('TEST', FALSE);
+        $this->assertTrue(!isset($node->nid));
+
+        $node = CMSMeeting::node_create('TEST', FALSE, 'TEST-UUID');
+        $this->assertTrue(!isset($node->nid));
+        $this->assertEqual('TEST-UUID', $node->uuid);
+
+        $node = CMSMeeting::node_create('TEST');
+        $this->assertEqual(1, $node->nid);
+        $this->assertNotNull($node->uuid);
+
+        $node = CMSMeeting::node_create('TEST', TRUE, 'TEST-UUID');
+        $this->assertEqual(2, $node->nid);
+        $this->assertEqual('TEST-UUID', $node->uuid);
+
+        $node = CMSMeeting::node_create('TEST', TRUE, 'TEST-UUID');
+        $this->assertEqual(3, $node->nid);
+        $this->assertEqual('TEST-UUID', $node->uuid);
+
+        $n2 = node_load(2);
+        $n3 = node_load(3);
+        // Two nodes can have the same UUID. Isn't that nice?
+        $this->assertEqual($n2->uuid, $n3->uuid);
+    }
+
+
+    function test_get_meetings_for_country() {
+        $ro = Country::node_create('Romania', 'RO');
+        $de = Country::node_create('Germany', 'DE');
+
+        $m1 = CMSMeeting::node_create('MEETING 1');
+        $m2 = CMSMeeting::node_create('MEETING 2');
+        $m3 = CMSMeeting::node_create('MEETING 3');
+
+        $m1->field_country[$m1->language][0]['target_id'] = $ro->nid;
+        $m2->field_country[$m2->language][0]['target_id'] = $ro->nid;
+        $m3->field_country[$m3->language][0]['target_id'] = $ro->nid;
+
+        node_save($m1);
+        node_save($m2);
+        $m3->status = NODE_NOT_PUBLISHED;
+        node_save($m3);
+
+        $meetings = CMSMeeting::get_meetings_for_country($ro->nid);
+        $this->assertEqual(2, count($meetings));
+        $this->assertTrue(array_key_exists($m1->nid, $meetings));
+        $this->assertTrue(array_key_exists($m2->nid, $meetings));
+
+        $meetings = CMSMeeting::get_meetings_for_country($de->nid);
+        $this->assertEqual(0, count($meetings));
+
+        /* Pass object instead of integer - test for DB exception */
+        $ob = new stdClass();
+        $meetings = CMSMeeting::get_meetings_for_country($ob);
+        $this->assertEqual(0, count($meetings));
+    }
+
+    function test_get_meeting_by_abbreviation(){
+        $m1 = CMSMeeting::node_create('MEETING 1');
+        $m2 = CMSMeeting::node_create('MEETING 2');
+
+        $abbreviation = "MOP 1";
+        
+        $mou = CMSUtils::vocabulary_get_or_create_term('MOU', VOC_INSTRUMENT_STATUS);
+        $i1 = CMSLegalInstrument::node_create('INSTRUMENT 1', 'INSTRUMENT 1 FULL NAME', $mou->tid, '1999-01-23');
+        $i2 = CMSLegalInstrument::node_create('INSTRUMENT 2', 'INSTRUMENT 2 FULL NAME', $mou->tid, '1999-02-23');
+
+        $data1 = array(
+            'field_meeting_abbreviation' => $abbreviation,
+            'field_instrument' => 'INSTRUMENT 1'
+        );
+
+        $data2 = array(
+            'field_meeting_abbreviation' => $abbreviation,
+            'field_instrument' => 'INSTRUMENT 2'
+        );
+
+        CMSBase::set_field_single_value($m1, 'field_meeting_abbreviation', $data1);
+        CMSBase::set_field_single_value($m2, 'field_meeting_abbreviation', $data2);
+        CMSBase::set_field_instrument($m1, 'field_instrument', $data1);
+        CMSBase::set_field_instrument($m2, 'field_instrument', $data2);
+        $m1->status = NODE_PUBLISHED;
+        $m2->status = NODE_PUBLISHED;
+
+        node_save($m1);
+        node_save($m2);
+
+        $nid = CMSMeeting::get_meeting_by_abbreviation($abbreviation,'INSTRUMENT 1');
+        $this->assertEqual($m1->nid, $nid);
+    }
+}

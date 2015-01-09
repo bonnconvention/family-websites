@@ -1,0 +1,14 @@
+name = CMS Node Import
+description = Provides node import from url
+core = 7.x
+package = CMS
+version = 7.x-1.0
+project = cms_feed_import
+files[] = cms_feed_import.module
+configure = admin/config/content/cms_feed_import
+; Information added by fserver
+core = "7.x"
+datestamp = "1420734842"
+project = "cms"
+project status url = "http://fserver.eaudeweb.ro/fserver"
+version = "7.x-7.34"

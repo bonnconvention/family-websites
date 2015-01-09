@@ -1,0 +1,126 @@
+<?php
+/**
+ * @file
+ * Code for the CMS Views feature.
+ */
+
+include_once 'cms_views.features.inc';
+
+function cms_views_views_pre_view(&$view, &$display_id, &$args) {
+    switch ($view->name) {
+        case 'front_end_documents':
+            $cms_mous_displays = array(
+                'national_reports' => 'mous_national_reports',
+                'action_plans' => 'mous_action_plans'
+            );
+            cms_change_views_cms_mous($view, $display_id, $args, $cms_mous_displays);
+            break;
+        case 'front_end_meetings':
+            $cms_mous_displays = array(
+                'meetings_of_parties' => 'mous_meeting_signatories',
+                'standing_committee' => 'mous_standing_committee',
+                'advisory_committee' => 'mous_advis_comm',
+            );
+            cms_change_views_cms_mous($view, $display_id, $args, $cms_mous_displays);
+            break;
+        case 'front_end_species':
+            $cms_mous_displays = array(
+                'species_list' => 'mous_species_list',
+            );
+            cms_change_views_cms_mous($view, $display_id, $args, $cms_mous_displays);
+            break;
+        case 'front_end_publications':
+            $cms_mous_displays = array(
+                '' => 'mous_publications',
+            );
+            cms_change_views_cms_mous($view, $display_id, $args, $cms_mous_displays);
+            break;
+        case 'front_end_projects':
+            $cms_mous_displays = array(
+                'projects' => 'mous_projects',
+            );
+            cms_change_views_cms_mous($view, $display_id, $args, $cms_mous_displays);
+            break;
+        case 'front_end_working_groups':
+            $cms_mous_displays = array(
+                'working_groups' => 'mous_wg',
+            );
+            cms_change_views_cms_mous($view, $display_id, $args, $cms_mous_displays);
+            break;
+        case 'front_end_news':
+            cms_change_views_cms_mous($view, $display_id, $args);
+            break;
+
+        //Hompage domain instrument views
+        case 'quicktab_publications':
+            if (in_array($display_id, array('publications_homepage_tab', 'publications_all'))) {
+                $instrument_id = cms_domain_instrument_id();
+                if ($instrument_id) {
+                    $args []= $instrument_id;
+                }
+            }
+            break;
+        case 'news_slideshow':
+            if ($display_id == 'block') {
+                $instrument_id = cms_domain_instrument_id();
+                if ($instrument_id) {
+                    $args []= $instrument_id;
+                }
+            }
+            break;
+        case 'calendar':
+            $instrument_id = cms_domain_instrument_id();
+            if ($instrument_id) {
+                $args[0] = (string) $instrument_id;
+            }
+            break;
+    }
+}
+
+
+/**
+ * Implements hook_views_pre_render(&$view)
+ *
+ * @param type $view
+ */
+function cms_views_views_pre_render(&$view) {
+    switch ($view->name) {
+        case 'cms_instruments_slideshow':
+            foreach ($view->result as &$result) {
+                foreach ($result->field_field_picture as &$image) {
+                    $image['alter']['path'] = 'path';
+                }
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+/**
+ * Set the display and arguments for MoUs views, accordingly to current subdomain
+ *
+ * @param stdClass $view
+ * @param string $display_id
+ * @param array $args
+ *          - these params to be passed as they come from hook_views_pre_view
+ *
+ * @param array $cms_mous_displays - KEY --display name for CMS | VALUE - corresponding display name for MoUs
+ */
+function cms_change_views_cms_mous(&$view, &$display_id, &$args, $cms_mous_displays = array()) {
+    $instrument_id = cms_domain_instrument_id();
+    if ($instrument_id) {
+        if ($cms_mous_displays == null) {
+            //add arg on any display
+            $args []= $instrument_id;
+        }
+        if (in_array($display_id, $cms_mous_displays)) {
+            $args []= $instrument_id;
+        } else if (array_key_exists($display_id, $cms_mous_displays) && $instrument_id != 1) {
+            //if CMS display, but in MoU subdomain, move to MoUs correspondent display
+            $view->set_display($cms_mous_displays[$display_id]);
+            $args []= $instrument_id;
+        }
+    }
+    return;
+}

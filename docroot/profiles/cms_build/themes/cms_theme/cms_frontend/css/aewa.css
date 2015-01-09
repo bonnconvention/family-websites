@@ -1,0 +1,259 @@
+/* Colour theme for AEWA portal */
+
+/* HEADER */
+.search-area-and-logos {
+background: url("../images/header_wave_aewa.png") 80% 0% no-repeat;
+}
+
+.global-menu {
+border-bottom: 1px solid #FBAF38;
+}
+
+.global-menu > li {
+background: #FBAF38;
+}
+
+.global-menu a {
+color: #FFF;
+}
+
+.global-menu > .active-trail {
+background: #FBAF38 url("../images/arrow_hexFDCF88.png") 49% 110% no-repeat;
+color: #4D4D4D;
+}
+
+.region-secondary-menu {
+background-color: #FDDFAF;
+}
+
+.global-menu .dropdown-menu a {
+color: #B07B27;
+}
+
+.global-menu .active-trail,
+.global-menu a:hover,
+.global-menu .dropdown-menu .active-trail,
+.submenu a:hover {
+color: #4D4D4D;
+}
+
+.global-menu > li > ul {
+background-color: #FDCF88;
+}
+
+.global-menu > li > ul > .active-trail.dropdown-submenu {
+background: #FDCF88 url("../images/arrow_hexFDDFAF.png") 49% 110% no-repeat;
+}
+
+.global-menu > li > ul ul > .active-trail.dropdown-submenu {
+background: #FDDFAF url("../images/arrow_hexFFEFD5.png") 49% 110% no-repeat;
+}
+
+.menu-level-4 ul {
+background: #FFEFD5;
+padding-left: 11px;
+border-bottom: 0;
+margin-left: -15px;
+width: 1140px;
+}
+
+.menu-level-4 ul li {
+background: #FFEFD5;
+float: left;
+padding: 0px 8px;
+min-width: 10px;
+border-right: 0;
+}
+
+.menu-level-4 h2 {
+font-size: 15px;
+font-weight: 400;
+margin-top: 11px;
+}
+
+.menu-level-4 h2 a {
+color: #B07B27;
+}
+
+.menu-level-4 h2 a:hover,
+.menu-level-4 .active-trail {
+color: #4D4D4D;
+text-decoration: none;
+background: #FFEFD5;
+}
+
+.global-menu > li > ul > li > ul,
+.global-menu > li > li > ul .active-trail.dropdown-submenu {
+background: #FDDFAF;
+}
+
+@media (max-width: 1200px) {
+  .down-area {
+  padding-left: 25px;
+  padding-bottom: 10px;
+  }
+}
+
+
+/* NEWS slideshow */
+.view-news-slideshow .views-field-title,
+.view-news-slideshow .views-field-title-field {
+background-image: -webkit-linear-gradient(top, rgba(29, 93, 145, 0), rgba(29, 93, 145, 0.7));
+background-image: -moz-linear-gradient(top, rgba(29, 93, 145, 0), rgba(29, 93, 145, 0.7));
+background-image: -o-linear-gradient(top, rgba(29, 93, 145, 0), rgba(29, 93, 145, 0.7));
+background-image: linear-gradient(to bottom, rgba(29, 93, 145, 0), rgba(29, 93, 145, 0.7));
+}
+
+.view-news-slideshow .jcarousel-skin-default .jcarousel-navigation {
+background: rgba(29, 93, 145, 0.7);
+}
+
+.view-news-slideshow .jcarousel-skin-default .jcarousel-navigation li a:hover {
+background: url("../images/aewa_news_hover.png") no-repeat;
+}
+
+.view-news-slideshow .views-field-title a:hover,
+.view-news-slideshow .view-footer a,
+.view-news-slideshow .views-field-title-field a:hover,
+.view-news-slideshow .view-footer a:hover {
+color: #FBAF38;
+}
+
+
+/* TABBED MENU on homepage */
+.ui-tabs-nav li.ui-state-active,
+.ui-tabs-nav li.ui-state-active:hover,
+.block-quicktabs .ui-accordion-header.ui-state-active {
+border-top: 4px solid #FBAF38;
+}
+
+.ui-tabs .ui-state-default,
+.block-quicktabs .ui-accordion-header.ui-state-default {
+background: #f9f9f9;
+}
+
+.ui-tabs .ui-state-default:hover {
+background: #DDD;
+}
+
+
+/* homepage CALENDAR  */
+.view-calendar table .mini-day-on a:hover {
+border: 2px solid #00BCE4;
+}
+
+
+/* buttons */
+.btn-primary {
+background-color: #47C7E9;
+border-color: #47C7E9;
+}
+
+.btn-primary:hover {
+background-color: #1D5D91;
+border-color: #1D5D91;
+}
+
+.search-results h3 a,
+.view-front-end-news h2 a,
+.view-front-end-working-groups h2 a,
+.view-front-end-campaigns h2 a,
+.view-front-end-awards h2 a {
+color: #47C7E9;
+}
+
+.view-front-end-news .node-readmore,
+.view-front-end-working-groups .node-readmore,
+.view-front-end-campaigns .node-readmore,
+.view-front-end-awards .node-readmore,
+.page-search-site .facetapi-limit-link,
+.page-taxonomy .node-teaser .node-readmore {
+background: #ffdcaa;
+}
+
+
+/* SPECIES slideshow */
+.carousel-control.right,
+.carousel-control.left {
+background: #47C7E9;
+}
+
+
+/* FIXES */
+.global-menu.nav-show-level-2 {
+margin-bottom: 36px;
+}
+
+.global-menu.nav-show-level-3 {
+margin-bottom: 74px;
+}
+
+
+/* NEWS profile */
+.profile blockquote p {
+color: #80a32b;
+}
+
+
+/* MOBILE */
+@media (max-width: 800px) {
+  body .search-area-and-logos {
+  background-image: none;
+  }
+
+  .global-menu-bar,
+  .sidebar-offcanvas {
+  background: #FBAF38;
+  }
+
+  .navbar-default .navbar-toggle .icon-bar {
+  background: #FFF;
+  }
+
+  .navbar-default .navbar-toggle,
+  .navbar-default .navbar-toggle:hover,
+  .navbar-default .navbar-toggle:focus {
+  background: #FBAF38;
+  border-color: #FFF;
+  }
+
+  .sidebar-offcanvas nav > ul ul {
+  background-color: #FDCF88;
+  }
+
+  .sidebar-offcanvas nav > ul li h2 a {
+  border-bottom: 1px solid #555;
+  }
+
+  .sidebar-offcanvas nav > ul ul li h2 a,
+  .sidebar-offcanvas nav > ul li.last ul h2 a  {
+  color: #B07B27;
+  border-bottom: 1px solid #555;
+  }
+
+  .sidebar-offcanvas nav > ul li.opened > h2 > a {
+  color: #4D4D4D;
+  }
+
+  .sidebar-offcanvas nav > ul ul ul {
+  background-color: #FDDFAF;
+  }
+
+  .sidebar-offcanvas nav > ul ul ul li h2 a {
+  border-bottom: 1px solid #888;
+  }
+
+  /*support for menu level 4 */
+  .sidebar-offcanvas nav > ul ul ul ul {
+  background: #FCECD4;
+  }
+}
+
+
+/* print website's URL */
+@media print {
+  .down-area:after {
+  content: "www.unep-aewa.org";
+  color: #0066C0;
+  }
+}

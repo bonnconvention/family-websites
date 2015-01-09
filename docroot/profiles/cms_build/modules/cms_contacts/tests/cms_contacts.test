@@ -1,0 +1,673 @@
+<?php
+/**
+ * Author: Cristian Romanescu <cristi _at_ eaudeweb dot ro>
+ * Created: 201405131026
+ *
+ */
+
+
+class CMSContactsTestHelper {
+
+    static function init_test_environment() {
+        variable_set(LDAP_BASE_DN, "o=CMS");
+        variable_set(LDAP_BIND_RDN, "uid=sysadmin,o=CMS");
+        variable_set(LDAP_PEOPLE_DN, "ou=Users,o=CMS");
+        variable_set(LDAP_ORGANIZATION_DN, "ou=Organizations,o=CMS");
+        variable_set(LDAP_DEPARTMENT_DN, "ou=Departments,o=CMS");
+        variable_set(LDAP_PASSWORD, cms_contacts_encrypt_string('cmsldap'));
+        variable_set(LDAP_ADDRESS, "10.0.0.233");
+        variable_set(LDAP_PORT, "389");
+
+        // Pre-populate the cache to avoid retrieving data from the database - where does not exist!
+        CMSContactsCacheHelper::cache_set('instrument_uuid_title', cms_contacts_test_get_instruments());
+        CMSContactsCacheHelper::cache_set('iso2l_name', cms_contacts_test_get_countries());
+    }
+}
+
+
+class CMSContactsLDAPWebTest extends DrupalWebTestCase {
+
+
+    static function getInfo() {
+        return array(
+            'name' => 'CMS Contacts LDAP tests',
+            'description' => 'Test the functionality of LDAP integration for CMS Contacts module',
+            'group' => 'CMS Tests'
+        );
+    }
+
+    /* Array with properties as they come from $form_state['input'] */
+    static $form_contact = array(
+        'cmsavailability' => 'TRUE',
+        'personaltitle' => 'Personal Title Test',
+        'cn' => 'Test Given Name Test Surname',
+        'givenname' => 'Test Given Name',
+        'sn' => 'Test Surname',
+        'title' => 'Boss',
+        'iso2' => 'US',
+        'cpIso2' => 'US',
+        'region' => 'North America',
+        'st' => 'LA',
+        'postalCode' => '01005487',
+        'street' => 'Blvd. Hallway no. 15',
+        'o' => 'UNEP',
+        'ou' => 'Ministry of Sound',
+        'preferredlanguages' => array('English', 'French'),
+        'workphonenumbers' => '04255564646, 0545364',
+        'homephone' => '0456465465, 4654654',
+        'faxnumbers' => '05456465, 454654',
+        'mobilephonenumbers' => '08565213, 4556465',
+        'websites' => 'test.com, test.ro',
+        'additionalEmails' => 'test@test.com, test@test.ro',
+        'personalEmail' => 'test@home.com, test@pers.ro',
+        'skype' => 'test.2test, test.test3',
+        'description' => 'Great person',
+    );
+
+
+    function setUp() {
+        parent::setUp();
+        CMSContactsTestHelper::init_test_environment();
+    }
+
+
+    function test_get_instance() {
+        $ob = CMSContactsLDAP::get_instance();
+        $this->assertNotNull($ob);
+    }
+
+
+    function test_ldap_search_cms() {
+        $ldap = CMSContactsLDAP::get_instance();
+        $rows = $ldap->ldap_search_cms('objectClass=cmsOrganization');
+        $this->assertEqual(947, count($rows));
+        $this->assertEqual('oid=qWIGNe5m,ou=Organizations,o=CMS', $rows[0]['dn']);
+    }
+
+    function test_ldap_get_mailing_lists() {
+        $ldap = CMSContactsLDAP::get_instance();
+        $rows = $ldap->ldap_get_mailing_lists();
+        $this->assertEqual(48, count($rows));
+
+        $rows = $ldap->ldap_get_mailing_lists();
+        $this->assertEqual(48, count($rows));
+
+        $sample_dn = 'cn=Christmas cards,ou=Mailing List,uuid=f0b4ae05-8d04-4814-b01f-064c94da5a23,o=CMS';
+        $list = $rows[$sample_dn];
+        $this->assertEqual(array('top', 'cmsMailingList'), $list->objectclass);
+        $this->assertEqual('Christmas cards', $list->cn);
+        $this->assertEqual('Christmas cards (CMS)', $list->title);
+        $this->assertEqual('CMS', $list->in);
+        $this->assertEqual('f0b4ae05-8d04-4814-b01f-064c94da5a23', $list->uuid);
+        $this->assertEqual(
+            array('', 'uid=mantazurba,ou=Users,o=CMS', 'uid=daniewaiss,ou=Users,o=CMS', 'uid=ralvazfe,ou=Users,o=CMS',
+                'uid=rupermacle,ou=Users,o=CMS', 'uid=jarosjesln,ou=Users,o=CMS', 'uid=joschfisch,ou=Users,o=CMS',
+                'uid=johncarls,ou=Users,o=CMS'),
+            $list->uniquemember);
+    }
+
+    function test_get_statusperson_people() {
+        $ldap = CMSContactsLDAP::get_instance();
+        $rows = $ldap->get_statusperson_people();
+        $this->assertEqual(128, count($rows));
+
+        $rows = $ldap->get_statusperson_people();
+        $this->assertEqual(128, count($rows));
+
+        $sample_dn = 'cn=Standing Committee Observer,ou=Status Person,uuid=f0b4ae05-8d04-4814-b01f-064c94da5a23,o=CMS';
+        $this->assertTrue(array_key_exists($sample_dn, $rows));
+        $list = $rows[$sample_dn];
+
+        $this->assertEqual(array('top', 'cmsStatusPerson'), $list->objectclass);
+        $this->assertEqual('Standing Committee Observer (CMS)', $list->title);
+        $this->assertEqual('Standing Committee Observer', $list->cn);
+        $this->assertEqual('CMS', $list->in);
+        $this->assertEqual('f0b4ae05-8d04-4814-b01f-064c94da5a23', $list->uuid);
+        $this->assertTrue(in_array('uid=ndiaggueye,ou=Users,o=CMS', $list->uniquemember));
+    }
+
+    function test_get_people_statusperson() {
+        $ldap = CMSContactsLDAP::get_instance();
+        $rows = $ldap->get_people_statusperson();
+        $this->assertEqual(2855, count($rows));
+
+        $rows = $ldap->get_people_statusperson();
+        $this->assertEqual(2855, count($rows));
+        $this->assertEqual(
+            $rows['uid=feliccappe,ou=Users,o=CMS'],
+            array('cn=Focal Point,ou=Status Person,uuid=f0b4ae05-8d04-4814-b01f-064c94da5a23,o=CMS',
+                'cn=Contracting Party,ou=Status Person,uuid=dbce2ddc-648e-4302-be84-47d0aa36ad66,o=CMS',
+                'cn=Focal Point,ou=Status Person,uuid=dbce2ddc-648e-4302-be84-47d0aa36ad66,o=CMS'
+            )
+        );
+    }
+
+    function test_get_statusorganization_people() {
+        $ldap = CMSContactsLDAP::get_instance();
+        $rows = $ldap->get_statusorganization_people();
+        $this->assertEqual(27, count($rows));
+
+        $rows = $ldap->get_statusorganization_people();
+        $this->assertEqual(27, count($rows));
+
+        $sample_dn = 'cn=Scientific,ou=Status Organization,uuid=0b41fac4-6198-439a-a335-f7405f352681,o=CMS';
+        $this->assertTrue(array_key_exists($sample_dn, $rows));
+        $list = $rows[$sample_dn];
+
+        $this->assertEqual(array('top', 'cmsStatusOrganization'), $list->objectclass);
+        $this->assertEqual('Scientific (ASCOBANS)', $list->title);
+        $this->assertEqual('Scientific', $list->cn);
+        $this->assertEqual('ASCOBANS', $list->in);
+        $this->assertEqual('0b41fac4-6198-439a-a335-f7405f352681', $list->uuid);
+        $this->assertTrue(in_array('uid=annadebic,ou=Users,o=CMS', $list->uniquemember));
+    }
+
+    function test_get_people_statusorganization() {
+        $ldap = CMSContactsLDAP::get_instance();
+        $rows = $ldap->get_people_statusorganization();
+        $this->assertEqual(4682, count($rows));
+
+        $rows = $ldap->get_people_statusorganization();
+        $this->assertEqual(4682, count($rows));
+        $this->assertEqual(
+            $rows['uid=feliccappe,ou=Users,o=CMS'],
+            array('cn=Ministry,ou=Status Organization,uuid=f0b4ae05-8d04-4814-b01f-064c94da5a23,o=CMS',
+                'cn=Ministry,ou=Status Organization,uuid=dbce2ddc-648e-4302-be84-47d0aa36ad66,o=CMS'
+            )
+        );
+    }
+
+    function test_get_instrument_people() {
+        $ldap = CMSContactsLDAP::get_instance();
+        $rows = $ldap->get_instrument_people();
+        $this->assertEqual(31, count($rows));
+
+        $rows = $ldap->get_instrument_people();
+        $this->assertEqual(31, count($rows));
+
+        $sample_uuid = '40f7dad3-8796-4b8e-b3f0-0d14094a8065';
+        $this->assertTrue(array_key_exists($sample_uuid, $rows));
+        $instrument = $rows[$sample_uuid];
+
+        $this->assertEqual(array('top', 'cmsInstrument'), $instrument->objectclass);
+        $this->assertTrue('uuid=40f7dad3-8796-4b8e-b3f0-0d14094a8065,o=CMS', $instrument->dn);
+        $this->assertTrue($sample_uuid, $instrument->uuid);
+        $this->assertEqual('Birds of Prey (Raptors)', $instrument->cn);
+        $this->assertEqual('Birds of Prey (Raptors)', $instrument->title);
+        $this->assertEqual('Memorandum of Understanding on the Conservation of Migratory Birds of Prey in Africa and Eurasia', $instrument->description);
+        $this->assertTrue(in_array('uid=jerommokok,ou=Users,o=CMS', $instrument->uniquemember));
+    }
+
+    function test_ldap_get_contacts_partial_attributes() {
+        $ldap = CMSContactsLDAP::get_instance();
+        $results = $ldap->ldap_get_contacts_partial_attributes();
+        $this->assertEqual(7780, count($results));
+
+        $results = $ldap->ldap_get_contacts_partial_attributes();
+        $this->assertEqual(7780, count($results));
+
+        $user_dn = 'uid=nabiemukar,ou=Users,o=CMS';
+        $this->assertTrue(array_key_exists($user_dn, $results));
+        $user = $results[$user_dn];
+        $this->assertEqual($user_dn, $user->dn);
+        $this->assertEqual('nabiemukar', $user->uid);
+        $this->assertEqual('Nabiel Mukarim', $user->name);
+        $this->assertEqual('Nabiel', $user->first_name);
+        $this->assertEqual('Mukarim', $user->last_name);
+        $this->assertEqual('TRUE', $user->availability);
+        $this->assertEqual('ID', $user->country);
+        $this->assertEqual('Asia', $user->region);
+
+        $user_dn = 'uid=kuojawang,ou=Users,o=CMS';
+        $user = $results[$user_dn];
+        $this->assertEqual('AU', $user->country_post);
+        $this->assertEqual('Taipei Economic & Cultural Office', $user->organization);
+
+        $user_dn = 'uid=yvonmoriz,ou=Users,o=CMS';
+        $this->assertTrue(array_key_exists($user_dn, $results));
+
+        $user_dn = 'uid=thandchiko,ou=Users,o=CMS';
+        $this->assertTrue(array_key_exists($user_dn, $results));
+    }
+
+    function test_contacts_list_filter() {
+        $ldap = CMSContactsLDAP::get_instance();
+
+        // No filter returns all LDAP cmsContacts data
+        $filter = array();
+        $rows = $ldap->contacts_list_filter($filter);
+        $this->assertEqual(7780, count($rows));
+
+        // Instrument - single
+        $filter = array('instruments' => array('195ee0b1-319c-4e30-8647-8e0ea60328d1'));
+        $rows = $ldap->contacts_list_filter($filter);
+        $this->assertEqual(7, count($rows));
+
+        // Instrument - multiple with OR
+        $filter = array('instruments' => array('195ee0b1-319c-4e30-8647-8e0ea60328d1', '7b25548b-bbb2-43b2-b917-fa2d85280661'));
+        $rows = $ldap->contacts_list_filter($filter);
+        $this->assertEqual(11, count($rows));
+
+        // Instrument - multiple with AND // Instrument - multiple with OR (uid=abouboular)
+        $filter = array(
+            'per_field_operator' => 'and',
+            'instruments' => array('7b25548b-bbb2-43b2-b917-fa2d85280661', 'f0b4ae05-8d04-4814-b01f-064c94da5a23')
+        );
+        $rows = $ldap->contacts_list_filter($filter);
+        $this->assertEqual(3, count($rows));
+
+        // Country - single
+        $filter = array('countries' => array('DE'));
+        $rows = $ldap->contacts_list_filter($filter);
+        $this->assertEqual(549, count($rows));
+
+        // Country - multiple with OR
+        $filter = array('countries' => array('DE', 'AU'));
+        $rows = $ldap->contacts_list_filter($filter);
+        $this->assertEqual(635, count($rows));
+
+        // Country - multiple with AND - Has no effect for country, there is only one country per user
+        $filter = array('per_field_operator' => 'and', 'countries' => array('DE', 'AU'));
+        $rows = $ldap->contacts_list_filter($filter);
+        $this->assertEqual(635, count($rows));
+
+        // Region - single
+        $filter = array('regions' => array('Asia'));
+        $rows = $ldap->contacts_list_filter($filter);
+        $this->assertEqual(1199, count($rows));
+
+        // Region - multiple with OR
+        $filter = array('regions' => array('Asia', 'Europe'));
+        $rows = $ldap->contacts_list_filter($filter);
+        $this->assertEqual(4298, count($rows));
+
+        // Region - multiple with AND - Has no effect for region, there is only one region per user
+        $filter = array('per_field_operator' => 'and', 'regions' => array('Asia', 'Europe'));
+        $rows = $ldap->contacts_list_filter($filter);
+        $this->assertEqual(4298, count($rows));
+
+        // Availability - TRUE
+        $filter = array('availability' => 'TRUE');
+        $rows = $ldap->contacts_list_filter($filter);
+        $this->assertEqual(7775, count($rows));
+
+        // Availability - FALSE
+        $filter = array('availability' => 'FALSE');
+        $rows = $ldap->contacts_list_filter($filter);
+        $this->assertEqual(5, count($rows));
+
+        // Search arbitrary string
+        $filter = array('sSearch' => 'john');
+        $rows = $ldap->contacts_list_filter($filter);
+        $this->assertEqual(84, count($rows));
+
+        // Status person - single
+        $filter = array('status_person' => array(
+            'cn=Partner,ou=Status Person,uuid=f0b4ae05-8d04-4814-b01f-064c94da5a23,o=CMS'
+        ));
+        $rows = $ldap->contacts_list_filter($filter);
+        $this->assertEqual(29, count($rows));
+
+        // Status person - multiple with OR
+        $filter = array('status_person' => array(
+            'cn=Partner,ou=Status Person,uuid=f0b4ae05-8d04-4814-b01f-064c94da5a23,o=CMS',
+            'cn=North Sea Group,ou=Status Person,uuid=0b41fac4-6198-439a-a335-f7405f352681,o=CMS'
+        ));
+        $rows = $ldap->contacts_list_filter($filter);
+        $this->assertEqual(30, count($rows));
+
+        // Status person - multiple with AND
+        $filter = array('per_field_operator' => 'and', 'status_person' => array(
+            'cn=WMBD Contact,ou=Status Person,uuid=dbce2ddc-648e-4302-be84-47d0aa36ad66,o=CMS',
+            'cn=Contracting Party,ou=Status Person,uuid=dbce2ddc-648e-4302-be84-47d0aa36ad66,o=CMS'
+        ));
+        $rows = $ldap->contacts_list_filter($filter);
+        $this->assertEqual(84, count($rows));
+
+        // Status organization - single
+        $filter = array('status_organization' => array(
+            'cn=Non-Party,ou=Status Organization,uuid=0b41fac4-6198-439a-a335-f7405f352681,o=CMS'
+        ));
+        $rows = $ldap->contacts_list_filter($filter);
+        $this->assertEqual(11, count($rows));
+
+        // Status organization - multiple with OR
+        $filter = array('status_organization' => array(
+            'cn=Non-Party,ou=Status Organization,uuid=0b41fac4-6198-439a-a335-f7405f352681,o=CMS',
+            'cn=Embassy,ou=Status Organization,uuid=dbce2ddc-648e-4302-be84-47d0aa36ad66,o=CMS'
+        ));
+        $rows = $ldap->contacts_list_filter($filter);
+        $this->assertEqual(49, count($rows));
+
+        // Status organization - multiple with AND
+        $filter = array('per_field_operator' => 'and', 'status_organization' => array(
+            'cn=Non-Party,ou=Status Organization,uuid=0b41fac4-6198-439a-a335-f7405f352681,o=CMS',
+            'cn=Governmental,ou=Status Organization,uuid=0b41fac4-6198-439a-a335-f7405f352681,o=CMS'
+        ));
+        $rows = $ldap->contacts_list_filter($filter);
+        $this->assertEqual(8, count($rows));
+
+        // Status organization - multiple with OR
+        $filter = array('status_organization' => array(
+            'cn=Non-Party,ou=Status Organization,uuid=0b41fac4-6198-439a-a335-f7405f352681,o=CMS',
+            'cn=Embassy,ou=Status Organization,uuid=dbce2ddc-648e-4302-be84-47d0aa36ad66,o=CMS'
+        ));
+        $rows = $ldap->contacts_list_filter($filter);
+        $this->assertEqual(49, count($rows));
+
+        // Status organization - multiple with AND
+        $filter = array('per_field_operator' => 'and', 'status_organization' => array(
+            'cn=Non-Party,ou=Status Organization,uuid=0b41fac4-6198-439a-a335-f7405f352681,o=CMS',
+            'cn=Governmental,ou=Status Organization,uuid=0b41fac4-6198-439a-a335-f7405f352681,o=CMS'
+        ));
+        $rows = $ldap->contacts_list_filter($filter);
+        $this->assertEqual(8, count($rows));
+    }
+
+    function test_ldap_get_emails_of_list_members() {
+        $ldap = CMSContactsLDAP::get_instance();
+        $emails = $ldap->ldap_get_emails_of_list_members('0b41fac4-6198-439a-a335-f7405f352681', 'Bycatch WG');
+        $ref = array(
+            'S.N.Murphy@massey.ac.nz', 'marine-zoology@t-online.de', 'justyna.szumlicz@minrol.gov.pl',
+            'j.haelters@mumm.ac.be', 'eunice.pinn@jncc.gov.uk', 'james@fumunda.com', 'karl-hermann.kock@vti.bund.de',
+            'genevieve@gdnatur.dk', 'contact@sinay.fr', 'stefanie.werner@uba.de', 'peter.evans@bangor.ac.uk',
+            'm.siemensma@msandc.nl', 'Patricia.Brtnik@meeresmuseum.de', 'jari.raitaniemi@rktl.fi', 'Christian.Pusch@bfn-vilm.de',
+            'laetitia.nunny@mac.com'
+        );
+        $this->assertEqual(array_diff($emails, $ref), array_diff($ref, $emails));
+    }
+}
+
+
+function cms_contacts_test_get_instruments() {
+    return array(
+        'f0b4ae05-8d04-4814-b01f-064c94da5a23' => 'CMS',
+        'dbce2ddc-648e-4302-be84-47d0aa36ad66' => 'AEWA',
+        '99a489ec-64ff-4b0e-940b-d489d0b8e99a' => 'EUROBAT',
+        '0b41fac4-6198-439a-a335-f7405f352681' => 'ASCOBAN',
+        '5eb58782-ce99-4e5b-b803-ae79e1b5a0a4' => 'ACCOBAM',
+        '17361f3d-7017-4fc9-8986-514bd1066814' => 'Wadden Sea Seals',
+        'f67077a0-8970-4fef-b5a8-62fe235c44e3' => 'ACAP',
+        'a9d73cad-fa26-43d7-907c-732fff289bc0' => 'Gorilla Agreemen',
+        '50eb3b10-a5eb-483f-93be-e1f4151193cd' => 'Siberian Cran',
+        '80b9a671-e429-4a91-9658-8b6021c34272' => 'Slender-billed Curlew',
+        '173e80ef-cd41-4888-bca7-de411fc5db8a' => 'Middle-European Great Bustar',
+        'c1370967-4b76-4875-b6e2-9ef52762455b' => 'Atlantic Turtles',
+        '6012d9e5-8df3-4077-aa70-5a1f6acabbc4' => 'IOSEA Marine Turtle',
+        '195ee0b1-319c-4e30-8647-8e0ea60328d1' => 'Bukhara Deer',
+        '82224323-3898-487b-b87a-cb1deddaaa74' => 'Aquatic Warbler',
+        '7b25548b-bbb2-43b2-b917-fa2d85280661' => 'West African Elephants',
+        '2df9beca-c3d2-4442-9105-9073f6bd3b05' => 'Saiga Antelop',
+        '38712690-266d-436c-9c76-ee52a623dbc5' => 'Pacific Islands Cetaceans',
+        'bb8e216a-0ce2-4062-8d8e-71a91c0ba54e' => 'Ruddy-headed Goose',
+        'dcf0dc6b-068b-421f-a75c-8d76b967fbb0' => 'Southern South American Grassland Birds',
+        '0ed353c9-1edf-47b8-817f-02328e97bac9' => 'Monk Seal in the Atlantic',
+        '83104a86-156a-4b00-9e3c-801e316ffc2b' => 'Dugong ',
+        'aaa35688-6a21-4548-8c22-44004aa3e7b2' => 'Western African Aquatic Mammals',
+        '40f7dad3-8796-4b8e-b3f0-0d14094a8065' => 'Birds of Prey (Raptors)',
+        'e5c63c9f-c72c-4190-850f-58aea9229a8f' => 'High Andean Flamingos',
+        '0be84cbb-a6de-4881-92b0-79307ac43218' => 'Sharks',
+        '7d0905b7-01c8-4d9d-a714-3626bd47b858' => 'South Andean Huemul',
+        'cf29b997-5359-42fd-929f-a786425e4ee8' => 'Central Asian Mammals Initiative',
+        '092860d2-1f29-4759-ac63-97d4c348ef28' => 'Sahelo-Saharan Megafauna',
+        '75a49aa4-0907-4e0e-ab59-63d18151ee53' => 'Central Asian Flyway'
+    );
+}
+
+
+function cms_contacts_test_get_countries() {
+    return array(
+        'af' => 'Afghanistan',
+        'ax' => 'Åland Islands (Finland)',
+        'al' => 'Albania ',
+        'dz' => 'Algeria ',
+        'as' => 'American Samoa (USA)',
+        'ad' => 'Andorra ',
+        'ao' => 'Angol',
+        'ai' => 'Anguilla (UK) ',
+        'aq' => 'Antarctica ',
+        'ag' => 'Antigua and Barbuda ',
+        'ar' => 'Argentin',
+        'am' => 'Armenia ',
+        'aw' => 'Aruba (Netherlands) ',
+        'au' => 'Australi',
+        'at' => 'Austria ',
+        'az' => 'Azerbaijan ',
+        'bs' => 'Bahamas ',
+        'bh' => 'Bahrain ',
+        'bd' => 'Bangladesh ',
+        'bb' => 'Barbados',
+        'by' => 'Belarus ',
+        'be' => 'Belgium ',
+        'bz' => 'Beliz',
+        'bj' => 'Benin',
+        'bm' => 'Bermuda (UK',
+        'bt' => 'Bhuta',
+        'bo' => 'Bolivia ',
+        'bq' => 'Bonaire, Saint Eustatius and Saba (Netherlands)',
+        'ba' => 'Bosnia and Herzegovina ',
+        'bw' => 'Botswana',
+        'bv' => 'Bouvet Island (Norway) ',
+        'br' => 'Brazi',
+        'io' => 'British Indian Ocean Territory (UK)',
+        'vg' => 'British Virgin Islands (UK',
+        'bn' => 'Brunei Darussalam',
+        'bg' => 'Bulgaria',
+        'bf' => 'Burkina Fas',
+        'bi' => 'Burundi ',
+        'cv' => 'Cabo Verde ',
+        'kh' => 'Cambodia',
+        'cm' => 'Cameroon',
+        'ca' => 'Canad',
+        'ky' => 'Cayman Islands (UK) ',
+        'cf' => 'Central African Republi',
+        'td' => 'Chad ',
+        'cl' => 'Chile',
+        'cn' => 'China',
+        'cx' => 'Christmas Island (Australia) ',
+        'cc' => 'Cocos (Keeling) Islands (Australia)',
+        'co' => 'Colombia',
+        'km' => 'Comoros ',
+        'cg' => 'Congo (Brazzaville) ',
+        'ck' => 'Cook Island',
+        'cr' => 'Costa Rica ',
+        'ci' => 'Côte d\'Ivoire',
+        'hr' => 'Croatia ',
+        'cu' => 'Cuba ',
+        'cw' => 'Curaçao (Netherlands',
+        'cy' => 'Cypru',
+        'cz' => 'Czech Republic',
+        'cd' => 'Democratic Republic of the Congo (Kinshasa) ',
+        'dk' => 'Denmark ',
+        'dj' => 'Djibouti',
+        'dm' => 'Dominica',
+        'do' => 'Dominican Republi',
+        'ec' => 'Ecuador ',
+        'eg' => 'Egypt',
+        'sv' => 'El Salvador',
+        'gq' => 'Equatorial Guinea',
+        'er' => 'Eritrea ',
+        'ee' => 'Estonia ',
+        'et' => 'Ethiopia',
+        'eu' => 'European Union',
+        'fk' => 'Falkland Islands (Islas Malvinas',
+        'fo' => 'Faroe Islands (Denmark)',
+        'fj' => 'Fiji ',
+        'FI' => 'Finland ',
+        'fi' => 'Finland ',
+        'fr' => 'Franc',
+        'gf' => 'French Guiana ',
+        'pf' => 'French Polynesia ',
+        'tf' => 'French Southern and Antarctic Lands',
+        'ga' => 'Gabon',
+        'gm' => 'Gambi',
+        'ge' => 'Georgia ',
+        'de' => 'Germany ',
+        'gh' => 'Ghana',
+        'gi' => 'Gibraltar (UK)',
+        'gr' => 'Greec',
+        'gl' => 'Greenland (Denmark) ',
+        'gd' => 'Grenada ',
+        'gp' => 'Guadeloupe (France) ',
+        'gu' => 'Guam (USA) ',
+        'gt' => 'Guatemal',
+        'gg' => 'Guernsey (UK) ',
+        'gn' => 'Guine',
+        'gw' => 'Guinea-Bissau ',
+        'gy' => 'Guyan',
+        'ht' => 'Haiti',
+        'hm' => 'Heard Island and McDonald Islands (Australia',
+        'hn' => 'Honduras',
+        'hk' => 'Hong Kong (China)',
+        'hu' => 'Hungary ',
+        'is' => 'Iceland ',
+        'in' => 'India',
+        'id' => 'Indonesi',
+        'ir' => 'Iran ',
+        'iq' => 'Iraq ',
+        'ie' => 'Ireland ',
+        'im' => 'Isle of Man (UK) ',
+        'il' => 'Israe',
+        'it' => 'Italy',
+        'jm' => 'Jamaica ',
+        'jp' => 'Japan',
+        'je' => 'Jersey (UK)',
+        'jo' => 'Jorda',
+        'kz' => 'Kazakhstan ',
+        'ke' => 'Kenya',
+        'ki' => 'Kiribati',
+        'XK' => 'Kosov',
+        'kw' => 'Kuwai',
+        'kg' => 'Kyrgyzstan ',
+        'la' => 'Lao People\'s Democratic Republic',
+        'lv' => 'Latvi',
+        'lb' => 'Lebanon ',
+        'ls' => 'Lesotho ',
+        'lr' => 'Liberia ',
+        'ly' => 'Libya',
+        'li' => 'Liechtenstein ',
+        'lt' => 'Lithuani',
+        'lu' => 'Luxembourg ',
+        'mo' => 'Macao (China) ',
+        'mg' => 'Madagascar ',
+        'mw' => 'Malaw',
+        'my' => 'Malaysia',
+        'mv' => 'Maldives',
+        'ml' => 'Mali ',
+        'mt' => 'Malta',
+        'mh' => 'Marshall Islands ',
+        'mq' => 'Martinique (France) ',
+        'mr' => 'Mauritania ',
+        'mu' => 'Mauritiu',
+        'yt' => 'Mayotte (France) ',
+        'mx' => 'Mexic',
+        'fm' => 'Micronesia ',
+        'mc' => 'Monac',
+        'mn' => 'Mongolia',
+        'me' => 'Montenegro ',
+        'ms' => 'Montserrat (UK',
+        'ma' => 'Morocco ',
+        'mz' => 'Mozambique ',
+        'mm' => 'Myanmar ',
+        'na' => 'Namibia ',
+        'nr' => 'Nauru',
+        'np' => 'Nepal',
+        'nl' => 'Netherlands',
+        'nc' => 'New Caledonia (France) ',
+        'nz' => 'New Zealand',
+        'ni' => 'Nicaragu',
+        'ne' => 'Niger',
+        'ng' => 'Nigeria ',
+        'nu' => 'Niue ',
+        'nf' => 'Norfolk Island (Australia)',
+        'mp' => 'Northern Mariana Islands (USA',
+        'no' => 'Norwa',
+        'om' => 'Oman ',
+        'pk' => 'Pakistan',
+        'pw' => 'Palau',
+        'ps' => 'Palestin',
+        'pa' => 'Panam',
+        'pg' => 'Papua New Guinea ',
+        'py' => 'Paraguay',
+        'kp' => 'People\'s Democratic Republic of Korea ',
+        'pe' => 'Peru ',
+        'ph' => 'Philippines',
+        'pn' => 'Pitcairn Islands (UK',
+        'pl' => 'Polan',
+        'pt' => 'Portugal',
+        'pr' => 'Puerto Rico (USA)',
+        'qa' => 'Qatar',
+        'tw' => 'Republic of China, Taiwan ',
+        'kr' => 'Republic of Korea',
+        'md' => 'Republic of Moldova ',
+        're' => 'Réunion (France) ',
+        'ro' => 'Romania ',
+        'ru' => 'Russian Federatio',
+        'rw' => 'Rwand',
+        'bl' => 'Saint Barthélemy (France) ',
+        'sh' => 'Saint Helena, Ascension and Tristan da Cunha (UK) ',
+        'kn' => 'Saint Kitts and Nevi',
+        'lc' => 'Saint Lucia',
+        'mf' => 'Saint Martin (France',
+        'pm' => 'Saint Pierre and Miquelon (France) ',
+        'vc' => 'Saint Vincent and the Grenadines',
+        'ws' => 'Samoa',
+        'sm' => 'San Marino ',
+        'st' => 'São Tomé and Príncip',
+        'sa' => 'Saudi Arabi',
+        'sn' => 'Senegal ',
+        'rs' => 'Serbi',
+        'sc' => 'Seychelles ',
+        'sl' => 'Sierra Leon',
+        'sg' => 'Singapor',
+        'sx' => 'Sint Maarten (Netherlands)',
+        'sk' => 'Slovakia',
+        'si' => 'Slovenia',
+        'sb' => 'Solomon Island',
+        'so' => 'Somalia ',
+        'za' => 'South Afric',
+        'gs' => 'South Georgia and the South Sandwich Islands',
+        'ss' => 'South Sudan',
+        'es' => 'Spain',
+        'lk' => 'Sri Lank',
+        'sd' => 'Sudan',
+        'sr' => 'Suriname',
+        'sj' => 'Svalbard and Jan Mayen (Norway) ',
+        'sz' => 'Swazilan',
+        'se' => 'Swede',
+        'ch' => 'Switzerland',
+        'sy' => 'Syrian Arab Republic',
+        'tj' => 'Tajikistan ',
+        'th' => 'Thailand',
+        'mk' => 'the former Yugoslav Republic of Macedonia',
+        'tl' => 'Timor-Leste',
+        'tg' => 'Togo ',
+        'tk' => 'Tokelau (New Zealand',
+        'to' => 'Tonga',
+        'tt' => 'Trinidad and Tobago ',
+        'tn' => 'Tunisia ',
+        'tr' => 'Turke',
+        'tm' => 'Turkmenista',
+        'tc' => 'Turks and Caicos Islands (UK)',
+        'tv' => 'Tuval',
+        'ug' => 'Ugand',
+        'ua' => 'Ukraine ',
+        'ae' => 'United Arab Emirates',
+        'gb' => 'United Kingdom',
+        'tz' => 'United Republic of Tanzani',
+        'um' => 'United States Minor Outlying Island',
+        'us' => 'United States of Americ',
+        'uy' => 'Uruguay ',
+        'vi' => 'US Virgin Islands',
+        'uz' => 'Uzbekistan ',
+        'vu' => 'Vanuatu ',
+        'va' => 'Vatican City Stat',
+        've' => 'Venezuel',
+        'vn' => 'Viet Nam',
+        'wf' => 'Wallis and Futuna (France)',
+        'eh' => 'Western Sahara',
+        'ye' => 'Yemen',
+        'zm' => 'Zambi',
+        'zw' => 'Zimbabwe'
+    );
+}

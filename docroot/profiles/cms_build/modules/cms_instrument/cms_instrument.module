@@ -1,0 +1,573 @@
+<?php
+/**
+ * @file
+ * Code for the Legal instrument feature.
+ */
+
+include_once 'cms_instrument.features.inc';
+
+define('VOC_INSTRUMENT_TYPE', 'instrument_type');
+define('VOC_INSTRUMENT_STATUS', 'instrument_status');
+if (!defined('ROLE_MANAGE_PARTY')) {
+    define('ROLE_MANAGE_PARTY', 'manage party');
+}
+
+if (!defined('VOC_PARTY_STATUS')) {
+    define('VOC_PARTY_STATUS', 'party_status');
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter();
+ *
+ * Show 'Create CMS Instrument' button on Species listing view
+ *
+ * @param   array   $data
+ * @param   array   $router_item
+ * @param   string  $root_path
+ */
+function cms_instrument_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+    switch($root_path){
+        case CMSLegalInstrument::$bundle . '/listing' :
+            // The path for node/add CMS Instrument must be slugified. '-' instead of '_'
+            $item = menu_get_item('node/add/' . CMSUtils::slug(CMSLegalInstrument::$bundle));
+
+            // The button label is different for CMS website
+            $current_profile = CMSUtils::get_current_profile();
+            if ($current_profile == 'cms') {
+                $item['title'] = t('Create CMS Instrument');
+            }else {
+                $item['title'] = t('Create Legal Instrument');
+            }
+
+            if ($item['access']) {
+                $data['actions']['output'][] = array(
+                    '#theme' => 'menu_local_action',
+                    '#link' => $item,
+                );
+            }
+            break;
+    }
+}
+
+function cms_instrument_views_default_views_alter(&$views) {
+    if (isset($views['legal_instrument_listing'])) {
+        $handler = &$views['legal_instrument_listing'];
+        $roles = user_roles();
+        $rids = array();
+        foreach($roles as $rid => $role) {
+            if($role == 'authenticated user') {
+                $rids[$rid] = $rid;
+            }
+        }
+        $handler->display['default']->display_options['access']['type'] = 'role';
+        $handler->display['default']->display_options['access']['role'] = array_filter($rids);
+    }
+    return $views;
+}
+
+/**
+ * Implements hook_node_view();
+*/
+function cms_instrument_node_view($node, $view_mode, $langcode) {
+    if(function_exists('cms_manage_node_access') && $node->type == CMSLegalInstrument::$bundle) {
+        cms_manage_node_access($node);
+    }
+
+    switch ($node->type) {
+        case 'legal_instrument':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                $node->contacts = array();
+                #$agent = CMSContacts::agent();
+                #
+                #$filter = '(conventions=' . strtolower($node->title) . ')';
+                #$result = $agent->search($agent->people_dn, $filter);
+                #$all_users = $agent->get_entries();
+                #
+                #unset($all_users['count']);
+                #$node->contacts = $all_users;
+
+
+                if (is_theme_admin()) {
+                } else if (is_theme_frontend()) {
+                    //Add data to node for Map in profile page - front-end
+                    $node->ammap_data = CMSLegalInstrument::get_countries_for_ammap($node);
+                }
+            }
+            break;
+    }
+}
+
+/**
+ * Implements hook_form_alter();
+*/
+function cms_instrument_form_alter(&$form, &$form_state, $form_id) {
+    switch ($form_id) {
+        case 'legal_instrument_node_form':
+            $breadcrumb = array();
+            $breadcrumb[] = l(t('Home'), '<front>');
+            $breadcrumb[] = l(t('CMS Instruments'), 'legal_instrument/listing');
+            if (isset($form['nid']) && (is_numeric($form['nid']['#value']))) {
+                $breadcrumb[] = l($form['#node']->title, 'node/' . $form['#node']->nid);
+            }
+
+            drupal_set_breadcrumb($breadcrumb);
+
+            //Set host country as single value field refs #2321
+            if (!empty($form['field_country'][LANGUAGE_NONE]['#multiple'])) {
+                $form['field_country'][LANGUAGE_NONE]['#multiple'] = FALSE;
+            }
+
+            break;
+        case 'node_delete_confirm':
+            if ($form['#node']->type == 'legal_instrument') {
+                $form['#submit'][] = '_legal_instrument_redirect_after_delete';
+            }
+            break;
+    }
+
+    return $form;
+}
+
+function _legal_instrument_redirect_after_delete(&$form, &$form_state) {
+    $form_state['redirect'] = 'legal_instrument/listing';
+}
+
+class CMSLegalInstrument extends CMSBase {
+
+    public static $CACHE_LIST_KEYED_BY_NAME = 'legal_instrument_legal_instrument_list_keyed_by_name';
+    public static $cache_instruments_list_by_uuid = 'legal_instrument_legal_instrument_keyed_by_uuid';
+    static $bundle = 'legal_instrument';
+
+    static $taxonomic_fields = array(
+        array(
+            'field_name' => 'field_instrument_type',
+            'vocabulary' => VOC_INSTRUMENT_TYPE,
+        ),
+        array(
+            'field_name' => 'field_instrument_status',
+            'vocabulary' => VOC_INSTRUMENT_STATUS,
+        ),
+        array(
+            'field_name' => 'field_languages',
+            'vocabulary' => VOC_UN_LANGUAGES,
+        ),
+    );
+
+    /**
+     * Instantiate Drupal Legal Instrument node
+     * @param string $title Instrument title
+     * @param string $full_name Full instrument name
+     * @param string $type_id Type of instrument (Vocabulary term ID)
+     * @param string $entry_into_force Date entered into force (YYYY-MM-DD)
+     * @return stdClass Drupal node
+     */
+    public static function node_create($title, $full_name, $type_id, $entry_into_force) {
+        $node = self::drupal_node_create($title, self::$bundle);
+        self::set_field_single_value($node, 'field_instrument_name', array('field_instrument_name' => $full_name));
+        $node->field_instrument_status[$node->language][0]['tid'] = $type_id;
+        self::set_field_single_value($node, 'field_instrument_in_force', array('field_instrument_in_force' => $entry_into_force));
+        node_save($node);
+        return $node;
+    }
+
+     /**
+     * Build an array from the legal instrument node to be saved as JSON string
+     *
+     * @param stdClass $node Drupal legal instrument node
+     * @param string $export_base_dir Path to directory where attached files (field field_instrument_treaty_text) will be exported
+     * @return mixed Dictionary with publication fields
+     *
+     */
+    public static function node_to_array($node, $export_base_dir) {
+        if(empty($node->title)) {
+            error_log("CMSLegalInstrument::node_to_array() Cannot export legal instruments without title. Aborting ...\n");
+            return array();
+        }
+
+        $ret = array(
+            'title' => $node->title,
+            'status' => $node->status,
+            'uuid' => CMSUtils::get_node_uuid($node)
+        );
+        self::get_field_single_value($node, 'field_instrument_name', $ret);
+        $ret['field_instrument_type'] = self::get_field_taxonomic_term_name($node, 'field_instrument_type', VOC_INSTRUMENT_TYPE);
+        $ret['field_instrument_status'] = self::get_field_taxonomic_term_name($node, 'field_instrument_status', VOC_INSTRUMENT_STATUS);
+        $ret['field_country'] = self::get_single_entity_reference_by_uuid($node,'field_country');
+        self::get_field_single_value($node, 'field_instrument_depositary', $ret);
+        $ret['field_languages'] = self::get_field_taxonomic_terms_names($node, 'field_languages', VOC_UN_LANGUAGES);
+        $ret['field_sponsors'] = self::get_entity_reference_by_uuid($node,'field_sponsors');
+        self::get_field_single_value($node, 'field_instrument_final_act', $ret);
+        self::get_field_single_value($node, 'field_instrument_signature', $ret);
+        self::get_field_single_value($node, 'field_instrument_in_force', $ret);
+        self::get_field_single_value($node, 'field_instrument_secretariat', $ret);
+        self::get_field_single_value($node, 'field_instrument_actual_force', $ret);
+        $ret['field_instrument_signed_by'] = array();
+        self::get_field_single_value($node, 'field_instrument_in_effect', $ret);
+        self::get_field_single_value($node, 'field_instrument_actual_effect', $ret);
+        self::get_field_single_value($node, 'body', $ret);
+        self::get_field_single_value($node, 'field_instrument_coverage', $ret);
+        $ret['field_instrument_treaty_text'] = self::export_field_files($node, 'field_instrument_treaty_text', $export_base_dir);
+        self::get_field_single_value($node, 'field_instrument_financing', $ret);
+        self::get_field_single_value($node, 'field_instrument_reservations', $ret);
+        self::get_field_single_value($node, 'field_instrument_species_ex', $ret);
+        self::get_field_single_value($node, 'field_instrument_other', $ret);
+        self::get_field_single_value($node, 'field_related_international_init', $ret);
+        self::get_field_single_value($node, 'field_working_groups', $ret);
+        self::get_field_single_value($node, 'field_member_of_blg', $ret);
+        self::get_field_single_value($node, 'field_instrument_amendments', $ret);
+
+        return $ret;
+    }
+
+    /**
+     * Create legal instrument node from JSON string
+     *
+     * @return   object   $node
+    */
+    static function node_from_array($data) {
+        $ret = NULL;
+        if(empty($data['title'])) {
+            error_log('CMSLegalInstrument::from_array(): Cannot import legal instrument without a title');
+            return $ret;
+        }
+		// create node
+        $node = self::node_create($data['title'],$data['field_instrument_name'],1,'');
+
+        if (!empty($data['uuid'])) {
+            $node->uuid = $data['uuid'];
+        }
+        if (!empty($data['status'])) {
+            $node->status = $data['status'];
+        }
+
+        // put data in node
+        self::set_field_single_value($node, 'field_instrument_name', $data);
+        self::set_field_single_value($node, 'field_instrument_depositary', $data);
+        self::set_field_single_value($node, 'field_instrument_in_effect', $data);
+        self::set_field_single_value($node, 'field_instrument_in_force', $data);
+        self::set_field_single_value($node, 'field_instrument_actual_effect', $data);
+        self::set_field_single_value($node, 'field_instrument_actual_force', $data);
+        self::set_field_single_value($node, 'field_instrument_secretariat', $data);
+        self::set_field_single_value($node, 'body', $data);
+        self::set_field_single_value($node, 'field_instrument_coverage', $data);
+        self::set_field_single_value($node, 'field_instrument_final_act', $data);
+        self::set_field_single_value($node, 'field_instrument_signature', $data);
+        self::set_field_single_value($node, 'field_instrument_financing', $data);
+        self::set_field_single_value($node, 'field_instrument_reservations', $data);
+        self::set_field_single_value($node, 'field_instrument_species_ex', $data);
+        self::set_field_single_value($node, 'field_instrument_other', $data);
+        self::set_field_single_value($node, 'field_related_international_init', $data);
+        self::set_field_single_value($node, 'field_working_groups', $data);
+        self::set_field_single_value($node, 'field_member_of_blg', $data);
+        self::set_field_single_value($node, 'field_instrument_amendments', $data);
+
+        self::set_content_taxonomic_fields($node, CMSLegalInstrument::$taxonomic_fields, $data);
+
+        self::set_single_entity_reference_by_uuid($node, 'field_country', $data);
+        self::set_entity_reference_by_uuid($node, 'field_sponsors', $data);
+
+        CMSUtils::node_import_file($node, 'field_instrument_treaty_text', $data);
+
+        node_save($node);
+        return $node;
+    }
+
+    /**
+     * Create node of type legal_instrument
+     * @param   string   $title Instrument title
+     * @param   array    $instrument Instrument configuration (dictionary with fields 'fullname', 'type', 'dateinforce')
+     * @return  stdClass   $node Drupal Legal Instrument node
+     * @deprecated since version 1.0 Use node_create
+    */
+    static function create_legal_instrument($title, $instrument) {
+        return self::node_create($title, $instrument['field_instrument_name'], $instrument['field_instrument_status'], $instrument['field_instruments_in_force']);
+    }
+
+    /**
+     * Return an associative array with legal instruments.
+     *
+     * If $title_as_key = TRUE the array key is set to title and the value to nid
+     * if $title_as_key = FALSE the array key is set to nid and the value to title
+     *
+     * @param string $title_as_key If true array keys are instrument title
+     * @return array Array of instruments
+    */
+    public static function get_mapped_instruments($title_as_key = TRUE) {
+        if ($title_as_key) {
+            $fields = array('title', 'nid');
+        }else {
+            $fields = array('nid', 'title');
+        }
+        return db_select('node', 'n')
+        ->fields('n', $fields)
+        ->condition('type', 'legal_instrument', '=')
+        ->execute()
+        ->fetchAllKeyed();
+    }
+
+
+    /**
+     * Retrieve CMS Instruments keyed by entity_id
+     * @return array Associative array of instruments array('instrument_id' => stdClass::Instrument)
+     */
+    public static function cms_instruments_by_id() {
+        $ret = array();
+        $query = new EntityFieldQuery();
+        $query = $query->entityCondition('entity_type', 'node')
+                ->propertyCondition('type', 'legal_instrument')
+                ->execute();
+        if(isset($query['node'])) {
+            $ids = array_keys($query['node']);
+            $instruments = entity_load('node', $ids);
+            foreach($instruments as $instrument) {
+                $ret[$instrument->nid] = $instrument;
+            }
+        }
+        return $ret;
+    }
+
+    public static function cms_instrument_title_by_id($instrument_id) {
+        $query = new EntityFieldQuery();
+        $query = $query->entityCondition('entity_type', 'node')
+                ->propertyCondition('type', 'legal_instrument')
+                ->execute();
+        if(isset($query['node'])) {
+            $ids = array_keys($query['node']);
+            $instruments = entity_load('node', $ids);
+            foreach($instruments as $instrument) {
+                if ($instrument->nid == $instrument_id) {
+                    return $instrument->title;
+                }
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * Retrieve the current instrument base on the current Drupal instance and current domain (for CMS MOU sites).
+     * @param bool $mou Return MOU as intrument if on CMS, otherwise CMS.
+     * @return stdClass Instrument object
+     */
+    public static function get_current_instrument($mou = FALSE) {
+        $current_profile = variable_get('current_profile', FALSE);
+        if($current_profile != 'cms') { // AEWA, ASCOBANS or EUROBATS
+            $all = self::get_instruments_keyed_uuid();
+            switch($current_profile) {
+                case 'aewa':
+                    return $all['dbce2ddc-648e-4302-be84-47d0aa36ad66'];
+                case 'ascobans':
+                    return $all['0b41fac4-6198-439a-a335-f7405f352681'];
+                case 'eurobats':
+                    return $all['99a489ec-64ff-4b0e-940b-d489d0b8e99a'];
+            }
+        } else { // CMS or MOU (if $mou == TRUE)
+            if($mou) {
+                $domain = domain_get_domain();
+                $did = $domain['domain_id'];
+                $map = self::$domain_instrument[$did];
+                $id = $map['instrument'];
+                $all = self::cms_instruments_by_id();
+                return $all[$id];
+            } else {
+                $all = self::get_instruments_keyed_uuid();
+                return $all['f0b4ae05-8d04-4814-b01f-064c94da5a23'];
+            }
+        }
+        return FALSE;
+    }
+
+    static function list_keyed_by_name() {
+        $cached_data = &drupal_static(self::$CACHE_LIST_KEYED_BY_NAME);
+        if(!isset($cached_data)) {
+            $ret = array();
+            $query = new EntityFieldQuery();
+            $query = $query->entityCondition('entity_type', 'node')
+                ->propertyCondition('type', self::$bundle)
+                ->execute();
+            if (!empty($query['node'])) {
+                foreach($query['node'] as $row) {
+                    $row = node_load($row->nid);
+                    $ret[$row->title] = $row;
+                    $ret[strtolower($row->title)] = $row;
+                    $ret[strtoupper($row->title)] = $row;
+                    // Name
+                    $name = self::get_field_single_value($row, 'field_instrument_name');
+                    $ret[$name] = $row;
+                    $ret[strtolower($name)] = $row;
+                    $ret[strtoupper($name)] = $row;
+                }
+            }
+            $cached_data = $ret;
+        }
+        return $cached_data;
+    }
+
+
+    static function get_by_name($name) {
+        if(!empty($name)) {
+            $instruments = self::list_keyed_by_name();
+            if(array_key_exists($name, $instruments)) {
+                return $instruments[$name];
+            }
+        }
+        return NULL;
+    }
+
+    public static function cms_instruments_names() {
+        $instruments = CMSLegalInstrument::get_mapped_instruments();
+        $instruments_names = array();
+        foreach (array_keys($instruments) as $instrument_name) {
+            $instruments_names[strtolower($instrument_name)] = $instrument_name;
+        }
+
+        return $instruments_names;
+    }
+
+    /**
+     * Get all countries for a specified CMS Instrument, grouped by ratification status
+     *
+     * @param   int      $nid
+     * @param   string   $language
+     * @return  array    $data
+    */
+    public static function list_countries_by_status($nid, $language) {
+        $inner = new EntityFieldQuery();
+        $inner_r = $inner->entityCondition('entity_type', 'field_collection_item')
+                         ->fieldCondition('field_instrument', 'target_id', $nid, '=')
+                         ->execute();
+
+        if(!empty($inner_r['field_collection_item'])) {
+            $keys = array_keys($inner_r['field_collection_item']);
+            $query = new EntityFieldQuery();
+            $nodes = $query->entityCondition('entity_type', 'node')
+                          ->entityCondition('bundle', Country::$bundle)
+                          ->fieldCondition('field_country_instrument_status', 'value', $keys)
+                          ->execute();
+            if(!empty($nodes['node'])) {
+                $countries = node_load_multiple(array_keys($nodes['node']));
+            }
+        }
+
+        $data = array();
+        if (!empty($countries)) {
+            foreach ($countries as $index => $country) {
+                foreach($country->field_country_instrument_status[$language] as $row) {
+                    $fc_array = array();
+                    $fc = entity_load('field_collection_item', array($row['value']));
+                    reset($fc);
+                    $fc = current($fc);
+                    if ($fc->field_instrument[$country->language][0]['target_id'] == $nid) {
+                        $term = taxonomy_term_load($fc->field_country_status[$country->language][0]['tid']);
+
+                        if ($term) {
+                            $date = '';
+                            if (!empty($fc->field_country_ratification_date[$country->language][0]['value'])) {
+                                $date = format_date(strtotime($fc->field_country_ratification_date[$country->language][0]['value']) ,'custom','j F Y');
+                            }
+
+                            $notes = array_key_exists($country->language, $fc->field_country_notes) ? $fc->field_country_notes[$country->language][0]['value'] : '';
+
+                            $data[$term->name][] = array(
+                                'nid' => $country->nid,
+                                'country' => $country->title,
+                                'status' => $term->name,
+                                'date' => $date,
+                                'notes' => $notes,
+                            );
+                        }
+
+                    }
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * List all instruments into an array with instrument's uuid as key
+     *
+     * @return   array   $cached_data
+    */
+    public static function list_keyed_by_uuid() {
+        $ret = array();
+        $nodes = self::get_instruments_keyed_uuid();
+        foreach ($nodes as $node) {
+            $ret[$node->uuid] = $node->title;
+        }
+        return $ret;
+    }
+
+
+    /**
+     * Get a list of all instruments from this instance keyed by UUID.
+     * @return array Array of instrument stdClass objects
+     */
+    public static function get_instruments_keyed_uuid() {
+        $cached_data = &drupal_static(self::$cache_instruments_list_by_uuid);
+        if (!isset($cached_data)) {
+            if ($cache = cache_get(self::$cache_instruments_list_by_uuid)) {
+                $cached_data = $cache->data;
+            }else {
+                $nodes = node_load_multiple(array(), array('type'=> CMSLegalInstrument::$bundle));
+                foreach ($nodes as $node) {
+                    $cached_data[$node->uuid] = $node;
+                }
+                cache_set(self::$cache_instruments_list_by_uuid, $cached_data, 'cache', time() + 60 * 5);
+            }
+        }
+        return $cached_data;
+    }
+
+    /**
+     * Function used in template to get data for front-end species profile page
+     * @param $node
+     *
+     * @return array - $data returned should be used in template file by drupal_ammap_render_map() to render the map
+     * @author Dragos Dumitrescu
+     */
+    public static function get_countries_for_ammap($node) {
+        $view_countries = views_get_view('front_end_countries');
+        $view_countries->set_display('instrument_map');
+        $view_countries->set_arguments(array($node->nid));
+        $view_countries->execute();
+        $countries = $view_countries->result;
+        if (empty($countries)) {
+            return false;
+        }
+        $legends = array();
+        $data = array();
+        foreach ($countries as $idx => $country) {
+            $legend = '';
+            if (isset($country->field_field_country_status[0])) {
+                $term = taxonomy_term_load($country->field_field_country_status[0]['raw']['tid']);
+                $legend = $term->name;
+                $legends[$term->name] = array(
+                    'name' => $term->name,
+                    'weight' => $term->weight,
+                );
+            }
+            $date = '';
+            if (isset($country->field_field_country_ratification_date[0])) {
+                $date = date('Y', strtotime($country->field_field_country_ratification_date[0]['raw']['value']));
+            }
+            $customData = (!empty($legend)) ? $legend : '';
+            $customData .= (!empty($date)) ? " since $date" : '';
+
+            $data []= array(
+                'title' => (!empty($country->field_title_field[0]['raw']['value']))
+                        ? $country->field_title_field[0]['raw']['value'] : $country->node_title,
+                'iso2'  => $country->field_field_country_iso2[0]['raw']['value'],
+                'customData'  => $customData,
+                'legend' => $legend,
+                'url' => drupal_lookup_path('alias',"node/" . $country->nid),
+                'color' => ''
+            );
+        }
+        $return = array();
+        $return['data'] = $data;
+        $return['legend'] = $legends;
+        return $return;
+    }
+}

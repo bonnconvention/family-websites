@@ -1,0 +1,367 @@
+<?php
+
+class CMSLegalInstrumentWebTestCase extends CMSWebTestCase {
+    protected $user;
+
+    public static function getInfo() {
+        return array(
+            'name' => 'CMS Legal Instrument',
+            'description' => 'Verify functionality of CMS Legal Instrument',
+            'group' => 'CMS Tests'
+        );
+    }
+
+
+    function setUp() {
+        parent::setUp('taxonomy', 'taxonomy_access_fix', 'legal_instrument', 'date_popup','uuid','country');
+        self::$bundle = CMSLegalInstrument::$bundle;
+
+    }
+
+    function test_security_role_anonymous() {
+        $agreement = CMSUtils::vocabulary_get_or_create_term('agreement', VOC_INSTRUMENT_STATUS);
+        $instrument = CMSLegalInstrument::node_create('test', 'test_instrument', $agreement->tid, '2011-12-22');
+        
+        
+        $data = array(
+            'field_instrument_type' => 'Article IV (3)'
+        );
+        CMSBase::set_field_taxonomic_term($instrument, 'field_instrument_type', VOC_INSTRUMENT_TYPE, $data);
+        
+        node_save($instrument);
+        
+        $this->assertNotNull($instrument);
+        $this->assertFalse(empty($instrument->nid));
+
+        $this->try_anonymous_role($instrument->nid, 'test_instrument', 'legal_instrument/listing', 'node/add/legal-instrument');
+        $this->ensure_access_denied_for_vocabulary(VOC_INSTRUMENT_STATUS, 'anonymous');
+        $this->ensure_access_denied_for_vocabulary(VOC_INSTRUMENT_TYPE, 'anonymous');
+    }
+
+    function test_security_role_authenticated() {
+        $agreement = CMSUtils::vocabulary_get_or_create_term('agreement', VOC_INSTRUMENT_STATUS);
+        $instrument = CMSLegalInstrument::node_create('test_instrument', 'test_instrument_full_name', $agreement->tid, '2011-12-22');
+        
+        $data = array(
+            'field_instrument_type' => 'Article IV (3)'
+        );
+        CMSBase::set_field_taxonomic_term($instrument, 'field_instrument_type', VOC_INSTRUMENT_TYPE, $data);
+        
+        node_save($instrument);
+        
+        $this->assertNotNull($instrument);
+        $this->assertFalse(empty($instrument->nid));
+
+        $this->try_authenticated_role($instrument->nid, 'test_instrument', 'legal_instrument/listing', 'node/add/legal-instrument');
+        $this->ensure_access_denied_for_vocabulary(VOC_INSTRUMENT_STATUS, self::$role_authenticated);
+        $this->ensure_access_denied_for_vocabulary(VOC_INSTRUMENT_TYPE, self::$role_authenticated);
+    }
+
+    function test_security_role_manager() {
+        $add = array(
+            'title' => 'test_instrument',
+            'field_instrument_name[und][0][value]' => 'test_instrument_full_name'
+        );
+
+        $this->try_manager_role(ROLE_MANAGE_PARTY, $add, 'legal_instrument/listing', 'node/add/legal-instrument', 'CMS Instrument');
+        $this->ensure_access_for_vocabulary(VOC_INSTRUMENT_STATUS, ROLE_MANAGE_PARTY, 1);
+        $this->ensure_access_for_vocabulary(VOC_INSTRUMENT_TYPE, ROLE_MANAGE_PARTY, 2);
+    }
+
+    function test_security_role_administrator() {
+        $add = array(
+            'title' => 'test_instrument',
+            'field_instrument_name[und][0][value]' => 'test_instrument_full_name'
+        );
+
+        $this->try_administrator_role($add, 'legal_instrument/listing', 'node/add/legal-instrument', 'CMS Instrument');
+        $this->ensure_access_for_vocabulary(VOC_INSTRUMENT_STATUS, self::$role_administrator, 1);
+        $this->ensure_access_for_vocabulary(VOC_INSTRUMENT_TYPE, self::$role_administrator, 2);
+    }
+
+
+    function test_node_create() {
+        $mou = CMSUtils::vocabulary_get_or_create_term('MOU', VOC_INSTRUMENT_STATUS);
+        $node = CMSLegalInstrument::node_create('test', 'Full name', $mou->tid, '2011-12-22');
+
+        $this->assertNotNull($node);
+        $this->assertEqual(1, $node->nid);
+
+        $node = node_load(1);
+        $this->assertEqual('test', $node->title);
+        $this->assertEqual($mou->tid, $node->field_instrument_status[$node->language][0]['tid']);
+        $this->assertEqual('2011-12-22 00:00:00', $node->field_instrument_in_force[$node->language][0]['value']);
+    }
+
+
+    function test_get_mapped_instruments() {
+        $mou = CMSUtils::vocabulary_get_or_create_term('MOU', VOC_INSTRUMENT_STATUS);
+        $agreement = CMSUtils::vocabulary_get_or_create_term('agreement', VOC_INSTRUMENT_STATUS);
+
+        CMSLegalInstrument::node_create('instrument 1', 'Instrument #1', $agreement->tid, '2001-11-23');
+        CMSLegalInstrument::node_create('instrument 2', 'Instrument #2', $mou->tid, '2011-10-28');
+
+        $arr1 = CMSLegalInstrument::get_mapped_instruments();
+        $this->assertEqual(array('instrument 1' => 1, 'instrument 2' => 2), $arr1);
+
+        $arr2 = CMSLegalInstrument::get_mapped_instruments(FALSE);
+        $this->assertEqual(array(1 => 'instrument 1', 2 => 'instrument 2'), $arr2);
+    }
+
+
+    function test_cms_instruments_by_id() {
+        $agreement = CMSUtils::vocabulary_get_or_create_term('agreement', VOC_INSTRUMENT_STATUS);
+
+        CMSLegalInstrument::node_create('Instrument 1', 'Instrument #1', $agreement->tid, '2012-11-23');
+        CMSLegalInstrument::node_create('Instrument 2', 'Instrument #2', $agreement->tid, '2012-10-28');
+        CMSLegalInstrument::node_create('Instrument 3', 'Instrument #3', $agreement->tid, '2012-10-28');
+
+        $instruments = CMSLegalInstrument::cms_instruments_by_id();
+        $this->assertEqual(3, count($instruments));
+        $this->assertEqual(array(1, 2, 3), array_keys($instruments));
+        $this->assertEqual('Instrument 1', $instruments[1]->title);
+        $this->assertEqual('Instrument 2', $instruments[2]->title);
+        $this->assertEqual('Instrument 3', $instruments[3]->title);
+    }
+
+
+    function test_list_keyed_by_name() {
+        $mou = CMSUtils::vocabulary_get_or_create_term('MOU', VOC_INSTRUMENT_STATUS);
+        $agreement = CMSUtils::vocabulary_get_or_create_term('agreement', VOC_INSTRUMENT_STATUS);
+
+        $i1 = CMSLegalInstrument::node_create('Instrument 1', 'Full title 1', $agreement->tid, '2012-02-22');
+        $i2 = CMSLegalInstrument::node_create('Instrument 2', 'Full title 2', $mou->tid, '2013-01-23');
+
+        $instruments = CMSLegalInstrument::list_keyed_by_name();
+        $names = array_keys($instruments);
+        $this->assertEqual(12, count($instruments));
+        $this->assertTrue(in_array('Instrument 1', $names));
+        $this->assertTrue(in_array('INSTRUMENT 1', $names));
+        $this->assertTrue(in_array('instrument 1', $names));
+        $this->assertTrue(in_array('Instrument 2', $names));
+        $this->assertTrue(in_array('INSTRUMENT 2', $names));
+        $this->assertTrue(in_array('Full title 1', $names));
+        $this->assertTrue(in_array('FULL TITLE 1', $names));
+        $this->assertTrue(in_array('full title 1', $names));
+        $this->assertTrue(in_array('Full title 2', $names));
+        $this->assertTrue(in_array('FULL TITLE 2', $names));
+        $this->assertTrue(in_array('full title 2', $names));
+
+        $k1 = $instruments['instrument 1'];
+        $k2 = $instruments['instrument 2'];
+        $this->assertEqual($i1->nid, $k1->nid);
+        $this->assertEqual($i2->nid, $k2->nid);
+    }
+    
+    function test_node_to_array() {
+    	$mou = CMSUtils::vocabulary_get_or_create_term('MOU', VOC_INSTRUMENT_STATUS);
+        
+        $art4_3 = CMSUtils::vocabulary_get_or_create_term('Article IV (3)', VOC_INSTRUMENT_TYPE);
+        
+        $node = CMSLegalInstrument::node_create('Instrument 1', 'Full title of instrument 1', $mou->tid, '2012-02-22');
+        
+ 		$file  = __DIR__ . DIRECTORY_SEPARATOR . 'test' . DIRECTORY_SEPARATOR . 'test.txt';
+        
+        $country1 = Country::node_create('Albania', 'AL', 'Europe', '001', '2001-02-15', 'ALB', 'Republic of Albania');
+        $country1->uuid = 'UUID-COUNTRY-1';
+        node_save($country1);
+        $country2 = Country::node_create('Romania', 'RO', 'Europe', '002', '2002-03-16', 'ROU', 'Romania');
+        $country2->uuid = 'UUID-COUNTRY-2';
+        node_save($country2);
+          
+        $data = array(
+        	'title' => 'Instrument 1',
+        	'field_instrument_name' => 'Full title of instrument 1',
+            'uuid' => 'UUID-INSTRUMENT-1',
+            'field_instrument_depositary' => 'Dummy text for Depositary field',
+            'field_instrument_in_effect' => 'Loooooooooong dummy text for Actually in effect field',
+            'field_instrument_in_force' => 'Loooooooooong dummy text for Actually in force field',
+            'field_instrument_actual_effect' => '2000-01-01 00:00:00',
+            'field_instrument_actual_force' => '1994-09-04 00:00:00',
+            'field_instrument_secretariat' => 'Dummy text for Secretariat field',
+            'body' => 'Loooooooooong dummy text for Description field',
+            'field_instrument_coverage' => 'Loooooooooong dummy text for Coverage field',
+            'field_instrument_type' => 'Article IV (3)',
+            'field_instrument_status' => 'MOU',
+        	'field_instrument_final_act' => 'Dummy text for Final Act field',
+        	'field_instrument_signature' => 'Dummy text for Signature field',
+	        'field_instrument_financing' => 'Dummy text for Financing field',
+	        'field_instrument_reservations' => 'Dummy text for Reservations field',
+	        'field_instrument_species_ex' => 'Loooooooooong dummy text for Species examples field',
+	        'field_instrument_other' => 'Loooooooooong dummy text for Other field',
+	        'field_related_international_init' => 'Loooooooooong dummy text for Related international initiatives field',
+	        'field_working_groups' => 'Loooooooooong dummy text for Working groups field',
+	        'field_member_of_blg' => 'Loooooooooong dummy text for Member of BLG field',
+            'field_country' => array(
+            	$country1->uuid
+            ),
+            'field_languages' => array('Chinese', 'Spanish'),
+            'field_sponsors' => array(
+            	$country1->uuid,
+            	$country2->uuid,
+            ),
+            'field_instrument_range' => array(
+            	$country1->uuid,
+            	$country2->uuid,
+            ),
+            'field_instrument_treaty_text' => array(
+              array('path' => $file)
+            )
+        );
+        
+        $node->uuid = $data['uuid'];
+        CMSBase::set_field_single_value($node, 'field_instrument_depositary', $data);
+        CMSBase::set_field_single_value($node, 'field_instrument_in_effect', $data);
+        CMSBase::set_field_single_value($node, 'field_instrument_in_force', $data);
+        CMSBase::set_field_single_value($node, 'field_instrument_actual_effect', $data);
+        CMSBase::set_field_single_value($node, 'field_instrument_actual_force', $data);
+        CMSBase::set_field_single_value($node, 'field_instrument_secretariat', $data);
+        CMSBase::set_field_single_value($node, 'body', $data);
+        CMSBase::set_field_single_value($node, 'field_instrument_coverage', $data);
+        
+        CMSBase::set_field_single_value($node, 'field_instrument_final_act', $data);
+        CMSBase::set_field_single_value($node, 'field_instrument_signature', $data);
+        CMSBase::set_field_single_value($node, 'field_instrument_financing', $data);
+        CMSBase::set_field_single_value($node, 'field_instrument_reservations', $data);
+        CMSBase::set_field_single_value($node, 'field_instrument_species_ex', $data);
+        CMSBase::set_field_single_value($node, 'field_instrument_other', $data);
+        CMSBase::set_field_single_value($node, 'field_related_international_init', $data);
+        CMSBase::set_field_single_value($node, 'field_working_groups', $data);
+        CMSBase::set_field_single_value($node, 'field_member_of_blg', $data);
+        
+        CMSBase::set_field_taxonomic_term($node, 'field_instrument_type', VOC_INSTRUMENT_TYPE, $data);
+        CMSBase::set_field_taxonomic_term($node, 'field_instrument_status', VOC_INSTRUMENT_STATUS, $data);
+        CMSBase::set_field_taxonomic_terms($node, 'field_languages', VOC_UN_LANGUAGES, $data);
+        
+        CMSBase::set_entity_reference_by_uuid($node, 'field_sponsors', $data);
+        CMSBase::set_entity_reference_by_uuid($node, 'field_instrument_range', $data);
+        CMSBase::set_single_entity_reference_by_uuid($node, 'field_country', $data);
+        CMSUtils::node_import_file($node, 'field_instrument_treaty_text',$data);
+        
+        node_save($node);
+    
+        $instrument = CMSLegalInstrument::node_to_array($node, '\tmp\cms');
+
+        $this->assertEqual($data['title'], $instrument['title']);
+        $this->assertEqual($data['field_instrument_name'], $instrument['field_instrument_name']);
+        $this->assertEqual($data['uuid'], $instrument['uuid']);
+        $this->assertEqual($data['field_instrument_depositary'], $instrument['field_instrument_depositary']);
+        $this->assertEqual($data['field_instrument_in_effect'], $instrument['field_instrument_in_effect']);
+        $this->assertEqual($data['field_instrument_in_force'], $instrument['field_instrument_in_force']);
+        $this->assertEqual($data['field_instrument_actual_effect'], $instrument['field_instrument_actual_effect']);
+        $this->assertEqual($data['field_instrument_actual_force'], $instrument['field_instrument_actual_force']);
+        $this->assertEqual($data['field_instrument_secretariat'], $instrument['field_instrument_secretariat']);
+        $this->assertEqual($data['body'], $instrument['body']);
+        $this->assertEqual($data['field_instrument_coverage'], $instrument['field_instrument_coverage']);
+        
+        $this->assertEqual($data['field_instrument_final_act'], $instrument['field_instrument_final_act']);
+        $this->assertEqual($data['field_instrument_signature'], $instrument['field_instrument_signature']);
+        $this->assertEqual($data['field_instrument_financing'], $instrument['field_instrument_financing']);
+        $this->assertEqual($data['field_instrument_reservations'], $instrument['field_instrument_reservations']);
+        $this->assertEqual($data['field_instrument_species_ex'], $instrument['field_instrument_species_ex']);
+        $this->assertEqual($data['field_instrument_other'], $instrument['field_instrument_other']);
+        $this->assertEqual($data['field_related_international_init'], $instrument['field_related_international_init']);
+        $this->assertEqual($data['field_working_groups'], $instrument['field_working_groups']);
+        $this->assertEqual($data['field_member_of_blg'], $instrument['field_member_of_blg']);
+        
+        $this->assertEqual($data['field_instrument_type'], $instrument['field_instrument_type']);
+        $this->assertEqual($data['field_instrument_status'], $instrument['field_instrument_status']);
+        $this->assertEqual($data['field_languages'], $instrument['field_languages']);
+        
+        $this->assertEqual(1, count($instrument['field_instrument_treaty_text']));
+    }
+    
+    function test_node_from_array() {
+    	$mou = CMSUtils::vocabulary_get_or_create_term('MOU', VOC_INSTRUMENT_STATUS);
+        
+        $art4_3 = CMSUtils::vocabulary_get_or_create_term('Article IV (3)', VOC_INSTRUMENT_TYPE);
+        
+        $node = CMSLegalInstrument::node_create('Instrument 1', 'Full title of instrument 1', $mou->tid, '2012-02-22');
+        
+        $file  = __DIR__ . DIRECTORY_SEPARATOR . 'test' . DIRECTORY_SEPARATOR . 'test.txt';
+        
+        $country1 = Country::node_create('Albania', 'AL', 'Europe', '001', '2001-02-15', 'ALB', 'Republic of Albania');
+        $country1->uuid = 'UUID-COUNTRY-1';
+        node_save($country1);
+        $country2 = Country::node_create('Romania', 'RO', 'Europe', '002', '2002-03-16', 'ROU', 'Romania');
+        $country2->uuid = 'UUID-COUNTRY-2';
+        node_save($country2);
+          
+        $data = array(
+        	'title' => 'Instrument 1',
+        	'field_instrument_name' => 'Full title of instrument 1',
+            'uuid' => 'UUID-INSTRUMENT-1',
+            'field_instrument_depositary' => 'Dummy text for Depositary field',
+            'field_instrument_in_effect' => 'Loooooooooong dummy text for Actually in effect field',
+            'field_instrument_in_force' => 'Loooooooooong dummy text for Actually in force field',
+            'field_instrument_actual_effect' => '2000-01-01 00:00:00',
+            'field_instrument_actual_force' => '1994-09-04 00:00:00',
+            'field_instrument_secretariat' => 'Dummy text for Secretariat field',
+            'body' => 'Loooooooooong dummy text for Description field',
+            'field_instrument_coverage' => 'Loooooooooong dummy text for Coverage field',
+            'field_instrument_type' => 'Article IV (3)',
+            'field_instrument_status' => 'MOU',
+			'field_instrument_final_act' => 'Dummy text for Final Act field',
+        	'field_instrument_signature' => 'Dummy text for Signature field',
+	        'field_instrument_financing' => 'Dummy text for Financing field',
+	        'field_instrument_reservations' => 'Dummy text for Reservations field',
+	        'field_instrument_species_ex' => 'Loooooooooong dummy text for Species examples field',
+	        'field_instrument_other' => 'Loooooooooong dummy text for Other field',
+	        'field_related_international_init' => 'Loooooooooong dummy text for Related international initiatives field',
+	        'field_working_groups' => 'Loooooooooong dummy text for Working groups field',
+	        'field_member_of_blg' => 'Loooooooooong dummy text for Member of BLG field',
+            'field_country' => array(
+            	$country1->uuid
+            ),
+            'field_languages' => array('English', 'French'),
+            'field_sponsors' => array(
+            	$country1->uuid,
+            	$country2->uuid
+            ),
+            'field_instrument_range' => array(
+            	$country1->uuid,
+            	$country2->uuid
+            ),
+            'field_instrument_treaty_text' => array(
+               array('path' => $file)
+            )
+        );
+        
+        $instrument = CMSLegalInstrument::node_from_array($data);
+        $instrument = node_load($instrument->nid);
+
+        $this->assertEqual($data['title'], $instrument->title);
+        $this->assertEqual($data['uuid'], $instrument->uuid);
+    
+        $this->assertEqual($data['field_instrument_name'], CMSBase::get_field_single_value($instrument, 'field_instrument_name'));
+        $this->assertEqual($data['field_instrument_depositary'], CMSBase::get_field_single_value($instrument, 'field_instrument_depositary'));
+        $this->assertEqual($data['field_instrument_in_effect'], CMSBase::get_field_single_value($instrument, 'field_instrument_in_effect'));
+        $this->assertEqual($data['field_instrument_in_force'], CMSBase::get_field_single_value($instrument, 'field_instrument_in_force'));
+        $this->assertEqual($data['field_instrument_actual_effect'], CMSBase::get_field_single_value($instrument, 'field_instrument_actual_effect'));
+        $this->assertEqual($data['field_instrument_actual_force'], CMSBase::get_field_single_value($instrument, 'field_instrument_actual_force'));
+        $this->assertEqual($data['field_instrument_secretariat'], CMSBase::get_field_single_value($instrument, 'field_instrument_secretariat'));
+        $this->assertEqual($data['body'], CMSBase::get_field_single_value($instrument, 'body'));
+        $this->assertEqual($data['field_instrument_coverage'], CMSBase::get_field_single_value($instrument, 'field_instrument_coverage'));
+        
+        $this->assertEqual($data['field_instrument_final_act'], CMSBase::get_field_single_value($instrument, 'field_instrument_final_act'));
+        $this->assertEqual($data['field_instrument_signature'], CMSBase::get_field_single_value($instrument, 'field_instrument_signature'));
+        $this->assertEqual($data['field_instrument_financing'], CMSBase::get_field_single_value($instrument, 'field_instrument_financing'));
+        $this->assertEqual($data['field_instrument_reservations'], CMSBase::get_field_single_value($instrument, 'field_instrument_reservations'));
+        $this->assertEqual($data['field_instrument_species_ex'], CMSBase::get_field_single_value($instrument, 'field_instrument_species_ex'));
+        $this->assertEqual($data['field_instrument_other'], CMSBase::get_field_single_value($instrument, 'field_instrument_other'));
+        $this->assertEqual($data['field_related_international_init'], CMSBase::get_field_single_value($instrument, 'field_related_international_init'));
+        $this->assertEqual($data['field_working_groups'], CMSBase::get_field_single_value($instrument, 'field_working_groups'));
+        $this->assertEqual($data['field_member_of_blg'], CMSBase::get_field_single_value($instrument, 'field_member_of_blg'));
+        
+        $this->assertEqual($data['field_instrument_type'], CMSBase::get_field_taxonomic_term_name($instrument, 'field_instrument_type', VOC_INSTRUMENT_TYPE));
+        $this->assertEqual($data['field_instrument_status'], CMSBase::get_field_taxonomic_term_name($instrument, 'field_instrument_status', VOC_INSTRUMENT_STATUS));
+        $this->assertEqual($data['field_languages'], CMSBase::get_field_taxonomic_terms_names($instrument, 'field_languages', VOC_UN_LANGUAGES));
+        
+        $this->assertEqual($data['field_sponsors'], CMSBase::get_entity_reference_by_uuid($instrument, 'field_sponsors'));
+        $this->assertEqual($data['field_instrument_range'], CMSBase::get_entity_reference_by_uuid($instrument, 'field_instrument_range'));
+        
+        $this->assertEqual(1, count($instrument->field_instrument_treaty_text[$instrument->language]));
+        $this->assertEqual('test.txt', $instrument->field_instrument_treaty_text[$instrument->language][0]['filename']);
+        
+    }
+}

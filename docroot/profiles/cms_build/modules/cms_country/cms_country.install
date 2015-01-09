@@ -1,0 +1,80 @@
+<?php
+
+/**
+ * Implements hook_uninstall()
+ * @todo Test this code
+ */
+function cms_country_uninstall() {
+    user_role_delete(ROLE_MANAGE_PARTY);
+
+    $query = new EntityFieldQuery();
+    $query = $query->entityCondition('entity_type', 'node')->propertyCondition('type', 'country')->execute();
+    if(isset($query['node'])) {
+        node_delete_multiple(array_keys($query['node']));
+    }
+    node_type_delete('country');
+}
+
+/**
+ * Implements hook_install()
+ */
+function cms_country_install() {
+    $role = CMSUtils::get_or_create_role(ROLE_MANAGE_PARTY);
+    CMSUtils::vocabulary_create('Party status', VOC_PARTY_STATUS);
+    menu_rebuild();
+    if(!empty($role)) {
+        $rid = $role->rid;
+        $permissions = array(
+            'create country content' => TRUE,
+            'edit own country content' => TRUE,
+            'edit any country content' => TRUE,
+            'delete own country content' => TRUE,
+            'delete any country content' => TRUE,
+
+            'search content' => TRUE,
+            'use advanced search' => TRUE,
+        );
+
+        CMSUtils::set_vocabulary_permissions($permissions, VOC_PARTY_STATUS, 'country', ROLE_MANAGE_PARTY);
+        user_role_change_permissions($rid, $permissions);
+        CMSUtils::role_add_permissions('administrator', $permissions);
+    } else {
+        watchdog('country', "Unable to load role name '@role'", array("@role" => ROLE_MANAGE_PARTY), WATCHDOG_WARNING);
+    }
+}
+
+/**
+ * Update Countries' statuses
+*/
+function cms_country_update_7001() {
+    if (CMSUtils::get_current_profile() != 'aewa') {
+        return t('Update script available only for AEWA instance.');
+    }
+
+    $countries = node_load_multiple(array(), array('type' => 'country'));
+    foreach($countries as $node) {
+        if (!empty($node->field_country_instrument_status[$node->language])) {
+            foreach($node->field_country_instrument_status[$node->language] as $row) {
+                $field_collection = entity_load('field_collection_item', array($row['value']));
+                reset($field_collection);
+                $field_collection = current($field_collection);
+                $tid = $field_collection->field_country_status[$node->language][0]['tid'];
+                $term = Country::get_field_taxonomic_term_name($field_collection, 'field_country_status', VOC_PARTY_STATUS);
+
+                if ($term == '(x)') {
+                    $new_term_data['field_country_status'] = 'Signed but not ratified';
+                    Country::set_field_taxonomic_term($field_collection, 'field_country_status', VOC_PARTY_STATUS, $new_term_data);
+                    $field_collection->save();
+                }
+
+                if ($term == 'X') {
+                    $new_term_data['field_country_status'] = 'Contracting Party';
+                    Country::set_field_taxonomic_term($field_collection, 'field_country_status', VOC_PARTY_STATUS, $new_term_data);
+                    $field_collection->save();
+                }
+            }
+        }
+    }
+
+    return t("Countries' statuses successfully updated.");
+}

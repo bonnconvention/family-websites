@@ -1,0 +1,833 @@
+<?php
+class CMSSpeciesWebTestCase extends CMSWebTestCase {
+
+    private static $vocabularies;
+
+    public static function getInfo() {
+        return array(
+            'name' => 'CMS Species',
+            'description' => 'Web test cases for Species module',
+            'group' => 'CMS Tests'
+        );
+    }
+
+    function setUp() {
+        parent::setUp('taxonomy', 'taxonomy_access_fix', 'legal_instrument','species', 'meeting', 'uuid', 'country',
+            'project', 'publication', 'document');
+        self::$bundle = CMSSpecies::$bundle;
+        self::$vocabularies = array(VOC_THREATS, VOC_SPECIES_CLASS, VOC_SPECIES_GENUS,
+            VOC_SPECIES_ORDER, VOC_SPECIES_FAMILY, VOC_SPECIES_SPECIES,
+            VOC_SPECIES_SUBSPECIES, VOC_SPECIES_AUTHOR, VOC_SPECIES_POPUPATION_NAME, VOC_SPECIES_AEWA_COUNTRY_STATUS,
+            VOC_SPECIES_AEWA_STATUS_A, VOC_SPECIES_AEWA_STATUS_B, VOC_SPECIES_AEWA_STATUS_C);
+    }
+
+    function test_security_role_anonymous() {
+        $acipenser = CMSSpecies::node_create('acipenser sturio');
+        $this->assertNotNull($acipenser);
+        $this->assertFalse(empty($acipenser->nid));
+
+        $this->try_anonymous_role($acipenser->nid, 'acipenser sturio', 'species/listing', 'node/add/species');
+        foreach(self::$vocabularies as $vocabulary) {
+            $this->ensure_access_denied_for_vocabulary($vocabulary, 'anonymous');
+        };
+    }
+
+    function test_security_role_authenticated() {
+        $acipenser = CMSSpecies::node_create('acipenser sturio');
+        $this->assertNotNull($acipenser);
+        $this->assertFalse(empty($acipenser->nid));
+
+        $this->try_authenticated_role($acipenser->nid, 'acipenser sturio', 'species/listing', 'node/add/species');
+        foreach(self::$vocabularies as $vocabulary) {
+            $this->ensure_access_denied_for_vocabulary($vocabulary, self::$role_authenticated);
+        };
+    }
+
+
+    function ensure_allowed_to_edit_species($role_name) {
+        $add = array(
+            'title' => 'acrocephalus paludicola',
+            'field_species_genus[und]' => 'Genus',
+            'field_species_species[und]' => 'Species'
+        );
+
+        $edit = array(
+            'title' => 'acipenser sturio',
+            'field_species_genus[und]' => 'Genus1',
+            'field_species_species[und]' => 'Species1'
+        );
+
+        $this->login_as($role_name);
+        $this->ensure_allowed_to_post('node/add/species', $role_name, $add, 'acrocephalus paludicola has been created');
+        $this->ensure_access('node/1', $role_name, 'acrocephalus paludicola');
+        $this->ensure_access('species/listing', $role_name, 'acrocephalus paludicola');
+        $this->ensure_allowed_to_post('node/1/edit', $role_name, $edit, 'acipenser sturio has been updated');
+        $this->ensure_allowed_to_post('node/1/delete', $role_name, array(), 'acipenser sturio has been deleted', 'Delete');
+
+        $i = 0;
+        foreach(self::$vocabularies as $vocabulary) {
+            $i++;
+            $this->ensure_access_for_vocabulary($vocabulary, $role_name, $i);
+        };
+    }
+
+    function test_security_role_manager() {
+        $this->ensure_allowed_to_edit_species(ROLE_MANAGE_SPECIES);
+    }
+
+    function test_security_role_administrator() {
+        $this->ensure_allowed_to_edit_species(self::$role_administrator);
+    }
+
+    /**
+     * Create user with 'manage species' role and try to manage vocabularies
+     * TODO Remove, deprecated
+     */
+    function test_security_role_manage_species_threats() {
+        // Create user with 'manage species' role and try to post content
+        $manager = $this->drupalCreateUser();
+        $r = user_role_load_by_name(ROLE_MANAGE_SPECIES);
+        $manager->roles[$r->rid] = ROLE_MANAGE_SPECIES;
+        user_save($manager);
+        $this->drupalLogin($manager);
+        $this->assertNotNull($this->loggedInUser);
+        $this->assertEqual($this->loggedInUser->roles[$r->rid], ROLE_MANAGE_SPECIES);
+
+        // Overview
+        $this->drupalGet('admin/structure/taxonomy');
+        $this->assertText('Threats', 'Overview contains Threats vocabulary');
+
+        // Create
+        $add = array('name' => 'new_threat');
+        $this->drupalPost('admin/structure/taxonomy/threats/add', $add, t('Save'));
+        $this->assertText('Created new term new_threat', 'Threat vocabulary item created successfully');
+
+        // Read
+        $this->drupalGet('admin/structure/taxonomy/threats');
+        $this->assertText('new_threat', 'Threats vocabulary read successfully');
+
+        // Update
+        $edit = array('name' => 'edited_threat');
+        $this->drupalPost("taxonomy/term/1/edit", $edit, t('Save'));
+        $this->assertText('Updated term edited_threat', 'Threats vocabulary updated successfully');
+
+        // Delete
+        $this->drupalPost("taxonomy/term/1/edit", array(), t('Delete'));
+        $this->drupalPost(NULL, NULL, t('Delete'));
+        $this->assertText('Deleted term edited_threat', 'Item deleted successfully from Threats vocabulary');
+
+        // Ensure we don't have access to other known vocabularies
+        $this->drupalGet('admin/structure/taxonomy');
+        $this->assertNoText('Languages', 'Overview does not contain Languages vocabulary');
+        $this->assertNoText('Publication authors', 'Overview does not contain Publication authors vocabulary');
+        $this->assertNoText('Publication types', 'Overview does not contain Publication types vocabulary');
+    }
+
+
+    function test_node_create() {
+        $node = CMSSpecies::node_create('test');
+        $this->assertNotNull($node);
+        $this->assertEqual(1, $node->nid);
+        $this->assertEqual('test', $node->title);
+
+        $node = CMSSpecies::node_create('second', FALSE);
+        $this->assertNotNull($node);
+        $this->assertTrue(empty($node->nid));
+
+        $node = CMSSpecies::node_create('');
+        $this->assertNotNull($node);
+        $this->assertEqual(2, $node->nid);
+        print "Species node created\n";
+    }
+
+
+    function test_node_from_array() {
+        $agreement = CMSUtils::vocabulary_get_or_create_term('agreement', VOC_INSTRUMENT_STATUS);
+        CMSLegalInstrument::node_create('CMS', 'Convention of Migratory Species', $agreement->tid, '2012-01-01');
+        CMSLegalInstrument::node_create('AEWA', 'AEWA', $agreement->tid, '2012-01-01');
+        CMSLegalInstrument::node_create('Birds of prey', 'Birds of prey', $agreement->tid, '2012-01-01');
+        CMSLegalInstrument::node_create('EUROBATS', 'European Bats', $agreement->tid, '2012-01-01');
+
+        Country::node_create('Angola', 'AO');
+        Country::node_create('Morocco', 'MA');
+        Country::node_create('Cameroon', 'CM');
+        $species = $this->get_sample_species_array();
+
+        $m1 = CMSMeeting::node_create('meeting1');
+        $prj1 = CMSProject::node_create('project1');
+        $pub1 = CMSPublication::node_create('publication1');
+        $doc1 = CMSDocument::node_create('document1');
+
+        $species['field_species_meeting'] = array($m1->uuid);
+        $species['field_species_project'] = array($prj1->uuid);
+        $species['field_species_publication'] = array($pub1->uuid);
+        $species['field_species_document'] = array($doc1->uuid);
+
+        $node = CMSSpecies::node_from_array($species);
+        $node = node_load($node->nid);
+
+        $this->assertEqual('field_species_genus field_species_species field_species_subspecies', $node->title);
+        $this->assertEqual($species['field_species_class'], CMSBase::get_field_taxonomic_term_name($node, 'field_species_class', VOC_SPECIES_CLASS));
+        $this->assertEqual($species['field_species_order'], CMSBase::get_field_taxonomic_term_name($node, 'field_species_order', VOC_SPECIES_ORDER));
+        $this->assertEqual($species['field_species_family'], CMSBase::get_field_taxonomic_term_name($node, 'field_species_family', VOC_SPECIES_FAMILY));
+        $this->assertEqual($species['field_species_genus'], CMSBase::get_field_taxonomic_term_name($node, 'field_species_genus', VOC_SPECIES_GENUS));
+        $this->assertEqual($species['field_species_species'], CMSBase::get_field_taxonomic_term_name($node, 'field_species_species', VOC_SPECIES_SPECIES));
+        $this->assertEqual($species['field_species_subspecies'], CMSBase::get_field_taxonomic_term_name($node, 'field_species_subspecies', VOC_SPECIES_SUBSPECIES));
+        $this->assertEqual($species['field_species_scientific_order'], CMSBase::get_field_single_value($node, 'field_species_scientific_order'));
+        $this->assertEqual($species['field_species_author'], CMSBase::get_field_taxonomic_term_name($node, 'field_species_author', VOC_SPECIES_AUTHOR));
+        $this->assertEqual($species['field_species_name_en'], CMSBase::get_field_single_value($node, 'field_species_name_en'));
+        $this->assertEqual($species['field_species_name_fr'], CMSBase::get_field_single_value($node, 'field_species_name_fr'));
+        $this->assertEqual($species['field_species_name_es'], CMSBase::get_field_single_value($node, 'field_species_name_es'));
+        $this->assertEqual($species['field_species_name_de'], CMSBase::get_field_single_value($node, 'field_species_name_de'));
+        $this->assertEqual($species['field_species_former_name'], CMSBase::get_field_single_value($node, 'field_species_former_name'));
+        $this->assertEqual('2003-01-01T00:00:00', CMSBase::get_field_single_value($node, 'field_species_appendix_1_date'));
+        $this->assertEqual('2004-01-01T00:00:00', CMSBase::get_field_single_value($node, 'field_species_appendix_2_date'));
+        $this->assertTrue(CMSBase::get_field_boolean($node, 'field_species_concerted_action'));
+        $this->assertTrue(CMSBase::get_field_boolean($node, 'field_species_cooperative_action'));
+        $this->assertEqual($species['field_species_pop_global'], CMSBase::get_field_single_value($node, 'field_species_pop_global'));
+        $this->assertEqual('2009-01-01T00:00:00', CMSBase::get_field_single_value($node, 'field_species_pop_global_date'));
+        $this->assertEqual($species['field_species_critical_sites'], CMSBase::get_field_single_value($node, 'field_species_critical_sites'));
+        $this->assertEqual($species['field_species_iucn_status'], CMSBase::get_field_single_value($node, 'field_species_iucn_status'));
+        $this->assertEqual($species['field_species_iucn_web_srv'], CMSBase::get_field_single_value($node, 'field_species_iucn_web_srv'));
+        $this->assertEqual($species['field_species_notes'], CMSBase::get_field_single_value($node, 'field_species_notes'));
+        // field_species_range_states
+        $rs_obs = CMSBase::get_field_collection_items($node, 'field_species_range_states');
+        reset($rs_obs);
+        $rs_ob1 = current($rs_obs);
+        $this->assertEqual('AO', CMSBase::get_field_country_code($rs_ob1, 'field_country'));
+        $this->assertEqual('territories 1', CMSBase::get_field_single_value($rs_ob1, 'field_species_territories'));
+        $rs_ob2 = next($rs_obs);
+        $this->assertEqual('CM', CMSBase::get_field_country_code($rs_ob2, 'field_country'));
+        $this->assertEqual('territories 2', CMSBase::get_field_single_value($rs_ob2, 'field_species_territories'));
+        $this->assertEqual($species['field_species_range_states_notes'], CMSBase::get_field_single_value($node, 'field_species_range_states_notes'));
+        // field_species_pop
+        $pop_obs = CMSBase::get_field_collection_items($node, 'field_species_pop');
+        reset($pop_obs);
+        $pop_ob1 = current($pop_obs);
+        $this->assertEqual('CMS', CMSBase::get_field_instrument_name($pop_ob1, 'field_instrument'));
+        $this->assertEqual('400 pairs',
+            CMSBase::get_field_taxonomic_term_name($pop_ob1, 'field_species_pop_v', VOC_SPECIES_POPUPATION_NAME));
+        $pop_ob2 = next($pop_obs);
+        $this->assertEqual('AEWA', CMSBase::get_field_instrument_name($pop_ob2, 'field_instrument'));
+        $this->assertEqual('120 pairs',
+            CMSBase::get_field_taxonomic_term_name($pop_ob2, 'field_species_pop_v', VOC_SPECIES_POPUPATION_NAME));
+
+        // field_species_pop_size
+        $pop_size_obs = CMSBase::get_field_collection_items($node, 'field_species_pop_size');
+        reset($pop_size_obs);
+        $pop_size_obs1 = current($pop_size_obs);
+        $this->assertEqual('size_r_1', CMSBase::get_field_taxonomic_term_name($pop_size_obs1, 'field_species_pop_size_r', VOC_SPECIES_POPUPATION_NAME));
+        $this->assertEqual('size_i_1', CMSBase::get_field_single_value($pop_size_obs1, 'field_species_pop_size_i'));
+        $this->assertEqual('size_q_1', CMSBase::get_field_single_value($pop_size_obs1, 'field_species_pop_size_q'));
+        $this->assertEqual('size_e_1', CMSBase::get_field_single_value($pop_size_obs1, 'field_species_pop_size_e'));
+        $this->assertEqual('size_ref_1', CMSBase::get_field_single_value($pop_size_obs1, 'field_species_pop_size_ref'));
+        $this->assertEqual('size_n_1', CMSBase::get_field_single_value($pop_size_obs1, 'field_species_pop_size_n'));
+        $this->assertEqual('trend_i_1', CMSBase::get_field_single_value($pop_size_obs1, 'field_species_pop_trend_i'));
+        $this->assertEqual('trend_q_1', CMSBase::get_field_single_value($pop_size_obs1, 'field_species_pop_trend_q'));
+        $this->assertEqual('trend_t_1', CMSBase::get_field_single_value($pop_size_obs1, 'field_species_pop_trend_t'));
+        $this->assertEqual('trend_ref_1', CMSBase::get_field_single_value($pop_size_obs1, 'field_species_pop_trend_ref'));
+        $this->assertEqual('trend_n_1', CMSBase::get_field_single_value($pop_size_obs1, 'field_species_pop_trend_n'));
+
+        $pop_size_obs2 = next($pop_size_obs);
+        $this->assertEqual('size_r_2', CMSBase::get_field_taxonomic_term_name($pop_size_obs2, 'field_species_pop_size_r', VOC_SPECIES_POPUPATION_NAME));
+        $this->assertEqual('size_i_2', CMSBase::get_field_single_value($pop_size_obs2, 'field_species_pop_size_i'));
+        $this->assertEqual('size_q_2', CMSBase::get_field_single_value($pop_size_obs2, 'field_species_pop_size_q'));
+        $this->assertEqual('size_e_2', CMSBase::get_field_single_value($pop_size_obs2, 'field_species_pop_size_e'));
+        $this->assertEqual('size_ref_2', CMSBase::get_field_single_value($pop_size_obs2, 'field_species_pop_size_ref'));
+        $this->assertEqual('size_n_2', CMSBase::get_field_single_value($pop_size_obs2, 'field_species_pop_size_n'));
+        $this->assertEqual('trend_i_2', CMSBase::get_field_single_value($pop_size_obs2, 'field_species_pop_trend_i'));
+        $this->assertEqual('trend_q_2', CMSBase::get_field_single_value($pop_size_obs2, 'field_species_pop_trend_q'));
+        $this->assertEqual('trend_t_2', CMSBase::get_field_single_value($pop_size_obs2, 'field_species_pop_trend_t'));
+        $this->assertEqual('trend_ref_2', CMSBase::get_field_single_value($pop_size_obs2, 'field_species_pop_trend_ref'));
+        $this->assertEqual('trend_n_2', CMSBase::get_field_single_value($pop_size_obs2, 'field_species_pop_trend_n'));
+
+        $this->assertEqual('field_species_standard_reference', CMSBase::get_field_single_value($node, 'field_species_standard_reference'));
+
+        $images = $node->field_species_images[$node->language];
+        $this->assertEqual(2, count($images));
+        $this->assertEqual('picture_1.jpg', $images[0]['filename']);
+        $this->assertEqual('picture_2.jpg', $images[1]['filename']);
+
+        // field_species_threats
+        $th_obs = CMSBase::get_field_collection_items($node, 'field_species_threats');
+        reset($th_obs);
+        $t1 = current($th_obs);
+        $this->assertEqual('Threat 1', CMSBase::get_field_taxonomic_term_name($t1, 'field_threats', VOC_THREATS));
+        $this->assertEqual('Threat notes 1', CMSBase::get_field_single_value($t1, 'field_species_threat_notes'));
+        $t2 = next($th_obs);
+        $this->assertEqual('Threat 2', CMSBase::get_field_taxonomic_term_name($t2, 'field_threats', VOC_THREATS));
+        $this->assertEqual('Threat notes 2', CMSBase::get_field_single_value($t2, 'field_species_threat_notes'));
+
+        // field_species_instruments
+        $instruments = CMSBase::get_field_collection_items($node, 'field_species_instruments');
+        reset($instruments);
+        $pop_i1 = current($instruments);
+        $this->assertEqual('CMS', CMSBase::get_field_instrument_name($pop_i1, 'field_instrument'));
+        $this->assertEqual('1999-02-03 00:00:00', CMSBase::get_field_single_value($pop_i1, 'field_species_instrument_date'));
+        $pop_i2 = next($instruments);
+        $this->assertEqual('EUROBATS', CMSBase::get_field_instrument_name($pop_i2, 'field_instrument'));
+        $this->assertEqual('2000-02-03 00:00:00', CMSBase::get_field_single_value($pop_i2, 'field_species_instrument_date'));
+        $pop_i3 = next($instruments);
+        $this->assertEqual('Birds of prey', CMSBase::get_field_instrument_name($pop_i3, 'field_instrument'));
+        $this->assertEqual('2001-02-03 00:00:00', CMSBase::get_field_single_value($pop_i3, 'field_species_instrument_date'));
+
+        // Test related content
+        $this->assertEqual(array($m1->uuid), CMSBase::get_entity_reference_by_uuid($node, 'field_species_meeting'));
+        $this->assertEqual(array($prj1->uuid), CMSBase::get_entity_reference_by_uuid($node, 'field_species_project'));
+        $this->assertEqual(array($pub1->uuid), CMSBase::get_entity_reference_by_uuid($node, 'field_species_publication'));
+        $this->assertEqual(array($doc1->uuid), CMSBase::get_entity_reference_by_uuid($node, 'field_species_document'));
+    }
+
+
+    function test_node_to_array() {
+        $agreement = CMSUtils::vocabulary_get_or_create_term('agreement', VOC_INSTRUMENT_STATUS);
+        CMSLegalInstrument::node_create('CMS', 'Convention of Migratory Species', $agreement->tid, '2012-01-01');
+        CMSLegalInstrument::node_create('AEWA', 'AEWA', $agreement->tid, '2012-01-01');
+        CMSLegalInstrument::node_create('Birds of prey', 'Birds of prey', $agreement->tid, '2012-01-01');
+        CMSLegalInstrument::node_create('EUROBATS', 'European Bats', $agreement->tid, '2012-01-01');
+
+        Country::node_create('Angola', 'AO');
+        Country::node_create('Morocco', 'MA');
+        Country::node_create('Cameroon', 'CM');
+
+        $m1 = CMSMeeting::node_create('meeting1');
+        $prj1 = CMSProject::node_create('project1');
+        $pub1 = CMSPublication::node_create('publication1');
+        $doc1 = CMSDocument::node_create('document1');
+
+        $export_dir = '/tmp/test/';
+        $species = $this->get_sample_species_array();
+        $node = CMSSpecies::node_from_array($species);
+
+        CMSBase::set_field_list_target_id($node, 'field_species_meeting',
+            array('field_species_meeting' => array($m1->nid)));
+        CMSBase::set_field_list_target_id($node, 'field_species_project',
+            array('field_species_project' => array($prj1->nid)));
+        CMSBase::set_field_list_target_id($node, 'field_species_publication',
+            array('field_species_publication' => array($pub1->nid)));
+        CMSBase::set_field_list_target_id($node, 'field_species_document',
+            array('field_species_document' => array($doc1->nid)));
+
+        node_save($node);
+
+        $node = node_load($node->nid);
+        CMSUtils::mkdir($export_dir);
+        $subject = CMSSpecies::node_to_array($node, $export_dir);
+
+        $this->assertEqual('field_species_genus field_species_species field_species_subspecies', $subject['title']);
+        $this->assertEqual($species['field_species_class'], $subject['field_species_class']);
+        $this->assertEqual($species['field_species_order'], $subject['field_species_order']);
+        $this->assertEqual($species['field_species_family'], $subject['field_species_family']);
+        $this->assertEqual($species['field_species_genus'], $subject['field_species_genus']);
+        $this->assertEqual($species['field_species_species'], $subject['field_species_species']);
+        $this->assertEqual($species['field_species_subspecies'], $subject['field_species_subspecies']);
+        $this->assertEqual($species['field_species_scientific_order'], $subject['field_species_scientific_order']);
+        $this->assertEqual($species['field_species_author'], $subject['field_species_author']);
+        $this->assertEqual($species['field_species_name_en'], $subject['field_species_name_en']);
+        $this->assertEqual($species['field_species_name_fr'], $subject['field_species_name_fr']);
+        $this->assertEqual($species['field_species_name_es'], $subject['field_species_name_es']);
+        $this->assertEqual($species['field_species_name_de'], $subject['field_species_name_de']);
+        $this->assertEqual($species['field_species_former_name'], $subject['field_species_former_name']);
+        $this->assertEqual('2003-01-01T00:00:00', $subject['field_species_appendix_1_date']);
+        $this->assertEqual('2004-01-01T00:00:00', $subject['field_species_appendix_2_date']);
+        $this->assertTrue($subject['field_species_concerted_action']);
+        $this->assertTrue($subject['field_species_cooperative_action']);
+
+        $this->assertEqual($species['field_species_pop_global'], $subject['field_species_pop_global']);
+        $this->assertEqual('2009-01-01T00:00:00', $subject['field_species_pop_global_date']);
+        $this->assertEqual($species['field_species_critical_sites'], $subject['field_species_critical_sites']);
+        $this->assertEqual('en', $subject['field_species_iucn_status']);
+        $this->assertEqual($species['field_species_iucn_web_srv'], $subject['field_species_iucn_web_srv']);
+        $this->assertEqual($species['field_species_notes'], $subject['field_species_notes']);
+
+        $range_states = $subject['field_species_range_states'];
+        $this->assertEqual(array(
+            'field_country' => 'AO',
+            'field_species_territories' => 'territories 1'
+        ), $range_states[0]);
+        $this->assertEqual(array(
+            'field_country' => 'CM',
+            'field_species_territories' => 'territories 2'
+        ), $range_states[1]);
+        $this->assertEqual($species['field_species_range_states_notes'], $subject['field_species_range_states_notes']);
+
+        $population = $subject['field_species_pop'];
+        $this->assertTrue(is_array($population));
+        $this->assertEqual(2, count($population));
+        $this->assertEqual('CMS', $population[0]['field_instrument']);
+        $this->assertEqual('400 pairs', $population[0]['field_species_pop_v']);
+        $this->assertEqual('AEWA', $population[1]['field_instrument']);
+        $this->assertEqual('120 pairs', $population[1]['field_species_pop_v']);
+
+        $population_size = $subject['field_species_pop_size'];
+        $this->assertTrue(is_array($population_size));
+        $this->assertEqual(2, count($population_size));
+        $this->assertEqual('size_r_1', $population_size[0]['field_species_pop_size_r']);
+        $this->assertEqual('size_i_1', $population_size[0]['field_species_pop_size_i']);
+        $this->assertEqual('size_q_1', $population_size[0]['field_species_pop_size_q']);
+        $this->assertEqual('size_e_1', $population_size[0]['field_species_pop_size_e']);
+        $this->assertEqual('size_ref_1', $population_size[0]['field_species_pop_size_ref']);
+        $this->assertEqual('size_n_1', $population_size[0]['field_species_pop_size_n']);
+        $this->assertEqual('trend_i_1', $population_size[0]['field_species_pop_trend_i']);
+        $this->assertEqual('trend_q_1', $population_size[0]['field_species_pop_trend_q']);
+        $this->assertEqual('trend_t_1', $population_size[0]['field_species_pop_trend_t']);
+        $this->assertEqual('trend_ref_1', $population_size[0]['field_species_pop_trend_ref']);
+        $this->assertEqual('trend_n_1', $population_size[0]['field_species_pop_trend_n']);
+
+        $this->assertEqual('size_r_2', $population_size[1]['field_species_pop_size_r']);
+        $this->assertEqual('size_i_2', $population_size[1]['field_species_pop_size_i']);
+        $this->assertEqual('size_q_2', $population_size[1]['field_species_pop_size_q']);
+        $this->assertEqual('size_e_2', $population_size[1]['field_species_pop_size_e']);
+        $this->assertEqual('size_ref_2', $population_size[1]['field_species_pop_size_ref']);
+        $this->assertEqual('size_n_2', $population_size[1]['field_species_pop_size_n']);
+        $this->assertEqual('trend_i_2', $population_size[1]['field_species_pop_trend_i']);
+        $this->assertEqual('trend_q_2', $population_size[1]['field_species_pop_trend_q']);
+        $this->assertEqual('trend_t_2', $population_size[1]['field_species_pop_trend_t']);
+        $this->assertEqual('trend_ref_2', $population_size[1]['field_species_pop_trend_ref']);
+        $this->assertEqual('trend_n_2', $population_size[1]['field_species_pop_trend_n']);
+
+        $this->assertEqual($species['field_species_standard_reference'], $subject['field_species_standard_reference']);
+        $images = $subject['field_species_images'];
+        $this->assertEqual(2, count($images));
+        $i0 = $images[0];
+        $this->assertEqual('species/field-species-genus-field-species-species-field-species-subspecies/field_species_images/picture_1.jpg', $i0['path']);
+        $i1 = $images[1];
+        $this->assertEqual('species/field-species-genus-field-species-species-field-species-subspecies/field_species_images/picture_2.jpg', $i1['path']);
+
+        $instruments = $subject['field_species_instruments'];
+        $this->assertTrue(is_array($instruments));
+        $this->assertEqual(3, count($instruments));
+
+        $i0 = $instruments[0];
+        $this->assertEqual('CMS', $i0['field_instrument']);
+        $this->assertEqual('1999-02-03 00:00:00', $i0['field_species_instrument_date']);
+        $i1 = $instruments[1];
+        $this->assertEqual('EUROBATS', $i1['field_instrument']);
+        $this->assertEqual('2000-02-03 00:00:00', $i1['field_species_instrument_date']);
+        $i2 = $instruments[2];
+        $this->assertEqual('Birds of prey', $i2['field_instrument']);
+        $this->assertEqual('2001-02-03 00:00:00', $i2['field_species_instrument_date']);
+
+        // Test related content
+        $this->assertEqual(array($m1->uuid), $subject['field_species_meeting']);
+        $this->assertEqual(array($prj1->uuid), $subject['field_species_project']);
+        $this->assertEqual(array($pub1->uuid), $subject['field_species_publication']);
+        $this->assertEqual(array($doc1->uuid), $subject['field_species_document']);
+
+        exec('rm -rf /tmp/test');
+    }
+
+
+    function test_set_instruments() {
+        $agreement = CMSUtils::vocabulary_get_or_create_term('agreement', VOC_INSTRUMENT_STATUS);
+        $i1 = CMSLegalInstrument::node_create('test', 'test', $agreement->tid, '2012-01-01');
+        $i2 = CMSLegalInstrument::node_create('second', 'second', $agreement->tid, '2012-01-01');
+
+        $node = CMSSpecies::node_create('test');
+        CMSSpecies::set_instruments($node, array('field_species_instruments' => array('test', 'second')));
+        node_save($node);
+
+        $node = node_load($node->nid);
+        $this->assertEqual(2, count($node->field_species_instruments[$node->language]));
+        $this->assertEqual($i1->nid, $node->field_species_instruments[$node->language][0]['target_id']);
+        $this->assertEqual($i2->nid, $node->field_species_instruments[$node->language][1]['target_id']);
+
+        $instruments = CMSLegalInstrument::get_mapped_instruments();
+        $node = CMSSpecies::node_create('test 2');
+        CMSSpecies::set_instruments($node, array('field_species_instruments' => array('second')), $instruments);
+        $this->assertEqual(1, count($node->field_species_instruments[$node->language]));
+        $this->assertEqual($i2->nid, $node->field_species_instruments[$node->language][0]['target_id']);
+
+        $node = CMSSpecies::node_create('test 3');
+        CMSSpecies::set_instruments($node, array('field_species_instruments' => array('fake')));
+        $this->assertEqual(0, count($node->field_species_instruments[$node->language]));
+
+        $node = CMSSpecies::node_create('test 4');
+        CMSSpecies::set_instruments($node, array('field_species_instruments' => array('')));
+        $this->assertEqual(0, count($node->field_species_instruments[$node->language]));
+    }
+
+
+    function test_get_instruments() {
+        $agreement = CMSUtils::vocabulary_get_or_create_term('agreement', VOC_INSTRUMENT_STATUS);
+        CMSLegalInstrument::node_create('test', 'test', $agreement->tid, '2012-01-01');
+        CMSLegalInstrument::node_create('second', 'second', $agreement->tid, '2012-01-01');
+
+        $node = CMSSpecies::node_create('test');
+        CMSSpecies::set_instruments($node, array('field_species_instruments' => array('test', 'second')));
+        node_save($node);
+
+        $node = node_load($node->nid);
+
+        // Without cache
+        $instruments = CMSSpecies::get_instruments($node);
+        $this->assertEqual(array('test', 'second'), $instruments);
+
+        // With cache
+        $instrument_cache = CMSLegalInstrument::get_mapped_instruments($title_as_key = FALSE);
+        $instruments = CMSSpecies::get_instruments($node, $instrument_cache);
+        $this->assertEqual(array('test', 'second'), $instruments);
+    }
+
+    function test_set_appendix() {
+        $node = CMSSpecies::node_create('test');
+        $appendix = array(
+            "field_species_appendix_1_date" => "2003",
+            "field_species_appendix_2_date" => "2004",
+        );
+        CMSSpecies::set_appendix($node, $appendix);
+        node_save($node);
+        $node = node_load(1);
+        $this->assertEqual('2003-01-01T00:00:00', $node->field_species_appendix_1_date[$node->language][0]['value']);
+        $this->assertEqual('2004-01-01T00:00:00', $node->field_species_appendix_2_date[$node->language][0]['value']);
+    }
+
+    function test_set_action() {
+        $node = CMSSpecies::node_create('test');
+        $actions = array(
+            'field_species_concerted_action' => 0,
+            'field_species_cooperative_action' => 1,
+        );
+        CMSSpecies::set_action($node, $actions, 'concerted');
+        CMSSpecies::set_action($node, $actions, 'cooperative');
+        node_save($node);
+        $node = node_load(1);
+        $this->assertEqual(0, $node->field_species_concerted_action[$node->language][0]['value']);
+        $this->assertEqual(1, $node->field_species_cooperative_action[$node->language][0]['value']);
+    }
+
+    function test_set_iucn_status() {
+        $node = CMSSpecies::node_create('test');
+        CMSSpecies::set_iucn_status($node, array('field_species_iucn_status' => 'status'));
+        node_save($node);
+        $node = node_load(1);
+        $this->assertEqual('status', $node->field_species_iucn_status[$node->language][0]['value']);
+    }
+
+    function test_set_pop_global_date() {
+        $node = CMSSpecies::node_create('test');
+        CMSSpecies::set_pop_global_date($node, array('field_species_pop_global_date' => '2009'));
+        node_save($node);
+        $node = node_load(1);
+        $this->assertEqual('2009-01-01T00:00:00', $node->field_species_pop_global_date[$node->language][0]['value']);
+    }
+
+    function test_get_species_iucn_data() {
+        $species_data = CMSSpecies::get_species_iucn_data('Alca Torda');
+        $this->assertTrue(is_array($species_data));
+        $this->assertTrue(array_key_exists('field_species_iucn_status', $species_data));
+        $this->assertTrue(array_key_exists('field_species_iucn_web_srv', $species_data));
+        $this->assertEqual('lc', $species_data['field_species_iucn_status']);
+        $this->assertEqual('http://www.iucnredlist.org/details/106003304', $species_data['field_species_iucn_web_srv']);
+    }
+
+    function test_set_population_instrument() {
+        $agreement = CMSUtils::vocabulary_get_or_create_term('agreement', VOC_INSTRUMENT_STATUS);
+        CMSLegalInstrument::node_create('test', 'test', $agreement->tid, '2012-01-01');
+
+
+        $node = CMSSpecies::node_create('test');
+        $population = array('field_species_pop' =>
+                            array(0 =>
+                                  array('field_instrument' => '1',
+                                        'field_species_pop_v' => '10')));
+        CMSSpecies::set_species_population_instrument($node, $population);
+        node_save($node);
+        $node = node_load(2);
+        $this->assertTrue(is_array($node->field_species_pop[$node->language]));
+        $field_collection = entity_load('field_collection_item', array(1));
+        $this->assertEqual('1', $field_collection[1]->field_instrument[$node->language][0]['target_id']);
+        $this->assertEqual('10', $field_collection[1]->field_species_pop_v[$node->language][0]['value']);
+    }
+
+    function test_set_population_size() {
+        $node = CMSSpecies::node_create('test');
+        $population = array('field_species_pop_size' => array(0 => array(
+                    "field_species_pop_size_e" => "size_e_1",
+                    "field_species_pop_size_i" =>  "size_i_1",
+                    "field_species_pop_size_q" => "size_q_1",
+                    "field_species_pop_size_r" => "size_r_1",
+                    "field_species_pop_size_ref" => "size_ref_1",
+                    "field_species_pop_size_n" => "size_n_1"
+                )));
+        CMSSpecies::set_species_population_size($node, $population);
+        node_save($node);
+        $node = node_load(1);
+        $this->assertTrue(is_array($node->field_species_pop_size[$node->language]));
+        $field_collection = entity_load('field_collection_item', array(1));
+        $this->assertEqual('size_e_1', $field_collection[1]->field_species_pop_size_e[$node->language][0]['value']);
+        $this->assertEqual('size_i_1', $field_collection[1]->field_species_pop_size_i[$node->language][0]['value']);
+        $this->assertEqual('size_q_1', $field_collection[1]->field_species_pop_size_q[$node->language][0]['value']);
+        $this->assertEqual('size_r_1', $field_collection[1]->field_species_pop_size_r[$node->language][0]['value']);
+        $this->assertEqual('size_ref_1', $field_collection[1]->field_species_pop_size_ref[$node->language][0]['value']);
+        $this->assertEqual('size_n_1', $field_collection[1]->field_species_pop_size_n[$node->language][0]['value']);
+    }
+
+    function test_set_range_states() {
+        $node = CMSSpecies::node_create('test');
+        CMSSpecies::set_species_range_states($node,
+            array("field_species_range_states" =>
+                array(0 => array("country" => "angola", "territories" => "territories 1"))
+            )
+        );
+
+        node_save($node);
+        $node = node_load(1);
+        $this->assertTrue(is_array($node->field_species_range_states[$node->language]));
+        $field_collection = entity_load('field_collection_item', array(1));
+        $this->assertEqual('AO', $field_collection[1]->field_country[$node->language][0]['iso2']);
+        $this->assertEqual('territories 1', $field_collection[1]->field_species_territories[$node->language][0]['value']);
+    }
+
+    function test_exposed_form_data() {
+        $node = CMSSpecies::node_create('test');
+        $data = array(
+            "field_species_class" => "class1",
+            "field_species_order" => "order1",
+            "field_species_family" => "family1"
+        );
+        CMSUtils::set_node_simple_value($node, 'field_species_class', $data, 'field_species_class');
+        CMSUtils::set_node_simple_value($node, 'field_species_order', $data, 'field_species_order');
+        CMSUtils::set_node_simple_value($node, 'field_species_family', $data, 'field_species_family');
+        node_save($node);
+
+        $node = CMSSpecies::node_create('test 2');
+        $data = array(
+            "field_species_class" => "class2",
+            "field_species_order" => "order2",
+            "field_species_family" => "family2"
+        );
+        CMSUtils::set_node_simple_value($node, 'field_species_class', $data, 'field_species_class');
+        CMSUtils::set_node_simple_value($node, 'field_species_order', $data, 'field_species_order');
+        CMSUtils::set_node_simple_value($node, 'field_species_family', $data, 'field_species_family');
+        node_save($node);
+
+        $node = CMSSpecies::node_create('test3');
+        $data = array(
+            "field_species_class" => "class2",
+            "field_species_order" => "order2",
+            "field_species_family" => "family3"
+        );
+        CMSUtils::set_node_simple_value($node, 'field_species_class', $data, 'field_species_class');
+        CMSUtils::set_node_simple_value($node, 'field_species_order', $data, 'field_species_order');
+        CMSUtils::set_node_simple_value($node, 'field_species_family', $data, 'field_species_family');
+        node_save($node);
+
+        $data = CMSSpecies::exposed_form_data();
+        $this->assertTrue(is_array($data));
+        $this->assertEqual(2, count($data));
+        $this->assertTrue(array_key_exists('class1', $data));
+        $this->assertTrue(array_key_exists('class2', $data));
+        $this->assertTrue(is_array($data['class1']));
+        $this->assertTrue(is_array($data['class2']));
+        $this->assertEqual(1, count($data['class1']));
+        $this->assertEqual(1, count($data['class2']));
+        $this->assertTrue(array_key_exists('order1', $data['class1']));
+        $this->assertTrue(array_key_exists('order2', $data['class2']));
+        $this->assertTrue(is_array($data['class1']['order1']));
+        $this->assertTrue(is_array($data['class2']['order2']));
+        $this->assertEqual(1, count($data['class1']['order1']));
+        $this->assertEqual(2, count($data['class2']['order2']));
+        $this->assertTrue(array_key_exists('family1', $data['class1']['order1']));
+        $this->assertTrue(array_key_exists('family2', $data['class2']['order2']));
+        $this->assertTrue(array_key_exists('family3', $data['class2']['order2']));
+        $this->assertEqual('family1', $data['class1']['order1']['family1']);
+        $this->assertEqual('family2', $data['class2']['order2']['family2']);
+        $this->assertEqual('family3', $data['class2']['order2']['family3']);
+
+        $classes = CMSSpecies::get_classes();
+        $this->assertTrue(is_array($classes));
+        $this->assertEqual(2, count($classes));
+        $this->assertTrue(array_key_exists('class1', $classes));
+        $this->assertEqual('class1', $classes['class1']);
+        $this->assertTrue(array_key_exists('class2', $classes));
+        $this->assertEqual('class2', $classes['class2']);
+
+        $orders = CMSSpecies::get_orders_by_class();
+        $this->assertTrue(is_array($orders));
+        $this->assertEqual(2, count($orders));
+        $this->assertTrue(array_key_exists('order1', $orders));
+        $this->assertEqual('order1', $orders['order1']);
+        $this->assertTrue(array_key_exists('order2', $orders));
+        $this->assertEqual('order2', $orders['order2']);
+
+        $orders = CMSSpecies::get_orders_by_class('class2');
+        $this->assertTrue(is_array($orders));
+        $this->assertEqual(1, count($orders));
+        $this->assertTrue(array_key_exists('order2', $orders));
+        $this->assertEqual('order2', $orders['order2']);
+
+        $families = CMSSpecies::get_families_by_order('order3');
+        $this->assertTrue(is_array($families));
+        $this->assertEqual(3, count($families));
+        $this->assertTrue(array_key_exists('family1', $families));
+        $this->assertEqual('family1', $families['family1']);
+        $this->assertTrue(array_key_exists('family2', $families));
+        $this->assertEqual('family2', $families['family2']);
+        $this->assertTrue(array_key_exists('family3', $families));
+        $this->assertEqual('family3', $families['family3']);
+
+        $families = CMSSpecies::get_families_by_order('order2');
+        $this->assertTrue(is_array($families));
+        $this->assertEqual(2, count($families));
+        $this->assertTrue(array_key_exists('family2', $families));
+        $this->assertEqual('family2', $families['family2']);
+        $this->assertTrue(array_key_exists('family3', $families));
+        $this->assertEqual('family3', $families['family3']);
+    }
+
+
+    function get_sample_species_array() {
+        $species = array(
+            "title" => "scientific name",
+            "field_species_class" => "field_species_class",
+            "field_species_order" => "field_species_order",
+            "field_species_family" => "field_species_family",
+            "field_species_genus" => "field_species_genus",
+            "field_species_species" => "field_species_species",
+            "field_species_subspecies" => "field_species_subspecies",
+            "field_species_scientific_order" => "001",
+            "field_species_author" => "field_species_author",
+            "field_species_name_en" => "field_species_name_en",
+            "field_species_name_fr" => "field_species_name_fr",
+            "field_species_name_es" => "field_species_name_es",
+            "field_species_name_de" => "field_species_name_de",
+            "field_species_former_name" => "field_species_former_name",
+            "field_species_appendix_1_date" => "2003",
+            "field_species_appendix_2_date" => "2004",
+            "field_species_concerted_action" => "1",
+            "field_species_cooperative_action" => "1",
+            "field_species_pop_global" => "field_species_pop_global",
+            "field_species_pop_global_date" => "2009",
+            "field_species_critical_sites" => "field_species_critical_sites",
+            "field_species_iucn_status" => "en",
+            "field_species_iucn_web_srv" => "http://www.iucn.org/field_species_iucn_web_srv",
+            "field_species_notes" => "field_species_notes",
+            "field_species_range_states" => array(
+                array("field_country" => "angola", "field_species_territories" => "territories 1"),
+                array("field_country" => "cameroon", "field_species_territories" => "territories 2")
+            ),
+            "field_species_range_states_notes" => "range_states_notes",
+            "field_species_pop" => array(
+                array(
+                    "field_instrument" => "CMS",
+                    "field_species_pop_v" => "400 pairs",
+                ),
+                array(
+                    "field_instrument" => "AEWA",
+                    "field_species_pop_v" => "120 pairs",
+                ),
+            ),
+            "field_species_pop_size" => array(
+                array(
+                    "field_species_pop_size_r" => "size_r_1",
+                    "field_species_pop_size_i" => "size_i_1",
+                    "field_species_pop_size_q" => "size_q_1",
+                    "field_species_pop_size_e" => "size_e_1",
+                    "field_species_pop_size_ref" => "size_ref_1",
+                    "field_species_pop_size_n" => "size_n_1",
+                    "field_species_pop_trend_i" => "trend_i_1",
+                    "field_species_pop_trend_q" => "trend_q_1",
+                    "field_species_pop_trend_t" => "trend_t_1",
+                    "field_species_pop_trend_ref" => "trend_ref_1",
+                    "field_species_pop_trend_n" => "trend_n_1"
+                ),
+                array(
+                    "field_species_pop_size_r" => "size_r_2",
+                    "field_species_pop_size_i" => "size_i_2",
+                    "field_species_pop_size_q" => "size_q_2",
+                    "field_species_pop_size_e" => "size_e_2",
+                    "field_species_pop_size_ref" => "size_ref_2",
+                    "field_species_pop_size_n" => "size_n_2",
+                    "field_species_pop_trend_i" => "trend_i_2",
+                    "field_species_pop_trend_q" => "trend_q_2",
+                    "field_species_pop_trend_t" => "trend_t_2",
+                    "field_species_pop_trend_ref" => "trend_ref_2",
+                    "field_species_pop_trend_n" => "trend_n_2"
+                )
+            ),
+            "field_species_standard_reference" => "field_species_standard_reference",
+            "field_species_images" => array(
+                array(
+                    "path" => dirname(__FILE__) . DIRECTORY_SEPARATOR ."test" . DIRECTORY_SEPARATOR . "picture_1.jpg"
+                ),
+                array(
+                    "path" => dirname(__FILE__) . DIRECTORY_SEPARATOR ."test" . DIRECTORY_SEPARATOR . "picture_2.jpg"
+                )
+            ),
+            "field_species_threats" => array(
+                array(
+                    'field_threats' => 'Threat 1',
+                    'field_species_threat_notes' => 'Threat notes 1'
+                ),
+                array(
+                    'field_threats' => 'Threat 2',
+                    'field_species_threat_notes' => 'Threat notes 2'
+                )
+            ),
+            "field_species_instruments" => array(
+                array(
+                    'field_instrument' => 'CMS',
+                    'field_species_instrument_date' => '1999-02-03'
+                ),
+                array(
+                    'field_instrument' => 'Eurobats',
+                    'field_species_instrument_date' => '2000-02-03'
+                ),
+                array(
+                    'field_instrument' => 'Birds of Prey',
+                    'field_species_instrument_date' => '2001-02-03'
+                )
+            ),
+        );
+        return $species;
+    }
+
+
+    function test_get_species_for_range_state() {
+        $ro = Country::node_create('Romania', 'RO');
+        $de = Country::node_create('Germany', 'DE');
+
+        $s1 = CMSSpecies::node_create('species 1');
+        $s2 = CMSSpecies::node_create('species 2');
+        $s3 = CMSSpecies::node_create('species 3');
+
+        $c = array(
+            'field_name' => 'field_species_range_states',
+            'field_country' => array($s1->language => array(0 => array ('target_id' => $ro->nid)))
+        );
+        $entity = entity_create('field_collection_item', $c);
+        $entity->setHostEntity('node', $s1);
+        node_save($s1);
+
+        $c = array(
+            'field_name' => 'field_species_range_states',
+            'field_country' => array($s1->language => array(0 => array ('target_id' => $ro->nid)))
+        );
+        $entity = entity_create('field_collection_item', $c);
+        $entity->setHostEntity('node', $s2);
+        node_save($s2);
+
+        $c = array(
+            'field_name' => 'field_species_range_states',
+            'field_country' => array($s3->language => array(0 => array ('target_id' => $ro->nid)))
+        );
+        $entity = entity_create('field_collection_item', $c);
+        $entity->setHostEntity('node', $s3);
+        $s3->status = NODE_NOT_PUBLISHED;
+        node_save($s3);
+
+        $species = CMSSpecies::get_species_for_range_state($ro->nid);
+        $this->assertEqual(2, count($species));
+        $this->assertTrue(array_key_exists($s1->nid, $species));
+        $this->assertTrue(array_key_exists($s2->nid, $species));
+
+        $species = CMSSpecies::get_species_for_range_state($de->nid);
+        $this->assertEqual(0, count($species));
+
+        /* Pass object instead of integer - test for DB exception */
+        $ob = new stdClass();
+        $species = CMSSpecies::get_species_for_range_state($ob);
+        $this->assertEqual(0, count($species));
+    }
+}

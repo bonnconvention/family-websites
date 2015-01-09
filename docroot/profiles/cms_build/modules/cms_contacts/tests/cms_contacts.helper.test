@@ -1,0 +1,570 @@
+<?php
+/**
+ * Author: Cristian Romanescu <cristi _at_ eaudeweb dot ro>
+ * Created: 201405151450
+ */
+
+class CMSContactsSecurityTest extends DrupalUnitTestCase {
+
+    static function getInfo() {
+        return array(
+            'name' => 'CMSContactsSecurity',
+            'description' => 'Test encryption and decryption functions',
+            'group' => 'CMS Tests',
+        );
+    }
+
+    function test_encryption_decryption() {
+        $password = 's3cr3tp@ssw0r4';
+        $encrypted = cms_contacts_encrypt_string($password);
+        $decrypted = cms_contacts_decrypt_string($encrypted);
+        $this->assertEqual($password, $decrypted);
+
+        $password = '';
+        $encrypted = cms_contacts_encrypt_string($password);
+        $decrypted = cms_contacts_decrypt_string($encrypted);
+        $this->assertNull($decrypted);
+
+        $password = ' password with spaces ';
+        $encrypted = cms_contacts_encrypt_string($password);
+        $decrypted = cms_contacts_decrypt_string($encrypted);
+        $this->assertEqual($password, $decrypted);
+    }
+}
+
+
+class CMSContactsRequestHelperTest extends DrupalUnitTestCase {
+
+    static function getInfo() {
+        return array(
+            'name' => 'CMSContactsRequestHelper',
+            'description' => 'Test request parameters parser',
+            'group' => 'CMS Tests',
+        );
+    }
+
+    function test_get_parameter() {
+        $req = new CMSContactsRequestHelper(array('param1' => 'string1', 'param2' => array('string2', 'string3')));
+        $this->assertEqual('string1', $req->get_parameter('param1'));
+        $this->assertEqual(array('string2', 'string3'), $req->get_parameter('param2'));
+        $this->assertEqual(array(), $req->get_parameter('invalid1'));
+        $this->assertEqual('', $req->get_parameter('invalid2', ''));
+    }
+
+    function test_get_integer() {
+        $req = new CMSContactsRequestHelper(array('param1' => 666));
+        $this->assertEqual(666, $req->get_integer('param1'));
+        $this->assertEqual(0, $req->get_integer('invalid1'));
+        $this->assertEqual(999, $req->get_integer('invalid2', 999));
+    }
+
+    function test_get_list_parameters() {
+        $request = array(
+            'instruments' => array('i1', 'i2'), 'regions' => array('r1', 'r2'), 'countries' => array('c1', 'c2'),
+            'status_person' => array('s1', 's2'), 'status_organization' => array('so1', 'so2'),
+            'availability' => 'FALSE', 'sSearch' => 'str', 'clear_cache' => 'Clear'
+        );
+        $req = new CMSContactsRequestHelper($request);
+        $filters = $req->get_list_parameters();
+        $this->assertEqual(array('i1', 'i2'), $filters['instruments']);
+        $this->assertEqual(array('r1', 'r2'), $filters['regions']);
+        $this->assertEqual(array('c1', 'c2'), $filters['countries']);
+        $this->assertEqual(array('s1', 's2'), $filters['status_person']);
+        $this->assertEqual(array('so1', 'so2'), $filters['status_organization']);
+        $this->assertEqual('FALSE', $filters['availability']);
+        $this->assertEqual('str', $filters['sSearch']);
+        $this->assertEqual('Clear', $filters['clear_cache']);
+    }
+
+    function test_get_list_sorting() {
+        $req = new CMSContactsRequestHelper(array('iSortCol_0' => 33,'sSortDir_0' => 'desc'));
+        $r = $req->get_list_sorting();
+        $this->assertEqual(33, $r[0]['column']);
+        $this->assertEqual('desc', $r[0]['direction']);
+
+        $req = new CMSContactsRequestHelper(array());
+        $r = $req->get_list_sorting();
+        $this->assertEqual(2, $r[0]['column']);
+        $this->assertEqual('asc', $r[0]['direction']);
+    }
+
+    /*function test_format_formdata_to_ldapdata_new() {
+        $form_data = CMSContactsLDAPWebTest::$form_contact;
+        $form_data['is_new'] = true;
+
+
+    }*/
+}
+
+
+class CMSContactTest extends DrupalWebTestCase {
+
+    static $test_user_add = array(
+        'uid' => 'testromanescu',
+        'dn' => 'uid=testromanescu,ou=Users,o=CMS',
+        'ldap_data' => array(
+            //Required parameters - ldap_add does not work without these
+            'objectClass' => array('top', 'cmsContact'),
+            'cn' => 'Cristian Romanescu',
+            'uid' => 'testromanescu',
+            'sn' => 'Romanescu',
+
+            // inetOrgPerson specific attributes
+            #'st' => 'LA',
+            #'street' => 'Bd. Banul Manta 39',
+
+            'o' => 'Eau de Web',
+            'ou' => 'PHP Development',
+
+            // cmsContact specific attributes
+            'givenname' => 'Cristian',
+            'mail' => array('cristian.romanescu@eaudeweb.ro', 'cristian@romanescu.ro'),
+            'iso2' => 'RO',
+            'cpiso2' => 'US',
+            'description' => 'Not a very nice person',
+            'faxnumbers' => array('9876543', '210987'),
+            'homephone' => array('1234567', '8901234'),
+            'mobilephonenumbers' => array('0040745133096', '1234567890'),
+            'postalcode' => '011223',
+            'skype' => 'cristiroma',
+            'title' => 'Mr.',
+            'websites' => array('http://www.romanescu.ro', 'http://cristiroma.blogspot.com'),
+            'workphonenumbers' => array('0040212221522', '123456'),
+            'additionalemails' => array('cristiroma@yahoo.com', 'ext@k.ro'),
+            'region' => 'Europe',
+            'personaltitle' => 'Developer',
+            'cmsavailability' => 'TRUE',
+            'preferredlanguages' => array('English', 'French'),
+
+            // stateorprovincename
+            // Conventions
+            // position
+            // prefferedlanguages
+            // telexnumber
+            // countryEnglish
+            // countryFrench
+            // countrySpanish
+            // countryPostName
+            // departmentNumber
+            // homePostalAddress
+            // personalEmail
+            // cmsMailingCode
+            // userPassword
+
+            // - Lists
+            // statusOrganization
+            // mailingLists
+            // statusPerson
+
+            // lastModifiedBy
+            // lastModifiedTime
+        )
+    );
+
+    static function getInfo() {
+        return array(
+            'name' => 'CMSContact',
+            'description' => 'Test functionality from CMSContact class',
+            'group' => 'CMS Tests',
+        );
+    }
+
+    function setUp() {
+        parent::setUp();
+        CMSContactsTestHelper::init_test_environment();
+   }
+
+    function test_add_contact() {
+        $ldap = CMSContactsLDAP::get_instance();
+
+        $user_dn = self::$test_user_add['dn'];
+        $user = self::$test_user_add['ldap_data'];
+        $uid = self::$test_user_add['uid'];
+
+        $instruments = array(
+            '7d0905b7-01c8-4d9d-a714-3626bd47b858',
+            'cf29b997-5359-42fd-929f-a786425e4ee8'
+        );
+        $statusperson = array(
+            'cn=Chair,ou=Status Person,uuid=f0b4ae05-8d04-4814-b01f-064c94da5a23,o=CMS',
+            'cn=Noise WG,ou=Status Person,uuid=0b41fac4-6198-439a-a335-f7405f352681,o=CMS'
+        );
+        $statusorganization = array(
+            'cn=Other,ou=Status Organization,uuid=dbce2ddc-648e-4302-be84-47d0aa36ad66,o=CMS',
+            'cn=Press/Media,ou=Status Organization,uuid=dbce2ddc-648e-4302-be84-47d0aa36ad66,o=CMS'
+        );
+
+        CMSContact::add_contact($user_dn, $user, $instruments, $statusperson, $statusorganization);
+
+        CMSContactsCacheHelper::cache_clear_all();
+        drupal_static_reset();
+
+        $results = $ldap->ldap_search_cms('uid=' . $uid);
+        $this->assertEqual(1, count($results));
+
+        $p = $results[0];
+
+        $this->assertEqual($user['cn'], $p['cn'][0]);
+        $this->assertEqual($user['uid'], $p['uid'][0]);
+        $this->assertEqual($user['sn'], $p['sn'][0]);
+
+        $this->assertEqual($user['o'], $p['o'][0]);
+        $this->assertEqual($user['ou'], $p['ou'][0]);
+
+        $this->assertEqual($user['givenname'], $p['givenname'][0]);
+        $this->assertEqual($user['mail'][0], $p['mail'][0]);
+        $this->assertEqual($user['mail'][1], $p['mail'][1]);
+
+        $this->assertEqual($user['iso2'], $p['iso2'][0]);
+        $this->assertEqual($user['cpiso2'], $p['cpiso2'][0]);
+
+        $this->assertEqual($user['description'], $p['description'][0]);
+
+        $this->assertEqual($user['faxnumbers'][0], $p['faxnumbers'][0]);
+        $this->assertEqual($user['faxnumbers'][1], $p['faxnumbers'][1]);
+
+        $this->assertEqual($user['homephone'][0], $p['homephone'][0]);
+        $this->assertEqual($user['homephone'][1], $p['homephone'][1]);
+
+        $this->assertEqual($user['mobilephonenumbers'][0], $p['mobilephonenumbers'][0]);
+        $this->assertEqual($user['mobilephonenumbers'][1], $p['mobilephonenumbers'][1]);
+
+        $this->assertEqual($user['postalcode'], $p['postalcode'][0]);
+
+        $this->assertEqual($user['skype'], $p['skype'][0]);
+
+        $this->assertEqual($user['title'], $p['title'][0]);
+
+        $this->assertEqual($user['websites'][0], $p['websites'][0]);
+        $this->assertEqual($user['websites'][1], $p['websites'][1]);
+
+        $this->assertEqual($user['workphonenumbers'][0], $p['workphonenumbers'][0]);
+        $this->assertEqual($user['workphonenumbers'][1], $p['workphonenumbers'][1]);
+
+        $this->assertEqual($user['additionalemails'][0], $p['additionalemails'][0]);
+        $this->assertEqual($user['additionalemails'][1], $p['additionalemails'][1]);
+
+        $this->assertEqual($user['region'], $p['region'][0]);
+        $this->assertEqual($user['personaltitle'], $p['personaltitle'][0]);
+        $this->assertEqual($user['cmsavailability'], $p['cmsavailability'][0]);
+
+        $this->assertEqual($user['preferredlanguages'][0], $p['preferredlanguages'][0]);
+        $this->assertEqual($user['preferredlanguages'][1], $p['preferredlanguages'][1]);
+
+        // Check that the user exists in the lists
+        $people_instrument = $ldap->get_people_instrument();
+        $this->assertTrue(array_key_exists($user_dn, $people_instrument));
+        $this->assertEqual(
+            array_diff($people_instrument[$user_dn], $instruments),
+            array_diff($instruments, $people_instrument[$user_dn])
+        );
+
+        $people_statusperson = $ldap->get_people_statusperson();
+        $this->assertTrue(array_key_exists($user_dn, $people_statusperson));
+        $this->assertEqual(
+            array_diff($people_statusperson[$user_dn], $statusperson),
+            array_diff($statusperson, $people_statusperson[$user_dn])
+        );
+
+        $people_statusorganization = $ldap->get_people_statusorganization();
+        $this->assertTrue(array_key_exists($user_dn, $people_statusorganization));
+        $this->assertEqual(
+            array_diff($people_statusorganization[$user_dn], $statusorganization),
+            array_diff($statusorganization, $people_statusorganization[$user_dn])
+        );
+
+        CMSContact::delete_contact($user_dn);
+    }
+
+    function test_set_user_instruments() {
+        $ldap = CMSContactsLDAP::get_instance();
+
+        $user_dn = 'uid=romanrajta,ou=Users,o=CMS';
+        $original = array('173e80ef-cd41-4888-bca7-de411fc5db8a'); // Middle-European Great Bustard
+        $new_instruments = array(
+            'c1370967-4b76-4875-b6e2-9ef52762455b', // Atlantic Turtles
+            '80b9a671-e429-4a91-9658-8b6021c34272' // Slender-billed Curlew
+        );
+
+        // Check the user is only member of $instrument_dn
+        $people_instrument = $ldap->get_people_instrument();
+        $current = $people_instrument[$user_dn];
+        $this->assertEqual($original, $current);
+
+        CMSContact::set_user_instruments($user_dn, $new_instruments);
+
+        // Clear involved caches
+        CMSContactsCacheHelper::cache_clear_all();
+        drupal_static_reset();
+
+        // Check the user member of $new_instruments
+        $people_instrument = $ldap->get_people_instrument();
+        $current = $people_instrument[$user_dn];
+
+        $this->assertEqual(array_diff($new_instruments, $current), array_diff($current, $new_instruments));
+
+        // Restore user to initial instrument
+        CMSContact::set_user_instruments($user_dn, $original);
+    }
+
+    function test_set_user_statusperson() {
+        $ldap = CMSContactsLDAP::get_instance();
+
+        $user_dn = 'uid=sniamende,ou=Users,o=CMS';
+        $original = array('cn=Partner,ou=Status Person,uuid=f0b4ae05-8d04-4814-b01f-064c94da5a23,o=CMS');
+        $new = array(
+            'cn=Chair,ou=Status Person,uuid=f0b4ae05-8d04-4814-b01f-064c94da5a23,o=CMS',
+            'cn=Standing Committee Observer,ou=Status Person,uuid=f0b4ae05-8d04-4814-b01f-064c94da5a23,o=CMS'
+        );
+
+        // Check the user is only member of $current_statusperson
+        $statusperson = $ldap->get_people_statusperson();
+        $current = $statusperson[$user_dn];
+        $this->assertEqual($original, $current);
+
+        CMSContact::set_user_statusperson($user_dn, $new);
+
+        // Clear involved caches
+        CMSContactsCacheHelper::cache_clear_all();
+        drupal_static_reset();
+
+        // Check the user member of $new_instruments
+        $statusperson = $ldap->get_people_statusperson();
+        $current = $statusperson[$user_dn];
+
+        $this->assertEqual(array_diff($new, $current), array_diff($current, $new));
+
+        // Restore user to initial instrument
+        CMSContact::set_user_statusperson($user_dn, $original);
+    }
+
+    function test_set_user_statusorganization() {
+        $ldap = CMSContactsLDAP::get_instance();
+
+        $user_dn = 'uid=frankbreme,ou=Users,o=CMS';
+        $original = array('cn=Other,ou=Status Organization,uuid=dbce2ddc-648e-4302-be84-47d0aa36ad66,o=CMS');
+        $new = array(
+            'cn=Press/Media,ou=Status Organization,uuid=dbce2ddc-648e-4302-be84-47d0aa36ad66,o=CMS',
+            'cn=Scientific,ou=Status Organization,uuid=dbce2ddc-648e-4302-be84-47d0aa36ad66,o=CMS'
+        );
+
+        // Check the user is only member of $current_statusperson
+        $statusperson = $ldap->get_people_statusorganization();
+        $current = $statusperson[$user_dn];
+        $this->assertEqual($original, $current);
+
+        CMSContact::set_user_statusorganization($user_dn, $new);
+
+        // Clear involved caches
+        CMSContactsCacheHelper::cache_clear_all();
+        drupal_static_reset();
+
+        // Check the user member of $new_instruments
+        $statusperson = $ldap->get_people_statusorganization();
+        $current = $statusperson[$user_dn];
+
+        $this->assertEqual(array_diff($new, $current), array_diff($current, $new));
+
+        // Restore user to initial instrument
+        CMSContact::set_user_statusorganization($user_dn, $original);
+    }
+
+    function test_delete_contact() {
+        $ldap = CMSContactsLDAP::get_instance();
+
+        $user_dn = self::$test_user_add['dn'];
+        $user = self::$test_user_add['ldap_data'];
+        $uid = self::$test_user_add['uid'];
+
+        $instruments = array(
+            '7d0905b7-01c8-4d9d-a714-3626bd47b858',
+            'cf29b997-5359-42fd-929f-a786425e4ee8'
+        );
+        $statusperson = array(
+            'cn=Chair,ou=Status Person,uuid=f0b4ae05-8d04-4814-b01f-064c94da5a23,o=CMS',
+            'cn=Noise WG,ou=Status Person,uuid=0b41fac4-6198-439a-a335-f7405f352681,o=CMS'
+        );
+        $statusorganization = array(
+            'cn=Other,ou=Status Organization,uuid=dbce2ddc-648e-4302-be84-47d0aa36ad66,o=CMS',
+            'cn=Press/Media,ou=Status Organization,uuid=dbce2ddc-648e-4302-be84-47d0aa36ad66,o=CMS'
+        );
+
+        // Create the sample user
+        CMSContact::add_contact($user_dn, $user, $instruments, $statusperson, $statusorganization);
+
+        CMSContactsCacheHelper::cache_clear_all();
+        drupal_static_reset();
+
+        // Check user exists
+        $rows = $ldap->ldap_search_cms('uid=' . $uid);
+        $this->assertEqual(1, count($rows));
+        $this->assertEqual($user_dn, $rows[0]['dn']);
+
+        // Check user exists in the lists
+        $people_instrument = $ldap->get_people_instrument();
+        $this->assertTrue(array_key_exists($user_dn, $people_instrument));
+
+        $people_statusperson = $ldap->get_people_statusperson();
+        $this->assertTrue(array_key_exists($user_dn, $people_statusperson));
+
+        $people_statusorganization = $ldap->get_people_statusorganization();
+        $this->assertTrue(array_key_exists($user_dn, $people_statusorganization));
+
+        // Delete the user
+        CMSContact::delete_contact($user_dn);
+
+        CMSContactsCacheHelper::cache_clear_all();
+        drupal_static_reset();
+
+        // Check the user no longer exists
+        $rows = $ldap->ldap_search_cms('uid=' . $uid);
+        $this->assertEqual(0, count($rows));
+
+        // Check removal from the lists
+        $people_instrument = $ldap->get_people_instrument();
+        $this->assertFalse(array_key_exists($user_dn, $people_instrument));
+
+        $people_statusperson = $ldap->get_people_statusperson();
+        $this->assertFalse(array_key_exists($user_dn, $people_statusperson));
+
+        $people_statusorganization = $ldap->get_people_statusorganization();
+        $this->assertFalse(array_key_exists($user_dn, $people_statusorganization));
+    }
+
+
+    function test_update_contact() {
+        $ldap = CMSContactsLDAP::get_instance();
+
+        $user_dn = self::$test_user_add['dn'];
+        $user = self::$test_user_add['ldap_data'];
+        $uid = self::$test_user_add['uid'];
+
+        $instruments = array(
+            '7d0905b7-01c8-4d9d-a714-3626bd47b858',
+            'cf29b997-5359-42fd-929f-a786425e4ee8'
+        );
+        $statusperson = array(
+            'cn=Chair,ou=Status Person,uuid=f0b4ae05-8d04-4814-b01f-064c94da5a23,o=CMS',
+            'cn=Noise WG,ou=Status Person,uuid=0b41fac4-6198-439a-a335-f7405f352681,o=CMS'
+        );
+        $statusorganization = array(
+            'cn=Other,ou=Status Organization,uuid=dbce2ddc-648e-4302-be84-47d0aa36ad66,o=CMS',
+            'cn=Press/Media,ou=Status Organization,uuid=dbce2ddc-648e-4302-be84-47d0aa36ad66,o=CMS'
+        );
+
+        CMSContact::add_contact($user_dn, $user, $instruments, $statusperson, $statusorganization);
+
+        CMSContactsCacheHelper::cache_clear_all();
+        drupal_static_reset();
+
+        $new_user = array(
+            //Required parameters - ldap_add does not work without these
+            'objectClass' => array('top', 'cmsContact'),
+            'cn' => strrev('Cristian Romanescu'),
+            'uid' => 'testromanescu',
+            'sn' => strrev('Romanescu'),
+            // inetOrgPerson specific attributes
+            #'st' => 'LA',
+            #'street' => 'Bd. Banul Manta 39',
+            'o' => strrev('Eau de Web'),
+            'ou' => strrev('PHP Development'),
+
+            // cmsContact specific attributes
+            'givenname' => strrev('Cristian'),
+            'mail' => array('cristiroma@yahoo.com'),
+            'iso2' => strrev('RO'),
+            'cpiso2' => strrev('US'),
+            'description' => strrev('Not a very nice person'),
+            'faxnumbers' => array(strrev('1234567890')),
+            'homephone' => array(strrev('0987654321')),
+            'mobilephonenumbers' => array(strrev('0040745133096')),
+            'postalcode' => strrev('011223'),
+            'skype' => strrev('cristiroma'),
+            'title' => strrev('Mr.'),
+            'websites' => array(strrev('http://www.romanescu.ro')),
+            'workphonenumbers' => array(strrev('0040212221522')),
+            'additionalemails' => array(strrev('diabolique@nord.se')),
+            'region' => strrev('Europe'),
+            'personaltitle' => strrev('Developer'),
+            'cmsavailability' => 'FALSE',
+            'preferredlanguages' => array(strrev('English')),
+        );
+
+        $new_instruments = array('38712690-266d-436c-9c76-ee52a623dbc5');
+        $new_statusperson = array('cn=TC Member,ou=Status Person,uuid=dbce2ddc-648e-4302-be84-47d0aa36ad66,o=CMS');
+        $new_statusorganization = array('cn=Ministry party,ou=Status Organization,uuid=f0b4ae05-8d04-4814-b01f-064c94da5a23,o=CMS');
+        CMSContact::update_contact($user_dn, $new_user, $new_instruments, $new_statusperson, $new_statusorganization);
+
+        CMSContactsCacheHelper::cache_clear_all();
+        drupal_static_reset();
+
+        $results = $ldap->ldap_search_cms('uid=' . $uid);
+        $this->assertEqual(1, count($results));
+
+        $p = $results[0];
+
+        $this->assertEqual($new_user['cn'], $p['cn'][0]);
+        $this->assertEqual($new_user['uid'], $p['uid'][0]);
+        $this->assertEqual($new_user['sn'], $p['sn'][0]);
+
+        $this->assertEqual($new_user['o'], $p['o'][0]);
+        $this->assertEqual($new_user['ou'], $p['ou'][0]);
+
+        $this->assertEqual($new_user['givenname'], $p['givenname'][0]);
+        $this->assertEqual($new_user['mail'][0], $p['mail'][0]);
+
+        $this->assertEqual($new_user['iso2'], $p['iso2'][0]);
+        $this->assertEqual($new_user['cpiso2'], $p['cpiso2'][0]);
+
+        $this->assertEqual($new_user['description'], $p['description'][0]);
+
+        $this->assertEqual($new_user['faxnumbers'][0], $p['faxnumbers'][0]);
+
+        $this->assertEqual($new_user['homephone'][0], $p['homephone'][0]);
+        $this->assertEqual($new_user['mobilephonenumbers'][0], $p['mobilephonenumbers'][0]);
+
+        $this->assertEqual($new_user['postalcode'], $p['postalcode'][0]);
+
+        $this->assertEqual($new_user['skype'], $p['skype'][0]);
+
+        $this->assertEqual($new_user['title'], $p['title'][0]);
+
+        $this->assertEqual($new_user['websites'][0], $p['websites'][0]);
+
+        $this->assertEqual($new_user['workphonenumbers'][0], $p['workphonenumbers'][0]);
+
+        $this->assertEqual($new_user['additionalemails'][0], $p['additionalemails'][0]);
+
+        $this->assertEqual($new_user['region'], $p['region'][0]);
+        $this->assertEqual($new_user['personaltitle'], $p['personaltitle'][0]);
+        $this->assertEqual($new_user['cmsavailability'], $p['cmsavailability'][0]);
+
+        $this->assertEqual($new_user['preferredlanguages'][0], $p['preferredlanguages'][0]);
+
+        // Check user exists in the new lists
+        $people_instrument = $ldap->get_people_instrument();
+        $this->assertTrue(array_key_exists($user_dn, $people_instrument));
+
+        $people_statusperson = $ldap->get_people_statusperson();
+        $this->assertTrue(array_key_exists($user_dn, $people_statusperson));
+
+        $people_statusorganization = $ldap->get_people_statusorganization();
+        $this->assertTrue(array_key_exists($user_dn, $people_statusorganization));
+
+        // Check the user no longer exists in the old lists
+        $instrument_people = $ldap->get_instrument_people();
+        $this->assertFalse(in_array($user_dn, $instrument_people[$instruments[0]]->uniquemember));
+        $this->assertFalse(in_array($user_dn, $instrument_people[$instruments[1]]->uniquemember));
+
+        $statusperson_people = $ldap->get_statusperson_people();
+        $this->assertFalse(in_array($user_dn, $statusperson_people[$statusperson[0]]->uniquemember));
+        $this->assertFalse(in_array($user_dn, $statusperson_people[$statusperson[1]]->uniquemember));
+
+        $statusorganization_people = $ldap->get_statusorganization_people();
+        $this->assertFalse(in_array($user_dn, $statusorganization_people[$statusorganization[0]]->uniquemember));
+        $this->assertFalse(in_array($user_dn, $statusorganization_people[$statusorganization[1]]->uniquemember));
+
+        // Remove the test data
+        CMSContact::delete_contact($user_dn);
+    }
+}

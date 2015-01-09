@@ -1,0 +1,339 @@
+<?php
+/**
+ * @file
+ * Code for the
+ *
+ * @author Dragos Dumitrescu
+ *
+ */
+
+
+
+/**
+ * Implements hook_menu().
+ */
+function cms_feed_import_menu() {
+    $items = array();
+    $items['admin/config/content/cms_feed_import'] = array(
+        'title' => 'CMS Feed Import',
+        'description' => 'CMS Feed Import config',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('cms_feed_import_form'),
+        'access arguments' => array('access administration pages'),
+        'type' => MENU_NORMAL_ITEM,
+    );
+    $items['admin/config/content/cms_feed_import/process'] = array(
+        'page callback' => 'cms_feed_import_node_import',
+        'type' => MENU_CALLBACK,
+        'access arguments' => array('access content'),
+    );
+
+    return $items;
+}
+
+/**
+ * Page callback: CMS AmMap settings
+ *
+ * @see current_posts_menu()
+ */
+function cms_feed_import_form($form, &$form_state) {
+    $bundles = field_info_bundles();
+    $node_bundles = array();
+    foreach ($bundles['node'] as $machine_name => $bundle) {
+        $node_bundles[$machine_name] = $bundle['label'];
+    }
+    $exiting_bundle = variable_get('cms_feed_import_bundle', "");
+    $existing_url = variable_get('cms_feed_import_url', "");
+    $form['cms_feed_import_bundle'] = array(
+        '#type' => 'select',
+        '#title' => t('Bundle'),
+        '#options' => $node_bundles,
+        '#default_value' => variable_get('cms_feed_import_bundle', ""),
+        '#description' => t('Bundle'),
+        '#required' => TRUE,
+    );
+    $form['cms_feed_import_url'] = array(
+        '#type' => 'textfield',
+        '#title' => t('URL'),
+        '#default_value' => variable_get('cms_feed_import_url', ""),
+        '#description' => t('URL'),
+        '#required' => TRUE,
+    );
+    if (!empty($exiting_bundle) && !empty($existing_url)) {
+        $form['cms_import_link'] = array(
+            '#markup' => '<a href="/admin/config/content/cms_feed_import/process">Import now</a>'
+        );
+    }
+    return system_settings_form($form);
+}
+
+/**
+ * Implements hook_cron
+ */
+function cms_feed_import_cron(){
+    $interval = 60 * 60;
+    if (time() >= variable_get('cms_feed_import_next_execution', 0)) {
+        cms_feed_import_node_import(TRUE);
+        variable_set('cms_feed_import_next_execution', time() + $interval);
+    }
+}
+
+function cms_feed_import_node_import($cron = FALSE){
+    $bundle = variable_get('cms_feed_import_bundle', "news");
+    $url = variable_get('cms_feed_import_url', "http://www.cms.int/ws/aewa-news");
+    $import = new CMSFeedImport($url, $bundle);
+    $import->call_feed();
+    $result = $import->get_result();
+    $result = json_decode($result, TRUE);
+    $saves = 0;
+
+    $fields_info = field_info_instances("node", $bundle);
+    $fields_image = array();
+    $fields_file = array();
+    $fields_entity_ref = array();
+    $fields_term_ref = array();
+    $fields_generic_info = array();
+
+    //Get bundle field infos
+    foreach ($fields_info as $field_name => $field) {
+        $fields_generic_info[$field_name] = field_info_field($field_name);
+        switch ($fields_generic_info[$field_name]['type']) {
+            case 'image':
+                $fields_image[$field_name]= $field_name;
+                break;
+            case 'file':
+                $fields_file[$field_name]= $field_name;
+                break;
+            case 'entityreference':
+                $fields_entity_ref[$field_name]= $field_name;
+                break;
+            case 'taxonomy_term_reference':
+                $fields_term_ref[$field_name] = $field_name;
+                break;
+        }
+    }
+
+    //Check trough received data
+    foreach ($result as $node_data) {
+        $query = new EntityFieldQuery();
+        $nodes = $query->entityCondition('entity_type', 'node')
+            ->entityCondition('bundle', $bundle)
+            ->propertyCondition('uuid', $node_data['uuid'])
+            ->execute();
+
+        //get languages that has data
+        $languages = language_list();
+        $node_languages = array();
+        foreach ($node_data as $field) {
+            if(is_array($field)) {
+                foreach($field as $key => $value){
+                    if(array_key_exists($key, $languages)) {
+                        $node_languages[$key] = $key;
+                    }
+                }
+            }
+        }
+
+        $current_node = array();
+        //if new
+        if (empty($nodes)) {
+            unset($node_data['nid']);
+        } else {
+            $current_node = node_load(current($nodes['node'])->nid);
+            $node_data['nid'] = $current_node->nid;
+        }
+
+        //if new or modified, we have to save it
+        if (empty($nodes) ||
+            (!empty($current_node) && $current_node->changed < $node_data['changed'])) {
+            $node_data['type'] = $bundle;
+
+            $node = (object) $node_data;
+
+            //Parse image fields
+            foreach ($fields_image as $field_image) {
+                if (!empty($node->{$field_image})) {
+                    foreach ($node->{$field_image} as $lang => $images) {
+                        foreach ($images as $idx => $image) {
+                            $f_img = (array) CMSFeedImport::saveFile(
+                                $image['url'],
+                                'public://' . $fields_info[$field_image]['settings']['file_directory']
+                            );
+                            $f_img['image_field_caption'] = $image['image_field_caption'];
+                            $node->{$field_image}[$lang][$idx] = $f_img;
+                        }
+                    }
+                }
+            }
+
+            //Parse File fields
+            foreach ($fields_file as $field_file) {
+                if (!empty($node->{$field_file})) {
+                    foreach ($node->{$field_file} as $lang => $files) {
+                        foreach ($files as $idx => $file) {
+                            $f_file = (array) CMSFeedImport::saveFile(
+                                $file['url'],
+                                'public://' . $fields_info[$field_file]['settings']['file_directory']
+                            );
+                            $f_file['description'] = $file['description'];
+                            $f_file['display'] = $file['display'];
+                            $node->{$field_file}[$lang][$idx] = $f_file;
+                        }
+                    }
+                }
+            }
+
+            //Parse Term ref fields
+            foreach ($fields_term_ref as $field_term_ref) {
+                if (!empty($node->{$field_term_ref})) {
+                    $voc = $fields_generic_info[$field_term_ref]['settings']['allowed_values'][0]['vocabulary'];
+                    $field_values = array();
+                    foreach ($node->{$field_term_ref} as $lang => $terms) {
+                        foreach ($terms as $term) {
+                            $current_term = taxonomy_get_term_by_name($term, $voc);
+                            if (!empty($current_term)) {
+                                $field_values[$lang] []= array('tid' => current($current_term)->tid);
+                            }
+                        }
+                    }
+                    $node->{$field_term_ref} = $field_values;
+                }
+            }
+
+            //Parse Entity ref fields
+            foreach ($fields_entity_ref as $field_entity_ref) {
+                if(!empty($node->{$field_entity_ref})) {
+                    $field_values = array();
+                    foreach ($node->{$field_entity_ref} as $lang => $ent_ref) {
+                        foreach($ent_ref as $target_title) {
+                            $query = new EntityFieldQuery();
+                            $target_nodes = $query->entityCondition('entity_type', 'node')
+                                ->entityCondition('bundle', $fields_generic_info[$field_entity_ref]['settings']['handler_settings']['target_bundles'])
+                                ->propertyCondition('title', $target_title)
+                                ->range(0,1)
+                                ->execute();
+                            if (!empty($target_nodes['node'])) {
+                                $field_values[$lang] []= array('target_id' => current($target_nodes['node'])->nid);
+                            }
+                        }
+                    }
+                    $node->{$field_entity_ref} = $field_values;
+                }
+            }
+
+            $node = node_submit($node);
+
+            //Get properties from existing node
+            if (!empty($current_node)) {
+                $node_array = (array) $node;
+                $diff = array_diff_assoc((array) $current_node, $node_array);
+                $node = (object) array_merge($node_array, $diff);
+            }
+
+            //set Translations
+            foreach($node_languages as $language) {
+                if ($language == $node->language) {
+                    continue;
+                }
+
+                $handler = entity_translation_get_handler('node', $node, TRUE);
+                $handler->initTranslations();
+
+                $translation = array(
+                    'language'  => $language,
+                    'source'    => $node->language,
+                    'status'    => 1,
+                    'translate' => 0
+                );
+
+                $handler->setTranslation($translation, $node);
+            }
+
+            node_save($node);
+            $saves ++;
+        }
+    }
+    watchdog('cms_feed_import', 'Imported '.$saves .' nodes', NULL, WATCHDOG_DEBUG, $url);
+    if (!$cron) {
+        drupal_set_message($saves .' nodes saved');
+        drupal_goto('admin/config/content/cms_feed_import');
+    }
+}
+
+class CMSFeedImport {
+    public $url;
+    public $bundle;
+    protected $result = false;
+
+    public function __construct($url, $bundle){
+        $this->url = $url;
+        $this->bundle = $bundle;
+    }
+
+    public function call_feed($parameters = array(), $headers = array(), $method = 'GET') {
+        $url = $this->url;
+        watchdog('cms_feed_import', 'Called remote web service', NULL, WATCHDOG_DEBUG, $url);
+        $headers = array_merge(array(
+            'Accept' => 'application/json',
+        ), $headers);
+
+        $p = array();
+        foreach($parameters as $k => $v) {
+            $p[] = $k . '=' . $v; // TODO: Escape?
+        }
+        $options = array(
+            'headers' => $headers,
+            'method' => $method,
+            'data' => implode('&', $p)
+        );
+        $ret = drupal_http_request($url, $options);
+        if($ret->code != 200) {
+            drupal_set_message(t(
+                    'Unable to get service data from @url (err_code: @code)',
+                    array('@url' => $url, '@code' => $ret->code)),
+                'error');
+            return FALSE;
+        }
+        $this->result = $ret->data;
+        return $ret;
+    }
+
+    public function get_result(){
+        return $this->result;
+    }
+
+    /**
+     * Downloads and saves a file in a field
+     *
+     * @param mixed $field
+     *   A string or an array of strings
+     * @param string $path
+     *   Where to save file. Default is public://
+     * @param int $options
+     *   Use 0 to rename existing file or 1 to replace it.
+     *
+     * @return mixed
+     *   An object or an array of objects containing file info
+     */
+    public static function saveFile($field, $path = 'public://', $options = FILE_EXISTS_RENAME) {
+        if (is_array($field)) {
+            foreach ($field as &$f) {
+                $f = self::saveFile($f, $path, $options);
+            }
+            return $field;
+        }
+        // Get file data.
+        try {
+            $image = file_get_contents($field);
+        }
+        catch (Exception $e) {
+            return NULL;
+        }
+        $field = trim($field, '/');
+        $field = drupal_substr($field, strrpos($field, '/') + 1);
+        if (file_prepare_directory($path, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
+            return file_save_data($image, $path .DIRECTORY_SEPARATOR. $field, (int) $options);
+        }
+        return NULL;
+    }
+}

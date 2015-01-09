@@ -1,0 +1,77 @@
+{
+    "servers" : {
+        "local" : {
+            "cms": {
+                "url": "http://dev.cms.localhost",
+                "title": "CMS"
+            },
+            "aewa": {
+                "url": "http://dev.aewa.localhost",
+                "title": "AEWA"
+            },
+            "ascobans": {
+                "url": "http://dev.ascobans.localhost",
+                "title": "ASCOBANS"
+            },
+            "eurobats": {
+                "url": "http://dev.eurobats.localhost",
+                "title": "EUROBATS"
+            }
+       },
+        "dev": {
+            "cms": {
+                "url": "http://dev.cms.eaudeweb.ro",
+                "title": "CMS"
+            },
+            "aewa": {
+                "url": "http://dev.aewa.eaudeweb.ro",
+                "title": "AEWA"
+            },
+            "ascobans": {
+                "url": "http://dev.ascobans.eaudeweb.ro",
+                "title": "ASCOBANS"
+            },
+            "eurobats": {
+                "url": "http://dev.eurobats.eaudeweb.ro",
+                "title": "EUROBATS"
+            }
+       },
+        "production": {
+            "cms": {
+                "url": "http://cms.eaudeweb.ro",
+                "title": "CMS"
+            },
+            "aewa": {
+                "url": "http://aewa.eaudeweb.ro",
+                "title": "AEWA"
+            },
+            "ascobans": {
+                "url": "http://ascobans.eaudeweb.ro",
+                "title": "ASCOBANS"
+            },
+            "eurobats": {
+                "url": "http://eurobats.eaudeweb.ro",
+                "title": "EUROBATS"
+            }
+        },
+        "test": {
+            "cms": {
+                "url": "http://cms.power.edw.ro",
+                "title": "CMS"
+            },
+            "aewa": {
+                "url": "http://aewa.power.edw.ro",
+                "title": "AEWA"
+            },
+            "ascobans": {
+                "url": "http://ascobans.power.edw.ro",
+                "title": "ASCOBANS"
+            },
+            "eurobats": {
+                "url": "http://eurobats.power.edw.ro",
+                "title": "EUROBATS"
+            }
+        }
+    }
+}
+

@@ -1,0 +1,656 @@
+<?php
+
+/**
+ * SimpleTest cases for CMS publication module
+ * Verify the functionalities of CMS publication module
+ */
+class CMSPublicationWebTestCase extends CMSWebTestCase {
+
+    public static function getInfo() {
+        return array(
+            'name' => 'CMS Publication',
+            'description' => 'Verify functionality of CMS Publication',
+            'group' => 'CMS Tests'
+        );
+    }
+
+
+    function setUp() {
+        parent::setUp('taxonomy', 'taxonomy_access_fix', 'legal_instrument', 'publication',
+            'date_popup', 'species', 'uuid');
+        self::$bundle = CMSPublication::$bundle;
+    }
+
+
+    function test_security_role_anonymous() {
+        $pub = CMSPublication::node_create('test_publication');
+
+        $this->try_anonymous_role($pub->nid, 'test_publication', 'publication/listing', 'node/add/publication');
+        $this->ensure_access_denied_for_vocabulary(VOC_PUBLICATION_AUTHORS, 'anonymous');
+        $this->ensure_access_denied_for_vocabulary(VOC_PUBLICATION_TYPES, 'anonymous');
+        $this->ensure_access_denied_for_vocabulary(VOC_LANGUAGES, 'anonymous');
+    }
+
+    function test_security_role_authenticated() {
+        $pub = CMSPublication::node_create('test_publication');
+
+        $this->try_authenticated_role($pub->nid, 'test_publication', 'publication/listing', 'node/add/publication');
+        $this->ensure_access_denied_for_vocabulary(VOC_PUBLICATION_AUTHORS, self::$role_authenticated);
+        $this->ensure_access_denied_for_vocabulary(VOC_PUBLICATION_TYPES, self::$role_authenticated);
+        $this->ensure_access_denied_for_vocabulary(VOC_LANGUAGES, self::$role_authenticated);
+    }
+
+    function test_security_role_manager() {
+        $add = array(
+            'title' => 'test_publication'
+        );
+
+        $this->try_manager_role(ROLE_MANAGE_PUBLICATION, $add, 'publication/listing', 'node/add/publication');
+        $this->ensure_access_for_vocabulary(VOC_PUBLICATION_AUTHORS, ROLE_MANAGE_PUBLICATION, 1);
+        $this->ensure_access_for_vocabulary(VOC_PUBLICATION_TYPES, ROLE_MANAGE_PUBLICATION, 2);
+        $this->ensure_access_for_vocabulary(VOC_LANGUAGES, ROLE_MANAGE_PUBLICATION, 3);
+    }
+
+    function test_security_role_administrator() {
+        $add = array(
+            'title' => 'test_publication'
+        );
+
+        $this->try_administrator_role($add, 'publication/listing', 'node/add/publication');
+        $this->ensure_access_for_vocabulary(VOC_PUBLICATION_AUTHORS, self::$role_administrator, 1);
+        $this->ensure_access_for_vocabulary(VOC_PUBLICATION_TYPES, self::$role_administrator, 2);
+        $this->ensure_access_for_vocabulary(VOC_LANGUAGES, self::$role_administrator, 3);
+    }
+
+    // TODO Remove this - redundant
+    function test_security_manage_taxonomy_languages() {
+        // Create user with 'manage publication' role and try to update related vocabularies
+        $this->drupalLogout();
+        $manager = $this->drupalCreateUser();
+        $r = user_role_load_by_name(ROLE_MANAGE_PUBLICATION);
+        $manager->roles[$r->rid] = ROLE_MANAGE_PUBLICATION;
+        user_save($manager);
+        $this->drupalLogin($manager);
+        $this->assertNotNull($this->loggedInUser);
+        $this->assertEqual($this->loggedInUser->roles[$r->rid], ROLE_MANAGE_PUBLICATION);
+
+        // Overview
+        $this->drupalGet('admin/structure/taxonomy');
+        $this->assertText('Languages', 'Overview contains Languages vocabulary');
+        $this->assertText('Publication authors', 'Overview contains Publication authors vocabulary');
+        $this->assertText('Publication types', 'Overview contains Publication types vocabulary');
+
+        // Create
+        $add = array('name' => 'new_language');
+        $this->drupalPost('admin/structure/taxonomy/languages/add', $add, t('Save'));
+        $this->assertText('Created new term new_language', 'Language vocabulary item created successfully');
+
+        // Read
+        $this->drupalGet('admin/structure/taxonomy/languages');
+        $this->assertText('new_language', 'Languages vocabulary read successfully');
+
+        // Update
+        $edit = array('name' => 'edited_language');
+        $this->drupalPost("taxonomy/term/1/edit", $edit, t('Save'));
+        $this->assertText('Updated term edited_language', 'Languages vocabulary updated successfully');
+
+        // Delete
+        $this->drupalPost("taxonomy/term/1/edit", array(), t('Delete'));
+        $this->drupalPost(NULL, NULL, t('Delete'));
+        $this->assertText('Deleted term edited_language', 'Item deleted successfully from languages vocabulary');
+
+        // Ensure we don't have access to other known vocabularies
+        $this->drupalGet('admin/structure/taxonomy');
+        $this->assertNoText('Threats', 'Overview does not contain Threats vocabulary');
+    }
+
+    // TODO Remove this - redundant
+    function test_security_manage_taxonomy_publication_authors() {
+        // Create user with 'manage publication' role and try to update related vocabularies
+        $this->drupalLogout();
+        $manager = $this->drupalCreateUser();
+        $r = user_role_load_by_name(ROLE_MANAGE_PUBLICATION);
+        $manager->roles[$r->rid] = ROLE_MANAGE_PUBLICATION;
+        user_save($manager);
+        $this->drupalLogin($manager);
+        $this->assertNotNull($this->loggedInUser);
+        $this->assertTrue(in_array(ROLE_MANAGE_PUBLICATION, $this->loggedInUser->roles));
+
+        // Overview
+        $this->drupalGet('admin/structure/taxonomy');
+        $this->assertText('Languages', 'Overview contains Languages vocabulary');
+        $this->assertText('Publication authors', 'Overview contains Publication authors vocabulary');
+        $this->assertText('Publication types', 'Overview contains Publication types vocabulary');
+
+        // Create
+        $add = array('name' => 'new_author');
+        $this->drupalPost('admin/structure/taxonomy/publication_authors/add', $add, t('Save'));
+        $this->assertText('Created new term new_author', 'Publication author item created successfully');
+
+        // Read
+        $this->drupalGet('admin/structure/taxonomy/publication_authors');
+        $this->assertText('new_author', 'Publication authors vocabulary read successfully');
+
+        // Update
+        $edit = array('name' => 'edited_author');
+        $this->drupalPost("taxonomy/term/1/edit", $edit, t('Save'));
+        $this->assertText('Updated term edited_author', 'Publication authors vocabulary updated successfully');
+
+        // Delete
+        $this->drupalPost("taxonomy/term/1/edit", array(), t('Delete'));
+        $this->drupalPost(NULL, NULL, t('Delete'));
+        $this->assertText('Deleted term edited_author', 'Item deleted successfully from Publication authors vocabulary');
+    }
+
+    // TODO Remove this - redundant
+    function test_security_manage_taxonomy_publication_types() {
+        // Create user with 'manage publication' role and try to update related vocabularies
+        $this->drupalLogout();
+        $manager = $this->drupalCreateUser();
+        $r = user_role_load_by_name(ROLE_MANAGE_PUBLICATION);
+        $manager->roles[$r->rid] = ROLE_MANAGE_PUBLICATION;
+        user_save($manager);
+        $this->drupalLogin($manager);
+        $this->assertNotNull($this->loggedInUser);
+        $this->assertTrue(in_array(ROLE_MANAGE_PUBLICATION, $this->loggedInUser->roles));
+
+        // Overview
+        $this->drupalGet('admin/structure/taxonomy');
+        $this->assertText('Languages', 'Overview contains Languages vocabulary');
+        $this->assertText('Publication authors', 'Overview contains Publication authors vocabulary');
+        $this->assertText('Publication types', 'Overview contains Publication types vocabulary');
+
+        // Create
+        $add = array('name' => 'new_publication_type');
+        $this->drupalPost('admin/structure/taxonomy/publication_types/add', $add, t('Save'));
+        $this->assertText('Created new term new_publication_type', 'Publication type item created successfully');
+
+        // Read
+        $this->drupalGet('admin/structure/taxonomy/publication_types');
+        $this->assertText('new_publication_type', 'Publication types vocabulary read successfully');
+
+        // Update
+        $edit = array('name' => 'edited_publication_type');
+        $this->drupalPost("taxonomy/term/1/edit", $edit, t('Save'));
+        $this->assertText('Updated term edited_publication_type', 'Publication types vocabulary updated successfully');
+
+        // Delete
+        $this->drupalPost("taxonomy/term/1/edit", array(), t('Delete'));
+        $this->drupalPost(NULL, NULL, t('Delete'));
+        $this->assertText('Deleted term edited_publication_type', 'Item deleted successfully from Publication types vocabulary');
+    }
+
+
+    function get_sample_publication_json() {
+        $file5 = __DIR__ . DIRECTORY_SEPARATOR . 'test' . DIRECTORY_SEPARATOR . 'image_5.jpg';
+        $file6 = __DIR__ . DIRECTORY_SEPARATOR . 'test' . DIRECTORY_SEPARATOR . 'image_6.jpg';
+        $json = sprintf('
+            { "body" : {
+                    "format" : "full_html",
+                    "summary" : "Summary",
+                    "value" : "<p><span>Body 1</span></p>"
+                },
+                "field_publication_attachment" : [ { "path" : "%s" } ],
+                "field_publication_author" : [ "Author 1", "Author 2"],
+                "field_publication_city" : "Bucharest",
+                "field_publication_co_authors" : [ "Coauthor 1", "Coauthor 2" ],
+                "field_country" : "Romania",
+                "field_publication_edition" : "1",
+                "field_publication_image" : [ { "path" : "%s" } ],
+                "field_instrument" : [ "test", "test2" ],
+                "field_publication_language" : [ "English", "French" ],
+                "field_publication_order_code" : [ "ORDER CODE 1", "ORDER CODE 2" ],
+                "field_publication_published" : "2006-11-14",
+                "field_publication_publisher" : "Publisher",
+                "field_publication_source" : {
+                    "url" : "http://www.google.com/",
+                    "title" : "Sample title"
+                },
+                "field_publication_type" : "Technical Series",
+                "title" : "Full publication #1"
+            }
+        ', $file5, $file6);
+        $json = json_decode($json, TRUE);
+        $this->assertTrue(!empty($json));
+        return $json;
+    }
+
+
+    function test_node_create() {
+        $node = CMSPublication::node_create('test');
+        $this->assertNotNull($node);
+        $this->assertEqual(1, $node->nid);
+        $this->assertEqual('test', $node->title);
+
+
+        $node = CMSPublication::node_create('second', FALSE);
+        $this->assertNotNull($node);
+        $this->assertTrue(empty($node->nid));
+
+        $node = CMSPublication::node_create('');
+        $this->assertNotNull($node);
+        $this->assertEqual(2, $node->nid);
+    }
+
+
+    function test_set_instruments() {
+        $agreement = CMSUtils::vocabulary_get_or_create_term('agreement', VOC_INSTRUMENT_TYPE);
+        CMSLegalInstrument::node_create('test', 'test', $agreement->tid, '2012-01-01');
+        CMSLegalInstrument::node_create('second', 'second', $agreement->tid, '2012-01-01');
+
+        $node = CMSPublication::node_create('test');
+        CMSPublication::set_instruments($node, array('field_instrument' => array('test', 'second')));
+        node_save($node);
+
+        $node = node_load(3);
+        $this->assertEqual(2, count($node->field_instrument[$node->language]));
+        $this->assertEqual(1, $node->field_instrument[$node->language][0]['target_id']);
+        $this->assertEqual(2, $node->field_instrument[$node->language][1]['target_id']);
+
+        $instruments = CMSLegalInstrument::get_mapped_instruments();
+        $node = CMSPublication::node_create('test 2');
+        CMSPublication::set_instruments($node, array('field_instrument' => array('second')), $instruments);
+        $this->assertEqual(1, count($node->field_instrument[$node->language]));
+        $this->assertEqual(2, $node->field_instrument[$node->language][0]['target_id']);
+
+        $node = CMSPublication::node_create('test 3');
+        CMSPublication::set_instruments($node, array('field_instrument' => array('fake')));
+        $this->assertEqual(0, count($node->field_instrument[$node->language]));
+
+        $node = CMSPublication::node_create('test 4');
+        CMSPublication::set_instruments($node, array('field_instrument' => array('')));
+        $this->assertEqual(0, count($node->field_instrument[$node->language]));
+    }
+
+
+    function test_get_instruments() {
+        $agreement = CMSUtils::vocabulary_get_or_create_term('agreement', VOC_INSTRUMENT_TYPE);
+        CMSLegalInstrument::node_create('test', 'test', $agreement->tid, '2012-01-01');
+        CMSLegalInstrument::node_create('second', 'second', $agreement->tid, '2012-01-01');
+
+        $node = CMSPublication::node_create('test');
+        CMSPublication::set_instruments($node, array('field_instrument' => array('test', 'second')));
+        node_save($node);
+
+        $node = node_load(3);
+
+        // Without cache
+        $instruments = CMSPublication::get_instruments($node);
+        $this->assertEqual(array('test', 'second'), $instruments);
+
+        // With cache
+        $instrument_cache = CMSLegalInstrument::get_mapped_instruments($title_as_key = FALSE);
+        $instruments = CMSPublication::get_instruments($node, $instrument_cache);
+        $this->assertEqual(array('test', 'second'), $instruments);
+    }
+
+
+    /**
+     * Test multiple values for the attachment field of CMSPublication
+     */
+    function test_field_field_publication_attachment() {
+        $node = CMSPublication::node_create('test');
+        $file1 = __DIR__ . DIRECTORY_SEPARATOR . 'test' . DIRECTORY_SEPARATOR . 'image_1.jpg';
+        $file2 = __DIR__ . DIRECTORY_SEPARATOR . 'test' . DIRECTORY_SEPARATOR . 'image_2.jpg';
+
+        CMSUtils::node_import_file($node, 'field_publication_attachment',
+            array(
+                'field_publication_attachment' => array(
+                    array('path' => $file1),
+                    array('path' => $file2)
+                )
+            )
+        );
+        node_save($node);
+
+        $node = node_load(1);
+        $this->assertEqual(2, count($node->field_publication_attachment[$node->language]));
+        $this->assertEqual('image_1.jpg', $node->field_publication_attachment[$node->language][0]['filename']);
+        $this->assertEqual('image_2.jpg', $node->field_publication_attachment[$node->language][1]['filename']);
+
+        // Check preservation of existing attachments
+        $file3 = __DIR__ . DIRECTORY_SEPARATOR . 'test' . DIRECTORY_SEPARATOR . 'image_3.jpg';
+        $file4 = __DIR__ . DIRECTORY_SEPARATOR . 'test' . DIRECTORY_SEPARATOR . 'image_4.jpg';
+        $node = CMSPublication::node_create('test 3');
+        CMSUtils::node_import_file($node, 'field_publication_attachment',
+            array(
+                'field_publication_attachment' => array(
+                    array('path' => $file3)
+                )
+            )
+        );
+        node_save($node);
+        $node = node_load(2);
+        CMSUtils::node_import_file($node, 'field_publication_attachment',
+            array(
+                'field_publication_attachment' => array(
+                    array('path' => $file4)
+                )
+            )
+        );
+        node_save($node);
+        $node = node_load(2);
+        $this->assertEqual(2, count($node->field_publication_attachment[$node->language]));
+        $this->assertEqual('image_3.jpg', $node->field_publication_attachment[$node->language][0]['filename']);
+        $this->assertEqual('image_4.jpg', $node->field_publication_attachment[$node->language][1]['filename']);
+
+        // Assign invalid files
+        $node = CMSPublication::node_create('test 3');
+        CMSUtils::node_import_file($node, 'field_publication_attachment',
+            array(
+                'field_publication_attachment' => array(
+                    array('path' => 'path to the moon')
+                )
+            )
+        );
+        node_save($node);
+        $node = node_load(3);
+        $this->assertEqual(array(), $node->field_publication_attachment);
+    }
+
+
+    function test_set_country() {
+        $node = CMSPublication::node_create('test');
+        Country::node_create('Romania', 'RO');
+        CMSPublication::set_country($node, array('field_country' => 'RomANiA'));
+        node_save($node);
+        $node = node_load($node->nid);
+        $this->assertEqual('RO', CMSBase::get_field_country_code($node, 'field_country'));
+
+        $node = CMSPublication::node_create('test 2');
+        CMSPublication::set_country($node, array('field_country' => 'XXX'));
+        node_save($node);
+        $node = node_load($node->nid);
+        $this->assertEqual(array(), $node->field_country);
+    }
+
+
+    function test_set_language() {
+        $vocabulary = taxonomy_vocabulary_machine_name_load('languages');
+        taxonomy_term_save((object)array('name' => 'Romanian', 'vid' => $vocabulary->vid));
+
+        $node = CMSPublication::node_create('test');
+        CMSPublication::set_language($node, array(
+            'field_publication_language' => array('XianXian')
+        ));
+        node_save($node);
+        $node = node_load(1);
+        $this->assertEqual(2, $node->field_publication_language[$node->language][0]['tid']);
+
+        CMSPublication::set_language($node, array(
+            'field_publication_language' => array('Romanian')
+        ));
+        node_save($node);
+        $node = node_load(1);
+        $this->assertEqual(1, $node->field_publication_language[$node->language][1]['tid']);
+
+        $node = CMSPublication::node_create('test 2');
+        CMSPublication::set_language($node, array(
+            'field_publication_language' => array('')
+        ));
+        node_save($node);
+        $node = node_load(2);
+        $this->assertEqual(array(), $node->field_publication_language);
+    }
+
+
+    function test_get_language() {
+        $vocabulary = taxonomy_vocabulary_machine_name_load('languages');
+        taxonomy_term_save((object)array('name' => 'Romanian', 'vid' => $vocabulary->vid));
+
+        $node = CMSPublication::node_create('test');
+        CMSPublication::set_language($node, array(
+            'field_publication_language' => array('Romanian')
+        ));
+        node_save($node);
+        $node = node_load(1);
+        $this->assertEqual(array('Romanian'), CMSPublication::get_language($node));
+    }
+
+
+    function test_set_authors() {
+        // Author
+        $node = CMSPublication::node_create('test');
+        CMSPublication::set_authors($node, array(
+            'field_publication_author' => array('Cristian Romanescu', 'John Doe')
+        ));
+        node_save($node);
+        $node = node_load(1);
+        $this->assertEqual(1, $node->field_publication_author[$node->language][0]['tid']);
+        $this->assertEqual(2, $node->field_publication_author[$node->language][1]['tid']);
+
+        // Co-author
+        $node = CMSPublication::node_create('test');
+        CMSPublication::set_authors($node, array(
+            'field_publication_co_authors' => array('Bob', 'Joe')
+        ), 'field_publication_co_authors');
+        node_save($node);
+        $node = node_load(2);
+        $this->assertEqual(3, $node->field_publication_co_authors[$node->language][0]['tid']);
+        $this->assertEqual(4, $node->field_publication_co_authors[$node->language][1]['tid']);
+
+        $node = CMSPublication::node_create('test');
+        CMSPublication::set_authors($node, array(
+            'field_publication_author' => array('')
+        ));
+        node_save($node);
+        $node = node_load(3);
+        $this->assertEqual(array(), $node->field_publication_author);
+    }
+
+
+    function test_get_authors() {
+        $node = CMSPublication::node_create('test');
+        $reference = array(
+            'field_publication_author' => array('Cristian Romanescu', 'John Doe')
+        );
+        CMSPublication::set_authors($node, $reference);
+        node_save($node);
+        $node = node_load(1);
+        $this->assertEqual($reference['field_publication_author'], CMSPublication::get_authors($node));
+    }
+
+
+    function test_get_source() {
+        $node = CMSPublication::node_create('test');
+        $original = array(
+            'field_publication_source' => array(
+                'url' => 'http://plus.google.com/',
+                'title' => 'Sample title'
+            )
+        );
+        CMSPublication::set_source($node, $original);
+        node_save($node);
+        $node = node_load(1);
+        $subject = CMSPublication::get_source($node);
+        $this->assertEqual($original['field_publication_source'], $subject);
+    }
+
+
+    function test_set_source() {
+        $node = CMSPublication::node_create('test');
+        CMSPublication::set_source($node, array(
+            'field_publication_source' => array(
+                'url' => 'http://plus.google.com/',
+                'title' => 'Sample title'
+            )
+        ));
+        node_save($node);
+        $node = node_load(1);
+
+        $this->assertNotNull($node);
+        $this->assertNotNull($node->field_publication_source);
+        $this->assertEqual('http://plus.google.com/', $node->field_publication_source[$node->language][0]['url']);
+        $this->assertEqual('Sample title', $node->field_publication_source[$node->language][0]['title']);
+    }
+
+
+    function test_get_order_code() {
+        $node = CMSPublication::node_create('test');
+        $original = array('string 1', 'string 2', 'string 3');
+        CMSUtils::set_node_list_value($node, 'field_publication_order_code', $original);
+        node_save($node);
+        $node = node_load(1);
+        $subject = CMSPublication::get_order_code($node);
+        $this->assertEqual($original, $subject);
+    }
+
+
+    function test_from_array() {
+        Country::node_create('Romania', 'RO');
+        $agreement = CMSUtils::vocabulary_get_or_create_term('agreement', VOC_INSTRUMENT_TYPE);
+        CMSLegalInstrument::node_create('test', 'test', $agreement->tid, '2012-01-01');
+        CMSLegalInstrument::node_create('test2', 'test2', $agreement->tid, '2012-01-01');
+        $s1 = CMSSpecies::node_create('species1');
+
+        $json = $this->get_sample_publication_json();
+        $json['field_publication_species'] = array($s1->uuid);
+
+        $node = CMSPublication::from_array($json);
+
+        node_save($node);
+        $node = node_load($node->nid);
+
+        $this->assertEqual($json['body'], CMSBase::get_field_body($node));
+        $this->assertEqual('image_5.jpg', $node->field_publication_attachment[$node->language][0]['filename']);
+        $this->assertEqual(
+            $json['field_publication_author'],
+            CMSBase::get_field_taxonomic_terms_names($node, 'field_publication_author', VOC_PUBLICATION_AUTHORS));
+        $this->assertEqual($json['field_publication_city'],
+            CMSBase::get_field_single_value($node, 'field_publication_city'));
+        $this->assertEqual(
+            $json['field_publication_co_authors'],
+            CMSBase::get_field_taxonomic_terms_names($node, 'field_publication_co_authors', VOC_PUBLICATION_AUTHORS));
+        $this->assertEqual('RO', CMSBase::get_field_country_code($node, 'field_country'));
+        $this->assertEqual($json['field_publication_edition'], CMSBase::get_field_single_value($node, 'field_publication_edition'));
+        $this->assertEqual('image_6.jpg', $node->field_publication_image[$node->language][0]['filename']);
+        $this->assertEqual($json['field_instrument'],
+            CMSBase::get_field_instruments_names($node, 'field_instrument'));
+        $this->assertEqual($json['field_publication_language'],
+            CMSBase::get_field_taxonomic_terms_names($node, 'field_publication_language', VOC_LANGUAGES));
+        $this->assertEqual($json['field_publication_order_code'],
+            CMSBase::get_field_list_value($node, 'field_publication_order_code'));
+        $this->assertEqual('2006-11-14',
+            CMSBase::get_field_single_value($node, 'field_publication_published'));
+
+        $this->assertEqual($json['field_publication_publisher'], CMSBase::get_field_single_value($node, 'field_publication_publisher'));
+        $this->assertEqual('http://www.google.com/', $node->field_publication_source[$node->language][0]['url']);
+        $this->assertEqual('Sample title', $node->field_publication_source[$node->language][0]['title']);
+        $this->assertEqual($json['field_publication_type'],
+            CMSBase::get_field_taxonomic_term_name($node, 'field_publication_type', VOC_PUBLICATION_TYPES));
+        $this->assertEqual('Full publication #1', $node->title);
+
+        // Test related content
+        $this->assertEqual(array($s1->uuid), CMSBase::get_entity_reference_by_uuid($node, 'field_publication_species'));
+    }
+
+
+    function test_from_array_empty() {
+        $json = '
+            { "body" : {
+                    "format" : "full_html",
+                    "summary" : "",
+                    "value" : ""
+                },
+                "field_publication_attachment" : [ ],
+                "field_publication_author" : [ ],
+                "field_publication_city" : "",
+                "field_publication_co_authors" : [ ],
+                "field_country" : "",
+                "field_publication_edition" : "",
+                "field_publication_image" : [ ],
+                "field_instrument" : [ ],
+                "field_publication_language" : [ ],
+                "field_publication_order_code" : [ ],
+                "field_publication_published" : "",
+                "field_publication_publisher" : "",
+                "field_publication_source" : [ ],
+                "field_publication_type" : "",
+                "title" : "Full publication #1"
+            }
+        ';
+        $json = json_decode($json, TRUE);
+        $this->assertNotNull($json);
+        $node = CMSPublication::from_array($json);
+        node_save($node);
+        $node = node_load(1);
+
+        $this->assertEqual('Full publication #1', $node->title);
+
+        $this->assertEqual('', $node->body[$node->language][0]['value']);
+        $this->assertEqual(NULL, $node->body[$node->language][0]['summary']);
+
+        $this->assertEqual(array(), $node->field_publication_attachment);
+        $this->assertEqual(array(), $node->field_publication_author);
+        $this->assertEqual(array(), $node->field_publication_author);
+        $this->assertEqual(array(), $node->field_publication_city);
+        $this->assertEqual(array(), $node->field_publication_co_authors);
+
+        $this->assertEqual(array(), $node->field_publication_co_authors);
+        $this->assertEqual(array(), $node->field_country);
+        $this->assertEqual(array(), $node->field_publication_edition);
+        $this->assertEqual(array(), $node->field_publication_image);
+        $this->assertEqual(array(), $node->field_instrument);
+        $this->assertEqual(array(), $node->field_instrument);
+
+        $this->assertEqual(array(), $node->field_publication_language);
+        $this->assertEqual(array(), $node->field_publication_order_code);
+        $this->assertEqual(array(), $node->field_publication_order_code);
+        $this->assertEqual(array(), $node->field_publication_published);
+        $this->assertEqual(array(), $node->field_publication_publisher);
+        $this->assertEqual(array(), $node->field_publication_source);
+        $this->assertEqual(array(), $node->field_publication_source);
+        $this->assertEqual(array(), $node->field_publication_type);
+    }
+
+
+    function test_to_array() {
+        Country::node_create('Romania', 'RO');
+        $agreement = CMSUtils::vocabulary_get_or_create_term('agreement', VOC_INSTRUMENT_TYPE);
+        CMSLegalInstrument::node_create('test', 'test', $agreement->tid, '2012-01-01');
+        CMSLegalInstrument::node_create('test2', 'test2', $agreement->tid, '2012-01-01');
+        $s1 = CMSSpecies::node_create('species1');
+
+        $json = $this->get_sample_publication_json();
+        $node = CMSPublication::from_array($json);
+
+        CMSBase::set_field_list_target_id($node, 'field_publication_species',
+            array('field_publication_species' => array($s1->nid)));
+
+        node_save($node);
+        $node = node_load($node->nid);
+
+        $out = CMSPublication::to_array($node, '/tmp');
+
+        $this->assertEqual($json['body'], $out['body'], 'Body field set incorrectly');
+        $this->assertEqual($json['title'], $out['title']);
+        $this->assertEqual($json['field_publication_author'], $out['field_publication_author']);
+        $this->assertEqual($json['field_publication_city'], $out['field_publication_city']);
+        $this->assertEqual($json['field_publication_co_authors'], $out['field_publication_co_authors']);
+        $this->assertEqual('RO', $out['field_country']);
+        $this->assertEqual($json['field_publication_edition'], $out['field_publication_edition']);
+        $this->assertEqual($json['field_instrument'], $out['field_instrument']);
+        $this->assertEqual($json['field_publication_language'], $out['field_publication_language']);
+        $this->assertEqual($json['field_publication_order_code'], $out['field_publication_order_code']);
+        $this->assertEqual('2006-11-14', $out['field_publication_published']);
+        $this->assertEqual($json['field_publication_publisher'], $out['field_publication_publisher']);
+        $this->assertEqual($json['field_publication_source'], $out['field_publication_source']);
+        $this->assertEqual($json['field_publication_type'], $out['field_publication_type']);
+        $this->assertEqual('publication/full-publication-1/field_publication_attachment/image_5.jpg', $out['field_publication_attachment'][0]['path']);
+        $this->assertEqual('publication/full-publication-1/field_publication_image/image_6.jpg', $out['field_publication_image'][0]['path']);
+
+        // Test related content
+        $this->assertEqual(array($s1->uuid), $out['field_publication_species']);
+    }
+
+
+    function test_role_create() {
+        $existing = user_roles();
+        $this->assertTrue(!in_array('test_role', $existing));
+        $result = CMSPublication::role_create('test_role');
+        $this->assertTrue($result);
+
+        $existing = user_roles();
+        $this->assertTrue(in_array('test_role', $existing));
+    }
+}

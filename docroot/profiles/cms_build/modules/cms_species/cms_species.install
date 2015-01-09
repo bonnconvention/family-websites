@@ -1,0 +1,76 @@
+<?php
+
+module_load_include('php', 'cms', 'utils');
+module_load_include('inc', 'cms_species', 'cms_species.updates');
+
+/**
+ * Implements hook_uninstall()
+ * @todo Test this code
+ */
+function cms_species_uninstall() {
+    user_role_delete(ROLE_MANAGE_SPECIES);
+    CMSUtils::vocabulary_delete(VOC_THREATS);
+
+    # Remove the 'Species' menu
+    $mlid = db_select('menu_links' , 'ml')
+            ->condition('ml.link_path' , '<front>')
+            ->condition('ml.link_title' , 'Species')
+            ->condition('ml.has_children' , '1')
+            ->condition('ml.expanded' , '1')
+            ->fields('ml' , array('mlid'))
+            ->execute()
+            ->fetchField();
+    if(!empty($mlid)) {
+        menu_link_delete($mlid);
+    }
+}
+
+
+/**
+ * Implementes hook_install()
+ */
+function cms_species_install() {
+    $role = CMSUtils::get_or_create_role(ROLE_MANAGE_SPECIES);
+
+    $vocs = array('Threats' => VOC_THREATS, '(Species) Class' => VOC_SPECIES_CLASS,
+            '(Species) Genus' => VOC_SPECIES_GENUS, '(Species) Order' => VOC_SPECIES_ORDER,
+            '(Species) Family' => VOC_SPECIES_FAMILY, '(Species) Species' => VOC_SPECIES_SPECIES,
+            '(Species) Sub-Species' => VOC_SPECIES_SUBSPECIES, '(Species) Author' => VOC_SPECIES_AUTHOR,
+            '(Species) Population name' => VOC_SPECIES_POPUPATION_NAME,'(AEWA Species) Country status' => VOC_SPECIES_AEWA_COUNTRY_STATUS,
+            '(AEWA Status) Column A' => VOC_SPECIES_AEWA_STATUS_A, '(AEWA Status) Column B' => VOC_SPECIES_AEWA_STATUS_B,
+            '(AEWA Status) Column C' => VOC_SPECIES_AEWA_STATUS_C,);
+
+    foreach($vocs as $name => $machine_name) {
+        CMSUtils::vocabulary_create($name, $machine_name);
+    }
+
+    // We clear the cache, otherwise we get PDOException that module is null (module seems is not fully initialized).
+    // @todo: Hopefully this can be be removed in the future
+    menu_rebuild();
+
+    if(!empty($role)) {
+        $rid = $role->rid;
+        $permissions = array(
+            'create species content' => TRUE,
+            'edit own species content' => TRUE,
+            'edit any species content' => TRUE,
+            'delete own species content' => TRUE,
+            'delete any species content' => TRUE,
+
+            'search content' => TRUE,
+            'use advanced search' => TRUE,
+        );
+
+        $vocs = array(VOC_THREATS, VOC_SPECIES_CLASS, VOC_SPECIES_GENUS,
+                VOC_SPECIES_ORDER, VOC_SPECIES_FAMILY, VOC_SPECIES_SPECIES,
+                VOC_SPECIES_SUBSPECIES, VOC_SPECIES_AUTHOR, VOC_SPECIES_POPUPATION_NAME, VOC_SPECIES_AEWA_COUNTRY_STATUS,
+                VOC_SPECIES_AEWA_STATUS_A, VOC_SPECIES_AEWA_STATUS_B, VOC_SPECIES_AEWA_STATUS_C);
+        foreach($vocs as $machine_name) {
+            CMSUtils::set_vocabulary_permissions($permissions, $machine_name, 'species', ROLE_MANAGE_SPECIES);
+        }
+        user_role_change_permissions($rid, $permissions);
+        CMSUtils::role_add_permissions('administrator', $permissions);
+    } else {
+        watchdog('species', "Unable to load role name '@role'", array("@role" => ROLE_MANAGE_SPECIES), WATCHDOG_WARNING);
+    }
+}

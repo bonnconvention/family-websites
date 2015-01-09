@@ -1,0 +1,103 @@
+<?php
+
+class CMSDocumentWebTestCase extends CMSWebTestCase {
+
+    static function getInfo() {
+        return array(
+            'name' => 'CMS Document',
+            'description' => 'Verify functionality of CMS Document',
+            'group' => 'CMS Tests'
+        );
+    }
+
+    function setUp() {
+        parent::setUp('taxonomy', 'taxonomy_access_fix', 'document', 'species', 'meeting', 'project', 'uuid');
+        self::$bundle = CMSDocument::$bundle;
+    }
+
+    function test_security_role_anonymous() {
+        $node = CMSDocument::node_create('test_document');
+
+        $this->try_anonymous_role($node->nid, 'test_document', 'document/listing', 'node/add/document');
+        $this->ensure_access_denied_for_vocabulary(VOC_DOCUMENT_STATUS, 'anonymous');
+        $this->ensure_access_denied_for_vocabulary(VOC_DOCUMENT_SUBMITTER, 'anonymous');
+        $this->ensure_access_denied_for_vocabulary(VOC_DOCUMENT_TYPE, 'anonymous');
+    }
+
+    function test_security_role_authenticated() {
+        $node = CMSDocument::node_create('test_document');
+
+        $this->try_authenticated_role($node->nid, 'test_document', 'document/listing', 'node/add/document');
+        $this->ensure_access_denied_for_vocabulary(VOC_DOCUMENT_STATUS, self::$role_authenticated);
+        $this->ensure_access_denied_for_vocabulary(VOC_DOCUMENT_SUBMITTER, self::$role_authenticated);
+        $this->ensure_access_denied_for_vocabulary(VOC_DOCUMENT_TYPE, self::$role_authenticated);
+    }
+
+    function test_security_role_manager() {
+        $this->try_manager_role(ROLE_MANAGE_DOCUMENT, array('title' => 'test_document'), 'document/listing', 'node/add/document');
+        $this->ensure_access_for_vocabulary(VOC_DOCUMENT_SUBMITTER, ROLE_MANAGE_DOCUMENT, 1);
+        $this->ensure_access_for_vocabulary(VOC_DOCUMENT_TYPE, ROLE_MANAGE_DOCUMENT, 2);
+        $this->ensure_access_for_vocabulary(VOC_DOCUMENT_STATUS, ROLE_MANAGE_DOCUMENT, 3);
+    }
+
+    function test_security_role_administrator() {
+        $this->try_administrator_role(array('title' => 'test_document'), 'document/listing', 'node/add/document');
+        $this->ensure_access_for_vocabulary(VOC_DOCUMENT_SUBMITTER, self::$role_administrator, 1);
+        $this->ensure_access_for_vocabulary(VOC_DOCUMENT_TYPE, self::$role_administrator, 2);
+        $this->ensure_access_for_vocabulary(VOC_DOCUMENT_STATUS, self::$role_administrator, 3);
+    }
+
+
+    function test_node_to_array() {
+        $node = CMSDocument::node_create('document1');
+
+        $s1 = CMSSpecies::node_create('species1');
+        $m1 = CMSMeeting::node_create('meeting1');
+        $prj1 = CMSProject::node_create('project1');
+
+        CMSBase::set_field_list_target_id($node, 'field_document_species',
+            array('field_document_species' => array($s1->nid)));
+        CMSBase::set_field_list_target_id($node, 'field_document_meeting',
+            array('field_document_meeting' => array($m1->nid)));
+        CMSBase::set_field_list_target_id($node, 'field_document_project',
+            array('field_document_project' => array($prj1->nid)));
+
+        node_save($node);
+        $node = node_load($node->nid);
+        $data = CMSDocument::node_to_array($node, '/tmp');
+
+        // @todo: Test basic document fields
+
+        // Test related content
+        $this->assertEqual(array($s1->uuid), $data['field_document_species']);
+        $this->assertEqual(array($m1->uuid), $data['field_document_meeting']);
+        $this->assertEqual(array($prj1->uuid), $data['field_document_project']);
+    }
+
+
+    function test_node_from_array() {
+        $s1 = CMSSpecies::node_create('species1');
+        $m1 = CMSMeeting::node_create('meeting1');
+        $prj1 = CMSProject::node_create('project1');
+
+        $data = array(
+            'title' => 'PROJECT-TITLE',
+            'field_document_species' => array($s1->uuid),
+            'field_document_meeting' => array($m1->uuid),
+            'field_document_project' => array($prj1->uuid)
+        );
+
+        $node = CMSDocument::node_from_array($data, '/tmp');
+        $node = node_load($node->nid);
+
+        // @todo: Test basic document fields
+
+        // Test related content
+        $this->assertEqual($data['field_document_species'],
+            CMSBase::get_entity_reference_by_uuid($node, 'field_document_species'));
+        $this->assertEqual($data['field_document_meeting'],
+            CMSBase::get_entity_reference_by_uuid($node, 'field_document_meeting'));
+        $this->assertEqual($data['field_document_project'],
+            CMSBase::get_entity_reference_by_uuid($node, 'field_document_project'));
+    }
+}

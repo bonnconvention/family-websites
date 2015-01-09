@@ -1,0 +1,341 @@
+<?php
+define('ROLE_MANAGE_CONTACTS', 'manage contacts');
+define('CONTACT_VIEW_PERMISSION_FE', 'view contacts in front end');
+define('EDIT_CONTACT_PERMISSION', 'edit any contacts content');
+
+module_load_include('inc', 'cms_contacts', 'cms_contacts.helper');
+module_load_include('inc', 'cms_contacts', 'cms_contacts.forms.admin');
+module_load_include('inc', 'cms_contacts', 'cms_contacts.ldap');
+module_load_include('inc', 'cms_contacts', 'cms_contacts.views');
+module_load_include('inc', 'cms_contacts', 'cms_contacts.export');
+
+
+/**
+ * Overrides hook_permission()
+ * Define Contacts related permissions
+ *
+ * @return   array   Array of Contacts related permissions
+ */
+function cms_contacts_permission() {
+    return array(
+        'view contacts content' => array(
+            'title' => t('View available LDAP contacts'),
+        ),
+        'create contacts content' => array(
+            'title' => t('Create LDAP contacts'),
+        ),
+        'edit any contacts content' => array(
+            'title' => t('Edit LDAP contacts'),
+        ),
+        'delete any contacts content' => array(
+            'title' => t('Delete LDAP contacts'),
+        ),
+        'administer contacts settings' => array(
+            'title' => t('Manage LDAP server configuration'),
+            'restrict access' => TRUE,
+            'warning' => t('Give to trusted roles only; this permission allows managing LDAP server settings')
+        ),
+        CONTACT_VIEW_PERMISSION_FE => array(
+            'title' => t('View LDAP contacts in front end lists'),
+        ),
+    );
+}
+
+
+/**
+ * Implements hook_library()
+ *
+ * Copied the library and modified the datatables.js because it doesn't allow passing fnServerParams as callable.
+ * Instead is passed as string and when API call this functions it raises undefined on fn.apply, as fn is a string
+ */
+function cms_contacts_library() {
+    $libraries = array();
+    $lib_path = NULL;
+    if(file_exists(drupal_get_path('module', 'datatables') . '/dataTables/media/js/jquery.dataTables.js')) {
+        $lib_path = drupal_get_path('module', 'datatables') . '/dataTables';
+    } elseif (module_exists('libraries') && file_exists(libraries_get_path('datatables') . '/media/js/jquery.dataTables.js')) {
+        $lib_path = libraries_get_path('datatables');
+    }
+    if(!empty($lib_path)) {
+        $libraries['cms_contacts_datatables'] = array(
+            'title' => 'CMS Contacts DataTables',
+            'website' => 'http://datatables.net/',
+            'version' => '1.9',
+            'js' => array(
+                $lib_path . '/media/js/jquery.dataTables.js' => array(),
+                $lib_path . '/media/js/dataTables.bootstrap.js' => array(),
+                drupal_get_path('module', 'cms_contacts') . '/js/datatables.js' => array(),
+            ),
+            'css' => array(
+                $lib_path . '/media/css/demo_table.css' => array(),
+                $lib_path . '/media/css/dataTables.bootstrap.css' => array()
+            ),
+        );
+    }
+    return $libraries;
+}
+
+
+/**
+ * Overrides hook_menu()
+ * @return array
+ */
+function cms_contacts_menu() {
+    $items = array();
+
+    $items['admin/config/system/cms_contacts'] = array(
+        'title' => t('CMS contacts LDAP connection'),
+        'description' => t('Configure LDAP server settings'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('cms_contacts_admin'),
+        'access arguments' => array('administer contacts settings'),
+        'type' => MENU_NORMAL_ITEM,
+        'file' => 'cms_contacts.forms.admin.inc',
+    );
+
+    $items['contacts/listing'] = array(
+        'title' => t('Contacts'),
+        'page callback' => 'cms_contacts_list',
+        'access arguments' => array('view contacts content'),
+    );
+
+    $items['contacts/ajax/listing'] = array(
+        'title' => t('Contacts'),
+        'page callback' => 'cms_contacts_list_ajax',
+        'access arguments' => array('view contacts content'),
+    );
+
+    $items['contacts/%cms_contacts'] = array(
+        'title' => t('Contact view'),
+        'page arguments' => array(1),
+        'page callback' => 'cms_contacts_view_contact',
+        'access arguments' => array('view contacts content'),
+    );
+
+    $items['contacts/%cms_contacts/edit'] = array(
+        'title' => 'Edit Contact',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('cms_contacts_form_edit_contact', 1),
+        'access arguments' => array('edit any contacts content'),
+    );
+
+    $items['contacts/%cms_contacts/delete'] = array(
+        'title' => 'Delete Contact',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('cms_contacts_form_delete_contact', 1),
+        'access arguments' => array('delete any contacts content'),
+    );
+
+    $items['contacts/add'] = array(
+        'title' => 'Add Contact',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('cms_contacts_form_edit_contact'),
+        'access arguments' => array('create contacts content'),
+    );
+
+    $items['contacts/item_list/%cms_contacts'] = array(
+        'title' => t('Contacts'),
+        'page callback' => 'cms_contacts_get_item_list_contact',
+        'page arguments' => array(2),
+        'access arguments' => array(CONTACT_VIEW_PERMISSION_FE),
+    );
+
+    $items['contacts/ajax/item_summary/%cms_contacts'] = array(
+        'title' => t('Contacts'),
+        'page callback' => 'cms_contacts_ajax_get_contact_summary',
+        'page arguments' => array(3),
+        'access arguments' => array('view contacts content'),
+    );
+
+    $items['contacts/instrument_lists/add'] = array(
+        'title' => 'Add List',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('cms_contacts_form_add_instrument_lists'),
+        'access arguments' => array('create contacts content'),
+    );
+
+    return $items;
+}
+
+
+/**
+ * Implements hook_flush_caches().
+ */
+function cms_contacts_flush_caches() {
+    return array('cache_cms_contacts');
+}
+
+/**
+ * Function that is called when %cms_contacts is in menu item
+ * the result is passed to callback function from menu item
+ * @param $uid
+ *
+ * @return bool|CMSContact
+ */
+function cms_contacts_load($uid) {
+
+    $contact = &drupal_static(__FUNCTION__);
+    if (empty($contact)) {
+        $ldap = CMSContactsLDAP::get_instance();
+        $filter = "(&(objectClass=cmsContact)(uid=$uid))";
+
+        $contact = $ldap->ldap_search_cms($filter);
+
+        if (!empty($contact)) {
+            $contact = new CMSContact($contact[0]);
+            $contact->clean_contact_array();
+            $contact->process_instruments_data();
+            return $contact;
+        } else {
+            return FALSE;
+        }
+    } else {
+        return $contact;
+    }
+}
+
+/**
+ * Ajax callback for contact summary
+ * return a html textarea with contact summary to be added in modal
+ * @param $contact
+ */
+function cms_contacts_ajax_get_contact_summary($contact) {
+    if (!empty($contact)) {
+        $module_path = drupal_get_path('module', 'cms_contacts');
+        $return['contact_textarea'] = array(
+            '#type' => 'markup',
+            '#markup' => theme_render_template($module_path .'/templates/contact_summary.tpl.php', array('contact' => $contact)),
+        );
+        print drupal_render($return);
+        exit();
+    }
+}
+
+/**
+ * Ajax callback for contact list
+ * return a html table to be added in modal
+ * @param $contact
+ */
+function cms_contacts_get_item_list_contact($contact) {
+
+    $rows = array();
+    if (!empty($contact)) {
+        $rows []= array(
+            array('data' => t('Name'), 'header' => TRUE),
+            array('data' => $contact->first_name .' ' . $contact->last_name),
+        );
+        foreach(CMSContact::$item_list_fields as $field_key => $label) {
+            if (!empty($contact->{$field_key}) || !empty($contact->clean_contact[$field_key])) {
+                $data = (!empty($contact->{$field_key})) ? $contact->{$field_key} : $contact->clean_contact[$field_key];
+                $rows [] = array(
+                    array('data' => t($label), 'header' => TRUE),
+                    array('data' => $data),
+                );
+            }
+        }
+
+        //add instruments statuses
+        $instruments = CMSContactsUIHelper::render_contact_instrument_data($contact->instruments_data)['#rows'];
+        $row = array();
+        foreach ($instruments as $instrument){
+            if (!empty($instrument[1])) {
+                $row []= $instrument[1];
+            }
+        }
+        $rows [] = array(
+            array('data' => t('Status'), 'header' => TRUE),
+            array('data' => implode(', ', $row)),
+        );
+
+    } else {
+        $rows []= array(t('Contact not found'));
+    }
+    $return['table'] = array(
+        '#theme' => 'table',
+        '#header' => array(),
+        '#rows' => $rows,
+        '#attributes' => array('class'=> array('table', 'table-bordered')),
+    );
+
+    if (user_access(EDIT_CONTACT_PERMISSION)) {
+        $return['btn_edit'] = array(
+            '#theme' => 'link',
+            '#text' => t('Edit'),
+            '#path' => $contact->edit_link,
+            '#options' => array(
+                'attributes' => array(
+                    'class' => array('btn', 'btn-primary'),
+                    'target' => '_blank',
+                ),
+                'html' => FALSE,
+            ),
+            '#prefix' => '<div class="btn-toolbar">'
+        );
+        $return['btn_view'] = array(
+            '#theme' => 'link',
+            '#text' => t('View'),
+            '#path' => $contact->view_link,
+            '#options' => array(
+                'attributes' => array(
+                    'class' => array('btn', 'btn-primary'),
+                    'target' => '_blank',
+                ),
+                'html' => FALSE,
+            ),
+            '#sufix' => '</div>'
+        );
+    }
+
+    print drupal_render($return);
+    exit();
+
+}
+
+/**
+ * Implement hook_node_view()
+ */
+function cms_contacts_node_view($node, $view_mode, $langcode) {
+    // Add lists in nodes where needed
+    switch ($node->type) {
+        case 'country':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                if (user_access(CONTACT_VIEW_PERMISSION_FE)) {
+                    //Add NFP list
+                    $langcode = field_language('node', $node, 'field_country_iso2');
+                    $contacts = CMSContactBase::get_country_nfp($node->field_country_iso2[$langcode][0]['value']);
+                    $node->nfp_contacts = CMSContactsUIHelper::render_contact_list($contacts, 'National Focal Points');
+                }
+        }
+        break;
+        case 'project':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                if (user_access(CONTACT_VIEW_PERMISSION_FE)) {
+                    //Add Contacts list
+                    if (!empty($node->field_project_agency_contact[LANGUAGE_NONE])) {
+                        $uids = array();
+                        foreach($node->field_project_agency_contact[LANGUAGE_NONE] as $value) {
+                            $uids []= $value['value'];
+                        }
+                        $contacts = cms_contacts_load_multiple($uids);
+                        $node->impl_ag_contacts = CMSContactsUIHelper::render_contact_list($contacts, 'Implementing Agency Contacts');
+                    }
+                }
+            }
+            break;
+        case 'species':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                if (user_access(CONTACT_VIEW_PERMISSION_FE)) {
+                    //Add Experts list
+                    if (!empty($node->field_species_experts[LANGUAGE_NONE])) {
+                        $uids = array();
+                        foreach($node->field_species_experts[LANGUAGE_NONE] as $value) {
+                            $uids []= $value['value'];
+                        }
+                        $contacts = cms_contacts_load_multiple($uids);
+                        $node->experts_contacts = CMSContactsUIHelper::render_contact_list($contacts, 'Experts');
+                    }
+                }
+            }
+            break;
+    }
+}

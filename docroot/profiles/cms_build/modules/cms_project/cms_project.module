@@ -1,0 +1,705 @@
+<?php
+/**
+ * @file
+ * Code for the Project feature.
+ */
+
+include_once 'cms_project.features.inc';
+
+define('ROLE_MANAGE_PROJECT', 'manage project');
+define('VOC_PROJECT_TAXONOMIC_GROUP', 'project_taxonomic_group');
+define('VOC_PROJECT_TYPE', 'project_type');
+define('FILTER_PROJECT_INSTRUMENT_FILTER', 'field_instrument_target_id');
+
+/**
+ * Implements hook_menu_local_tasks_alter();
+ *
+ * Show 'Create project' button on Species listing view
+ *
+ * @param   array   $data
+ * @param   array   $router_item
+ * @param   string  $root_path
+ */
+function cms_project_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+    switch($root_path){
+        case CMSProject::$bundle . '/listing' :
+            $item = menu_get_item('node/add/' . CMSProject::$bundle);
+            $item['title'] = t('Create ' . CMSProject::$bundle);
+            if ($item['access']) {
+                $data['actions']['output'][] = array(
+                    '#theme' => 'menu_local_action',
+                    '#link' => $item,
+                );
+            }
+            break;
+    }
+}
+
+function cms_project_views_default_views_alter(&$views) {
+    if (isset($views['project_admin'])) {
+        $handler = &$views['project_admin'];
+        $roles = user_roles();
+        $rids = array();
+        foreach($roles as $rid => $role) {
+            if($role == 'authenticated user') {
+                $rids[$rid] = $rid;
+            }
+        }
+        $handler->display['default']->display_options['access']['type'] = 'role';
+        $handler->display['default']->display_options['access']['role'] = array_filter($rids);
+    }
+    return $views;
+}
+
+function cms_project_node_view($node, $view_mode, $langcode) {
+    if(function_exists('cms_manage_node_access') && $node->type == CMSProject::$bundle) {
+        cms_manage_node_access($node);
+    }
+    switch ($node->type) {
+        case 'country':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                if (is_theme_admin()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'projects', 'project_admin', 'country_projects');
+                } else if (is_theme_frontend()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'projects', 'front_end_projects', 'country_projects');
+                }
+            }
+            break;
+        case 'document':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                if (is_theme_admin()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'projects', 'project_admin', 'document_projects');
+                } else if (is_theme_frontend()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'projects', 'front_end_projects', 'document_projects');
+                }
+            }
+            break;
+        case 'legal_instrument':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                if (is_theme_admin()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'projects', 'project_admin', 'instrument_projects');
+                } else if (is_theme_frontend()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'projects', 'front_end_projects', 'instrument_projects');
+                }
+            }
+            break;
+        case 'meeting':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                if (is_theme_admin()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'projects', 'project_admin', 'meeting_projects');
+                } else if (is_theme_frontend()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'projects', 'front_end_projects', 'meeting_projects');
+                }
+            }
+            break;
+        case 'project':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                $node->contacts = array();
+                /*if (isset($node->field_project_agency_contact) && (!empty($node->field_project_agency_contact))) {
+                    $agent = CMSContacts::agent();
+                    foreach ($node->field_project_agency_contact[$node->language] as $contact) {
+                        $contact = $agent->search_user($contact['value']);
+                        $node->contacts[] = $contact;
+                    }
+                }*/
+            }
+            break;
+        case 'publication':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                if (is_theme_admin()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'projects', 'project_admin', 'publication_projects');
+                } else if (is_theme_frontend()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'projects', 'front_end_projects', 'publication_projects');
+                }
+            }
+            break;
+        case 'species':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                if (is_theme_admin()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'projects', 'project_admin', 'species_projects');
+                } else if (is_theme_frontend()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'projects', 'front_end_projects', 'species_projects');
+                }
+            }
+            break;
+    }
+}
+
+/**
+ * Implements hook_form_alter();
+ */
+function cms_project_form_alter(&$form, &$form_state, $form_id) {
+    switch ($form_id) {
+        case 'project_node_form' :
+            $node =  $form['#node'];
+            $default_value = array();
+            $langcode = field_language('node', $node, 'field_project_agency_contact');
+            if (property_exists($node, 'field_project_agency_contact') && array_key_exists($langcode, $node->field_project_agency_contact)) {
+                foreach ($node->field_project_agency_contact[$langcode] as $index => $contact) {
+                    $default_value[] = $contact['value'];
+                }
+            }
+            $contacts_options = CMSContactBase::get_contacts_as_options();
+            asort($contacts_options);
+
+            $form['field_project_agency_contact'] = array(
+                '#type' => 'select',
+                '#title' => t('Implementing Agency contact'),
+                '#multiple' => TRUE,
+                '#options' => $contacts_options,
+                '#default_value' => $default_value,
+            );
+            /**
+             * Callback function to manipulate field_project_agency_contact data before DB insert
+             */
+            $form['#submit'][] = 'cms_project_alter_contact_submit';
+
+            $breadcrumb = array();
+            $breadcrumb[] = l(t('Home'), '<front>');
+            $breadcrumb[] = l(t('Projects'), 'project/listing');
+            if (isset($form['nid']) && (is_numeric($form['nid']['#value']))) {
+                $breadcrumb[] = l($form['#node']->title, 'node/' . $form['#node']->nid);
+            }
+
+            drupal_set_breadcrumb($breadcrumb);
+            break;
+        case 'views_exposed_form':
+            break;
+        case 'node_delete_confirm':
+            if ($form['#node']->type == 'project') {
+                $form['#submit'][] = '_project_redirect_after_delete';
+            }
+            break;
+    }
+
+    return $form;
+}
+
+function cms_project_alter_contact_submit(&$form, &$form_state) {
+    $values = $form_state['values'];
+    $language = $values['language'];
+    if (array_key_exists('field_project_agency_contact', $values)) {
+        if (!empty($values['field_project_agency_contact'])) {
+            $contacts = $values['field_project_agency_contact'];
+            $count = 0;
+            foreach ($contacts as $uid => $contact) {
+                $form_state['values']['field_project_agency_contact'][$language][$count]['value'] = $uid;
+                $count += 1;
+            }
+        }else {
+            $form_state['values']['field_project_agency_contact'][$language] = array();
+        }
+    }else {
+        $form_state['values']['field_project_agency_contact'][$language] = array();
+    }
+}
+
+function _project_redirect_after_delete(&$form, &$form_state) {
+    $form_state['redirect'] = 'project/listing';
+}
+
+/**
+ * Implements hook_field_extra_fields()
+ *
+ * @return mixed Extra fields information
+ */
+function cms_project_field_extra_fields() {
+    $extra['node'][CMSProject::$bundle_country_module]['display'] = array(
+        'projects' => array(
+            'label' => t('Projects'),
+            'description' => t('Injects into country content type the list of projects for the country'),
+            'weight' => 100,
+        ),
+    );
+    $extra['node'][CMSProject::$bundle_instrument_module]['display'] = array(
+        'projects' => array(
+            'label' => t('Projects'),
+            'description' => t('Injects into country content type the list of projects for the country'),
+            'weight' => 100,
+        ),
+    );
+    return $extra;
+}
+
+
+/**
+ * Implementes hook_theme($existing, $type, $theme, $path)
+ */
+function cms_project_theme($existing, $type, $theme, $path) {
+    $base = array(
+        'file' => 'theme.inc',
+        'path' => $path . '/theme',
+    );
+    return array(
+        'table__projects_template_country' => $base + array(
+                'variables' => array(
+                    'header' => NULL,
+                    'rows' => NULL,
+                    'attributes' => array(),
+                    'caption' => NULL,
+                    'colgroups' => array(),
+                    'sticky' => TRUE,
+                    'empty' => '',
+                    'settings' => array()
+                )
+            ),
+        'table__projects_template_instrument' => $base + array(
+                'variables' => array(
+                    'header' => NULL,
+                    'rows' => NULL,
+                    'attributes' => array(),
+                    'caption' => NULL,
+                    'colgroups' => array(),
+                    'sticky' => TRUE,
+                    'empty' => '',
+                    'settings' => array()
+                )
+            )
+    );
+}
+
+/**
+ * This class contains various utility functions related to publication
+ * module that can be reused in other parts of the project.
+ */
+class CMSProject extends CMSBase {
+
+    public static $bundle = 'project';
+    static $bundle_country_module = 'country';
+    static $field_projects_country = 'projects';
+    static $bundle_instrument_module = 'legal_instrument';
+    static $field_projects_instrument = 'projects';
+    static $false_related_fields = array(
+        'field_project_nat_plan' => 'document',
+        'field_project_national_reports' => 'document',
+    );
+
+    static $related_fields = array(
+        'species' => 'field_project_species',
+        'document' => 'field_project_document',
+        'meeting' => 'field_project_meeting',
+        'publication' => 'field_project_publication',
+    );
+
+    static $taxonomic_fields = array(
+        array(
+            'field_name' => 'field_threats',
+            'vocabulary' => VOC_THREATS,
+        ),
+        array(
+            'field_name' => 'field_project_funds_req_amount_c',
+            'vocabulary' => VOC_CURRENCY,
+        ),
+        array(
+            'field_name' => 'field_project_taxonomic_group',
+            'vocabulary' => VOC_PROJECT_TAXONOMIC_GROUP,
+        ),
+        array(
+            'field_name' => 'field_region',
+            'vocabulary' => VOC_REGION,
+        ),
+    );
+
+    /**
+     * Create a new CMS Project node instance.
+     *
+     * @param string $title Project title
+     * @param bool $save If TRUE, object is saved into database
+     * @return stdClass The node object initialized
+     */
+    static function node_create($title, $save = TRUE) {
+        return self::drupal_node_create($title, 'project', $save);
+    }
+
+
+    /**
+     * Set the legal instruments for a node
+     *
+     * @param stdClass $node Reference to the node to update
+     * @param array $data Data to get information from (ex. JSON). Must contain key field_instrument
+     * @param type $cache_instruments (Optional) Pre-cached data with Legal instruments as array 'name' => nid.
+     */
+    public static function set_instruments(&$node, $data, $cache_instruments = array()) {
+        $node->field_instrument[$node->language] = array();
+        if(!empty($data['field_instrument'])) {
+            if(empty($cache_instruments)) {
+                $cache_instruments = CMSLegalInstrument::get_mapped_instruments();
+            }
+
+            $instruments = array();
+            foreach($data['field_instrument'] as $instrument_name) {
+                if(array_key_exists($instrument_name, $cache_instruments)) {
+                    $instruments[] = $cache_instruments[$instrument_name];
+                } else {
+                    CMSUtils::println('CMSProject::set_instruments(): Could not find instrument %s', $instrument_name);
+                }
+            }
+            CMSUtils::set_node_list_value($node, 'field_instrument', $instruments, 'target_id');
+        }
+    }
+
+
+    /**
+     * Retrieve the instrument names from a node
+     *
+     * @param stdClass $node Drupal project node
+     * @param array $instrument_cache (Optional) Instrument cache (id | name) to avoid query for each call
+     * @return array Array of strings with instrument names
+     */
+    public static function get_instruments($node, $instrument_cache = array()) {
+        $ret = array();
+        $instruments = self::get_field_list_target_id($node, 'field_instrument');
+        if(!empty($instruments)) {
+            if(empty($instrument_cache)) {
+                $instrument_cache = CMSLegalInstrument::get_mapped_instruments($title_as_key = FALSE);
+            }
+            foreach($instruments as $id) {
+                if(array_key_exists($id, $instrument_cache)) {
+                    $ret[] = $instrument_cache[$id];
+                } else {
+                    CMSUtils::println("CMSProject::get_instruments(): Instrument with id: %d does not exist!", $id);
+                }
+            }
+        }
+        return $ret;
+    }
+
+
+    /**
+     * Create a new project from a JSON array.
+     * Data may come from JSON or other sources, encoded as array:
+     * {
+     *      'title' => 'test',
+     *      ...
+     * }
+     *
+     * @param array $data Array with object properties
+     * @param boolean $save (Optional) Save the node into database
+     * @return object Unsaved node
+     * @see CMSProject::set_instruments
+     */
+    public static function node_from_array($data, $files_path_prefix = '') {
+        $ret = NULL;
+        if(empty($data['title'])) {
+            CMSUtils::println('CMSProject::node_from_array(): Cannot import project without title');
+            return $ret;
+        }
+
+        $node = CMSProject::node_create($data['title']);
+        if (!empty($data['uuid'])) {
+            $node->uuid = $data['uuid'];
+        }
+        if (isset($data['status']) && in_array($data['status'],array(0,1))) {
+            $node->status = $data['status'];
+        }
+        //self::set_field_single_value($node, 'body', $data);
+        self::set_field_body($node, $data);
+        self::set_field_single_value($node, 'field_project_contract_type', $data);
+        self::set_field_single_value($node, 'field_project_summary', $data);
+        self::set_field_single_value($node, 'field_project_impl_agency', $data);
+        self::set_field_single_value($node, 'field_project_folder', $data);
+        self::set_field_single_value($node, 'field_project_id', $data);
+        if (array_key_exists('field_project_collab_agency', $data) && !empty($data['field_project_collab_agency'])) {
+            if (is_string($data['field_project_collab_agency'])) {
+                $value['field_project_collab_agency'] = array(trim($data['field_project_collab_agency']));
+            }else {
+                $value['field_project_collab_agency'] = $data['field_project_collab_agency'];
+            }
+
+            self::set_field_list_value($node, 'field_project_collab_agency', $value);
+        }
+        self::set_field_single_value($node, 'field_project_encumbrance_number', $data);
+        self::set_field_single_value($node, 'field_project_contract_number', $data);
+        self::set_field_single_value($node, 'field_project_start_date', $data);
+        self::set_field_single_value($node, 'field_project_end_date', $data);
+        self::set_field_single_value($node, 'field_project_signed_date', $data);
+        self::set_field_single_value($node, 'field_project_closed_date', $data);
+        if (array_key_exists('field_instrument', $data) && !empty($data['field_instrument'])) {
+            if (is_string($data['field_instrument'])) {
+                $instrument['field_instrument'] = array(trim($data['field_instrument']));
+            }else {
+                $instrument['field_instrument'] = $data['field_instrument'];
+            }
+
+            self::set_field_instruments($node, 'field_instrument', $instrument);
+        }
+
+        self::set_field_countries($node, 'field_country', $data);
+
+        self::set_content_taxonomic_fields($node, CMSProject::$taxonomic_fields, $data);
+        self::set_field_single_value($node, 'field_project_conservation', $data);
+        self::set_field_single_value($node, 'field_project_ia_no_id', $data);
+        self::set_field_single_value($node, 'field_project_obmo', $data);
+        self::set_field_single_value($node, 'field_project_final_report', $data);
+        self::set_field_single_value($node, 'field_project_responsible_unit', $data);
+        if (array_key_exists('field_project_objective', $data) && !empty($data['field_project_objective'])) {
+            if (is_string($data['field_project_objective'])) {
+                $objective['field_project_objective'] = array($data['field_project_objective']);
+            }else {
+                $objective['field_project_objective'] = $data['field_project_objective'];
+            }
+
+            self::set_field_list_value($node, 'field_project_objective', $objective);
+        }
+
+        self::set_field_single_value($node, 'field_project_project_id', $data);
+        self::set_field_single_value($node, 'field_project_status', $data);
+        self::set_field_single_value($node, 'field_project_funds_req_amount', $data);
+        self::set_field_single_value($node, 'field_project_cofunding', $data);
+        self::set_field_boolean($node, 'field_project_final_report', $data);
+        self::set_field_boolean($node, 'field_project_tech_report', $data);
+        self::set_field_list_value($node, 'field_project_agency_contact', $data);
+        self::set_field_single_value($node, 'field_project_contributor', $data);
+        self::set_field_list_value($node, 'field_project_appendix', $data);
+        self::set_field_single_value($node, 'field_project_sgp', $data);
+        self::set_field_single_value($node, 'field_project_comments', $data);
+
+        if(!empty($data['field_project_activity'])) {
+            foreach ($data['field_project_activity'] as $index => $activity) {
+                $c = array();
+                $c['field_project_activity_desc'][$node->language][0]['value'] = $activity['field_project_activity_desc'];
+                $c['field_project_activity_start'][$node->language][0]['value'] = $activity['field_project_activity_start'];
+                $c['field_project_activity_end'][$node->language][0]['value'] = $activity['field_project_activity_end'];
+                $c['field_project_activity_resp'][$node->language][0]['value'] = $activity['field_project_activity_resp'];
+                $c['field_project_activity_output'][$node->language][0]['value'] = $activity['field_project_activity_output'];
+                $entity = entity_create('field_collection_item', $c);
+                $entity->field_name = 'field_project_activity';
+                $entity->setHostEntity('node', $node);
+            }
+        }
+
+        if (!empty($data['field_project_bac'])) {
+            foreach ($data['field_project_bac'] as $index => $bac) {
+                $c = array();
+                $c['field_project_bac_ou'][$node->language][0]['value'] = $bac['field_project_bac_ou'];
+
+                if (isset($bac['field_project_bac_year']) && !empty($bac['field_project_bac_year'])) {
+                    $c['field_project_bac_year'][$node->language][0]['value'] = $bac['field_project_bac_year'];
+                }
+
+                $c['field_project_bac_object_code'][$node->language][0]['value'] = $bac['field_project_bac_object_code'];
+                $c['field_project_bac_programme'][$node->language][0]['value'] = $bac['field_project_bac_programme'];
+                $c['field_project_bac_project_number'][$node->language][0]['value'] = $bac['field_project_bac_project_number'];
+                $c['field_project_bac_fund'][$node->language][0]['value'] = trim(strtolower($bac['field_project_bac_fund']));
+                $entity = entity_create('field_collection_item', $c);
+                $entity->field_name = 'field_project_bac';
+                $entity->setHostEntity('node', $node);
+            }
+        }
+
+        if (!empty($data['field_project_payments'])) {
+            foreach ($data['field_project_payments'] as $index => $bac) {
+                $c = array();
+                $c['field_project_payment_amount'][$node->language][0]['value'] = isset($bac['field_project_payment_amount']) ? $bac['field_project_payment_amount'] : '';
+                $c['field_project_payment_date'][$node->language][0]['value'] = isset($bac['field_project_payment_date']) ? $bac['field_project_payment_date'] : NULL;
+                $c['field_project_payment_comments'][$node->language][0]['value'] = isset($bac['field_project_payment_comments']) ? $bac['field_project_payment_comments'] : '';
+                $c['field_project_payment_pyin'][$node->language][0]['value'] = isset($bac['field_project_payment_pyin']) ? $bac['field_project_payment_pyin'] : '';
+                $entity = entity_create('field_collection_item', $c);
+                $entity->field_name = 'field_project_payments';
+                $entity->setHostEntity('node', $node);
+            }
+        }
+
+        self::import_field_files($node, 'field_project_file', $data, self::$bundle, $files_path_prefix, 'node');
+        self::import_field_files($node, 'field_project_images', $data, self::$bundle, $files_path_prefix, 'node');
+
+        foreach(self::$related_fields as $field_name) {
+            self::set_entity_reference_by_uuid($node, $field_name, $data);
+        }
+        foreach(self::$false_related_fields as $field_name => $type) {
+            self::set_entity_reference_by_uuid($node, $field_name, $data);
+        }
+
+        node_save($node);
+
+        return $node;
+    }
+
+    /**
+     * Build an array from the project node to be saved as JSON string
+     *
+     * @param stdClass $node Drupal project node
+     * @param string $export_base_dir Path to directory where attached files (fields field_publication_attachment and field_publication_image) will be exported
+     * @return mixed Dictionary with publication fields or FALSE in case of an error
+     */
+    public static function node_to_array($node, $export_base_dir) {
+        if(empty($node->title)) {
+            CMSUtils::println("CMSProject::to_array() Cannot export project without title. Aborting ...");
+            return FALSE;
+        }
+        $ret = array(
+            'title' => $node->title,
+            'status' => $node->status,
+            'uuid' => CMSUtils::get_node_uuid($node)
+        );
+        $ret['body'] = self::get_field_body($node);
+
+        self::get_field_single_value($node, 'field_project_folder', $ret);
+        self::get_field_single_value($node, 'field_project_summary', $ret);
+        self::get_field_single_value($node, 'field_project_conservation', $ret);
+        self::get_field_single_value($node, 'field_project_impl_agency', $ret);
+        self::get_field_single_value($node, 'field_project_ia_no_id', $ret);
+        self::get_field_single_value($node, 'field_project_start_date', $ret);
+        self::get_field_single_value($node, 'field_project_end_date', $ret);
+        self::get_field_single_value($node, 'field_project_id', $ret);
+        self::get_field_single_value($node, 'field_project_status', $ret);
+        self::get_field_single_value($node, 'field_project_signed_date', $ret);
+        self::get_field_single_value($node, 'field_project_closed_date', $ret);
+        self::get_field_single_value($node, 'field_project_contract_number', $ret);
+        self::get_field_single_value($node, 'field_project_contract_type', $ret);
+        self::get_field_single_value($node, 'field_project_encumbrance_number', $ret);
+        self::get_field_single_value($node, 'field_project_obmo', $ret);
+        self::get_field_single_value($node, 'field_project_responsible_unit', $ret);
+        self::get_field_single_value($node, 'field_project_comments', $ret);
+
+        self::get_field_list_value($node, 'field_project_collab_agency', $ret);
+        self::get_field_list_value($node, 'field_project_agency_contact', $ret);
+        self::get_field_list_value($node, 'field_project_appendix', $ret);
+        self::get_field_list_value($node, 'field_project_objective', $ret);
+
+        self::get_field_boolean($node, 'field_project_final_report', $ret);
+        self::get_field_boolean($node, 'field_project_tech_report', $ret);
+        self::get_field_boolean($node, 'field_project_sgp', $ret);
+
+        $ret['field_region'] = array();
+        $terms = self::get_field_taxonomic_terms($node, 'field_region', VOC_REGION);
+        foreach($terms as $term) {
+            $ret['field_region'][] = $term->name;
+        }
+
+        $ret['field_country'] = self::get_field_countries_codes($node, 'field_country');
+
+        self::get_field_single_value($node, 'field_project_funds_req_amount', $ret);
+        $ret['field_project_funds_req_amount_c'] = self::get_field_taxonomic_term_name($node, 'field_project_funds_req_amount_c', VOC_CURRENCY);
+
+        $instruments = self::get_field_instruments($node, 'field_instrument');
+        $ret['field_instrument'] = array();
+        foreach($instruments as $instrument) {
+            $ret['field_instrument'][] = $instrument->title;
+        }
+
+        $ret['field_project_cofunding'] = self::get_field_single_value($node, 'field_project_cofunding');
+
+        $ret['field_project_taxonomic_group'] = array();
+        $terms = self::get_field_taxonomic_terms($node, 'field_project_taxonomic_group', VOC_PROJECT_TAXONOMIC_GROUP);
+        foreach($terms as $term) {
+            $ret['field_project_taxonomic_group'][] = $term->name;
+        }
+
+        $ret['field_threats'] = array();
+        $terms = self::get_field_taxonomic_terms($node, 'field_threats', VOC_THREATS);
+        foreach($terms as $term) {
+            $ret['field_threats'][] = $term->name;
+        }
+
+        $ret['field_project_file'] = self::export_field_files($node, 'field_project_file', $export_base_dir);
+        $ret['field_project_images'] = self::export_field_files($node, 'field_project_images', $export_base_dir);
+
+        $ret['field_project_activity'] = array();
+        $rows = self::get_field_collection_items($node, 'field_project_activity');
+        if(!empty($rows)) {
+            foreach($rows as $row) {
+                $item = array();
+                self::get_field_single_value($row, 'field_project_activity_desc', $item);
+                self::get_field_single_value($row, 'field_project_activity_start', $item);
+                self::get_field_single_value($row, 'field_project_activity_end', $item);
+                self::get_field_single_value($row, 'field_project_activity_resp', $item);
+                self::get_field_single_value($row, 'field_project_activity_output', $item);
+                $ret['field_project_activity'][] = $item;
+            }
+        }
+
+        $ret['field_project_payments'] = array();
+        $rows = self::get_field_collection_items($node, 'field_project_payments');
+        if(!empty($rows)) {
+            foreach($rows as $row) {
+                $item = array();
+                self::get_field_single_value($row, 'field_project_payment_amount', $item);
+                self::get_field_single_value($row, 'field_project_payment_date', $item);
+                self::get_field_single_value($row, 'field_project_payment_comments', $item);
+                self::get_field_single_value($row, 'field_project_payment_pyin', $item);
+                $ret['field_project_payments'][] = $item;
+            }
+        }
+
+        $ret['field_project_bac'] = array();
+        $rows = self::get_field_collection_items($node, 'field_project_bac');
+        if(!empty($rows)) {
+            foreach($rows as $row) {
+                $item = array();
+                self::get_field_single_value($row, 'field_project_bac_year', $item);
+                self::get_field_single_value($row, 'field_project_bac_fund', $item);
+                self::get_field_single_value($row, 'field_project_bac_ou', $item);
+                self::get_field_single_value($row, 'field_project_bac_project_number', $item);
+                self::get_field_single_value($row, 'field_project_bac_programme', $item);
+                self::get_field_single_value($row, 'field_project_bac_object_code', $item);
+                $ret['field_project_bac'][] = $item;
+            }
+        }
+
+        foreach(self::$related_fields as $field_name) {
+            $ret[$field_name] = self::get_entity_reference_by_uuid($node, $field_name);
+        }
+        foreach(self::$false_related_fields as $field_name => $type) {
+            $ret[$field_name] = self::get_entity_reference_by_uuid($node, $field_name);
+        }
+
+        return $ret;
+    }
+
+
+    /**
+     * Retrieve the projects which have target country set to a specified country
+     * @param $id_country integer Country to filter by
+     * @return mixed Array of project nodes
+     */
+    public static function get_projects_for_country($id_country) {
+        $ret = array();
+        if(!is_numeric($id_country)) {
+            watchdog('project', 'get_projects_for_country - parameter is not an integer, returning empty result');
+            return $ret;
+        }
+        $query = new EntityFieldQuery();
+        $query = $query
+            ->entityCondition('entity_type', 'node')
+            ->propertyCondition('type', self::$bundle)
+            ->propertyCondition('status', NODE_PUBLISHED)
+            ->fieldCondition('field_country', 'target_id', $id_country, '=')
+            ->execute();
+        if(!empty($query['node'])) {
+            $ret = node_load_multiple(array_keys($query['node']));
+        }
+        return $ret;
+    }
+
+    public static function get_projects_for_instrument($id_instrument) {
+        $ret = array();
+        if(!is_numeric($id_instrument)) {
+            watchdog('project', 'get_projects_for_instrument() - parameter is not an integer, returning empty result');
+            return $ret;
+        }
+        $query = new EntityFieldQuery();
+        $query = $query
+            ->entityCondition('entity_type', 'node')
+            ->propertyCondition('type', self::$bundle)
+            ->propertyCondition('status', NODE_PUBLISHED)
+            ->fieldCondition('field_instrument', 'target_id', $id_instrument, '=')
+            ->execute();
+        if(!empty($query['node'])) {
+            $ret = node_load_multiple(array_keys($query['node']));
+        }
+        return $ret;
+    }
+}

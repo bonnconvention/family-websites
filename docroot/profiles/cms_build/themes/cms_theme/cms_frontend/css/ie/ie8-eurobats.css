@@ -1,0 +1,13 @@
+/* FIXES for Internet Explorer 8,
+    for EUROBATS colour theme */
+
+
+/* NEWS slideshow, skin Default */
+.view-news-slideshow .views-field-title,
+.view-news-slideshow .views-field-title-field {
+background: url("../../images/eurobats-slideshow-title-bkg.png") 0% 9% repeat-x;
+}
+
+.view-news-slideshow .jcarousel-skin-default .jcarousel-navigation {
+background: url("../../images/eurobats-slideshow-controls-bkg.png") repeat-x;
+}

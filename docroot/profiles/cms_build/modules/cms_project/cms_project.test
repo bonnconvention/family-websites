@@ -1,0 +1,665 @@
+<?php
+
+/**
+ * SimpleTest cases for CMS project module
+ * Verify the functionality of CMS project module
+ */
+class CMSProjectWebTestCase extends CMSWebTestCase {
+
+    static function getInfo() {
+        return array(
+            'name' => 'CMS Project',
+            'description' => 'Verify functionality of CMS Project',
+            'group' => 'CMS Tests'
+        );
+    }
+
+
+    function setUp() {
+        parent::setUp('country', 'legal_instrument', 'project', 'date_popup', 'species', 'document',
+            'meeting', 'publication', 'national_plan', 'uuid');
+        self::$bundle = CMSProject::$bundle;
+    }
+
+    function test_security_role_anonymous() {
+        $node = CMSProject::node_create('test_project');
+
+        $this->try_anonymous_role($node->nid, 'test_project', 'project/listing', 'node/add/project');
+        $this->ensure_access_denied_for_vocabulary(VOC_PROJECT_TAXONOMIC_GROUP, 'anonymous');
+        $this->ensure_access_denied_for_vocabulary(VOC_REGION, 'anonymous');
+        $this->ensure_access_denied_for_vocabulary(VOC_CURRENCY, 'anonymous');
+    }
+
+    function test_security_role_authenticated() {
+        $node = CMSProject::node_create('test_project');
+
+        $this->try_authenticated_role($node->nid, 'test_project', 'project/listing', 'node/add/project');
+        $this->ensure_access_denied_for_vocabulary(VOC_PROJECT_TAXONOMIC_GROUP, self::$role_authenticated);
+        $this->ensure_access_denied_for_vocabulary(VOC_REGION, self::$role_authenticated);
+        $this->ensure_access_denied_for_vocabulary(VOC_CURRENCY, self::$role_authenticated);
+    }
+
+    function test_security_role_manager() {
+        $add = array(
+            'title' => 'test_project'
+        );
+
+        $this->try_manager_role(ROLE_MANAGE_PROJECT, $add, 'project/listing', 'node/add/project');
+        $this->ensure_access_for_vocabulary(VOC_PROJECT_TAXONOMIC_GROUP, ROLE_MANAGE_PROJECT, 1);
+        $this->ensure_access_for_vocabulary(VOC_REGION, ROLE_MANAGE_PROJECT, 2);
+        $this->ensure_access_for_vocabulary(VOC_CURRENCY, ROLE_MANAGE_PROJECT, 3);
+    }
+
+    function test_security_role_administrator() {
+        $add = array(
+            'title' => 'test_project'
+        );
+
+        $this->try_administrator_role($add, 'project/listing', 'node/add/project');
+        $this->ensure_access_for_vocabulary(VOC_PROJECT_TAXONOMIC_GROUP, self::$role_administrator, 1);
+        $this->ensure_access_for_vocabulary(VOC_REGION, self::$role_administrator, 2);
+        $this->ensure_access_for_vocabulary(VOC_CURRENCY, self::$role_administrator, 3);
+    }
+
+    function test_set_instruments() {
+        $node = CMSProject::node_create('test_project');
+        $mou = CMSUtils::vocabulary_get_or_create_term('MOU', VOC_INSTRUMENT_TYPE);
+        $i1 = CMSLegalInstrument::node_create('INSTRUMENT1', 'INSTRUMENT FULL', $mou->tid, '1999-03-23');
+        $i2 = CMSLegalInstrument::node_create('INSTRUMENT2', 'INSTRUMENT FULL', $mou->tid, '1999-03-23');
+        CMSProject::set_instruments($node, array('field_instrument' => array('INSTRUMENT1', 'INSTRUMENT2')));
+        node_save($node);
+        $node = node_load(1);
+        $this->assertEqual($i1->nid, $node->field_instrument[$node->language][0]['target_id']);
+        $this->assertEqual($i2->nid, $node->field_instrument[$node->language][1]['target_id']);
+    }
+
+
+    function test_get_instruments() {
+        $node = CMSProject::node_create('test_project');
+        $mou = CMSUtils::vocabulary_get_or_create_term('MOU', VOC_INSTRUMENT_TYPE);
+        $i1 = CMSLegalInstrument::node_create('INSTRUMENT1', 'INSTRUMENT FULL', $mou->tid, '1999-03-23');
+        $i2 = CMSLegalInstrument::node_create('INSTRUMENT2', 'INSTRUMENT FULL', $mou->tid, '1999-03-23');
+        $node->field_instrument[$node->language][0]['target_id'] = $i1->nid;
+        $node->field_instrument[$node->language][1]['target_id'] = $i2->nid;
+        node_save($node);
+        $node = node_load(1);
+        $items = CMSProject::get_instruments($node);
+        $this->assertEqual(2, count($items));
+        $this->assertEqual(array('INSTRUMENT1', 'INSTRUMENT2'), $items);
+    }
+
+
+    function test_node_to_array() {
+        $node = CMSProject::node_create('test_project');
+        Country::node_create('Romania', 'RO');
+        Country::node_create('France', 'FR');
+        $mou = CMSUtils::vocabulary_get_or_create_term('MOU', VOC_INSTRUMENT_TYPE);
+        CMSLegalInstrument::node_create('INSTRUMENT 1', 'INSTRUMENT FULL', $mou->tid, '1999-03-23');
+        CMSLegalInstrument::node_create('INSTRUMENT 2', 'INSTRUMENT FULL', $mou->tid, '1999-03-23');
+
+        CMSUtils::vocabulary_get_or_create_term('Europe', VOC_REGION);
+        CMSUtils::vocabulary_get_or_create_term('Asia', VOC_REGION);
+        $eur = CMSUtils::vocabulary_get_or_create_term('EUR', VOC_CURRENCY);
+
+        $s1 = CMSSpecies::node_create('species1');
+        $doc1 = CMSDocument::node_create('document1');
+        $m1 = CMSMeeting::node_create('meeting1');
+        $pub1 = CMSPublication::node_create('publication1');
+        $np1 = CMSNationalPlan::node_create('national_plan1');
+
+        CMSBase::set_field_single_value($node, 'field_project_allotment_code', array('field_project_allotment_code' => 'Allotment code'));
+        CMSBase::set_field_single_value($node, 'field_project_folder', array('field_project_folder' => 'Project folder'));
+        CMSBase::set_field_body($node, array('body' => array('value' => 'Project body', 'format' => 'html', 'summary' => '')));
+        CMSBase::set_field_single_value($node, 'field_project_summary', array('field_project_summary' => 'Project summary'));
+        CMSBase::set_field_list_value($node, 'field_project_contributor', array('field_project_contributor' => array('Contributor 1', 'Contributor 2')));
+        CMSBase::set_field_list_value($node, 'field_project_objective', array('field_project_objective' => array('Objective 1', 'Objective 2')));
+        CMSBase::set_field_single_value($node, 'field_project_conservation', array('field_project_conservation' => 'Conservation'));
+        CMSBase::set_field_single_value($node, 'field_project_impl_agency', array('field_project_impl_agency' => 'Implementing agency'));
+        CMSBase::set_field_list_value($node, 'field_project_collab_agency', array('field_project_collab_agency' => array('Agency 1', 'Agency 2')));
+        CMSBase::set_field_single_value($node, 'field_project_start_date', array('field_project_start_date' => '1999-01-01'));
+        CMSBase::set_field_single_value($node, 'field_project_end_date', array('field_project_end_date' => '2011-01-01'));
+        CMSBase::set_field_taxonomic_terms($node, 'field_region', VOC_REGION, array('field_region' => array('Europe', 'Asia')));
+        CMSBase::set_field_countries($node, 'field_country', array('field_country' => array('ro', 'fr')));
+        CMSBase::set_field_instruments($node, 'field_instrument', array('field_instrument' => array('INSTRUMENT 1', 'INSTRUMENT 2')));
+
+        CMSBase::set_field_single_value($node, 'field_project_funds_req_amount', array('field_project_funds_req_amount' => '12345678.89'));
+        CMSBase::set_field_taxonomic_term($node, 'field_project_funds_req_amount_c', VOC_CURRENCY, array('field_project_funds_req_amount_c' => 'EUR'));
+        CMSBase::set_field_single_value($node, 'field_project_cofunding', array('field_project_cofunding' => 'Co-funding'));
+        CMSBase::set_field_boolean($node, 'field_project_endorsement_form', TRUE);
+        CMSBase::set_field_taxonomic_terms($node, 'field_project_taxonomic_group', VOC_PROJECT_TAXONOMIC_GROUP, array('field_project_taxonomic_group' => array('G1', 'G2')));
+
+        // field_project_activity
+        $activities = array(
+            array('desc1', '1999-01-01', '1999-02-02', 'responsibility1', 'output1'),
+            array('desc2', '2000-01-01', '2000-02-02', 'responsibility2', 'output2')
+        );
+        foreach($activities as $act) {
+            $c = array();
+            $c['field_project_activity_desc'][$node->language][0]['value'] = $act[0];
+            $c['field_project_activity_start'][$node->language][0]['value'] = $act[1];
+            $c['field_project_activity_end'][$node->language][0]['value'] = $act[2];
+            $c['field_project_activity_resp'][$node->language][0]['value'] = $act[3];
+            $c['field_project_activity_output'][$node->language][0]['value'] = $act[4];
+            $entity = entity_create('field_collection_item', $c);
+            $entity->field_name = 'field_project_activity';
+            $entity->setHostEntity('node', $node);
+            $entity->save();
+        }
+
+        CMSBase::set_field_boolean($node, 'field_project_final_report', TRUE);
+        CMSBase::set_field_boolean($node, 'field_project_took_place', TRUE);
+        CMSBase::set_field_boolean($node, 'field_project_completed', TRUE);
+        CMSBase::set_field_taxonomic_terms($node, 'field_threats', VOC_THREATS, array('field_threats' => array('T1', 'T2')));
+
+        $f1 = 'file1.txt';
+        $f2 = 'file2.txt';
+        $prefix = '/tmp/test/';
+        CMSUtils::mkdir($prefix);
+        file_put_contents($prefix . $f1, 'TEST 0');
+        file_put_contents($prefix . $f2, 'TEST 1');
+        CMSBase::import_field_files($node, 
+            'field_project_file', 
+            array('field_project_file' => array(
+                    array('path' => $f1, 'description' => 'file1', 'md5' => 'cdbccc49b1e388f9ae06e8259cf47923'),
+                    array('path' => $f2, 'description' => 'file2', 'md5' => 'f676245d2b1ee5589cd0f19401fda420'),
+                )
+            ),
+            'project',
+            $prefix
+        );
+
+        CMSBase::set_field_list_target_id($node, 'field_project_species',
+            array('field_project_species' => array($s1->nid)));
+        CMSBase::set_field_list_target_id($node, 'field_project_document',
+            array('field_project_document' => array($doc1->nid)));
+        CMSBase::set_field_list_target_id($node, 'field_project_meeting',
+            array('field_project_meeting' => array($m1->nid)));
+        CMSBase::set_field_list_target_id($node, 'field_project_publication',
+            array('field_project_publication' => array($pub1->nid)));
+        CMSBase::set_field_list_target_id($node, 'field_project_nat_plan',
+            array('field_project_nat_plan' => array($np1->nid)));
+
+        node_save($node);
+        $node = node_load(1);
+        $arr = CMSProject::node_to_array($node, '/tmp');
+
+        $this->assertEqual('test_project', $arr['title']);
+        $this->assertEqual('Allotment code', $arr['field_project_allotment_code']);
+        $this->assertEqual('Project folder', $arr['field_project_folder']);
+        $this->assertEqual(array('value' => 'Project body', 'format' => 'html', 'summary' => ''), $arr['body']);
+        $this->assertEqual('Project summary', $arr['field_project_summary']);
+        $this->assertEqual(array('Contributor 1', 'Contributor 2'), $arr['field_project_contributor']);
+        $this->assertEqual('Conservation', $arr['field_project_conservation']);
+        $this->assertEqual(array('Objective 1', 'Objective 2'), $arr['field_project_objective']);
+        $this->assertEqual('Implementing agency', $arr['field_project_impl_agency']);
+        $this->assertEqual(array('Agency 1', 'Agency 2'), $arr['field_project_collab_agency']);
+        $this->assertEqual('1999-01-01 00:00:00', $arr['field_project_start_date']);
+        $this->assertEqual('2011-01-01 00:00:00', $arr['field_project_end_date']);
+        $this->assertEqual(array('Europe', 'Asia'), $arr['field_region']);
+        $this->assertEqual(array('RO', 'FR'), $arr['field_country']);
+        $this->assertEqual(array('INSTRUMENT 1', 'INSTRUMENT 2'), $arr['field_instrument']);
+
+        $this->assertEqual('12345678.89', CMSBase::get_field_single_value($node, 'field_project_funds_req_amount'));
+        $this->assertEqual('EUR', CMSBase::get_field_taxonomic_term_name($node, 'field_project_funds_req_amount_c', VOC_CURRENCY));
+
+        $this->assertEqual('Co-funding', $arr['field_project_cofunding']);
+        $this->assertTrue(TRUE, $arr['field_project_endorsement_form']);
+        $this->assertEqual(array('G1', 'G2'), $arr['field_project_taxonomic_group']);
+
+        //field_project_activity
+        $subj_activities = $arr['field_project_activity'];
+        $this->assertEqual(2, count($subj_activities));
+        $this->assertEqual(array(
+            array(
+                'field_project_activity_desc' => $activities[0][0],
+                'field_project_activity_start' => '1999-01-01 00:00:00',
+                'field_project_activity_end' => '1999-02-02 00:00:00',
+                'field_project_activity_resp' => $activities[0][3],
+                'field_project_activity_output' => $activities[0][4],
+            ),
+            array(
+                'field_project_activity_desc' => $activities[1][0],
+                'field_project_activity_start' => '2000-01-01 00:00:00',
+                'field_project_activity_end' => '2000-02-02 00:00:00',
+                'field_project_activity_resp' => $activities[1][3],
+                'field_project_activity_output' => $activities[1][4],
+            ),
+        ), $subj_activities);
+
+        $this->assertTrue(TRUE, $arr['field_project_final_report']);
+        $this->assertTrue(TRUE, $arr['field_project_took_place']);
+        $this->assertTrue(TRUE, $arr['field_project_completed']);
+
+        // field_project_file
+        $files = $arr['field_project_file'];
+        $this->assertEqual(2, count($files));
+        $this->assertEqual(
+            array(
+                array(
+                    'path' => "project/test-project/field_project_file/file1.txt",
+                    'description' => "file1",
+                    'md5' => "cdbccc49b1e388f9ae06e8259cf47923"
+                ),
+                array(
+                    'path' => "project/test-project/field_project_file/file2.txt",
+                    'description' => "file2",
+                    'md5' => "f676245d2b1ee5589cd0f19401fda420"
+                )
+           )
+       , $files);
+
+        $this->assertEqual(array('T1', 'T2'), $arr['field_threats']);
+
+        // Test related content
+        $this->assertEqual(array($s1->uuid), $arr['field_project_species']);
+        $this->assertEqual(array($doc1->uuid), $arr['field_project_document']);
+        $this->assertEqual(array($m1->uuid), $arr['field_project_meeting']);
+        $this->assertEqual(array($pub1->uuid), $arr['field_project_publication']);
+        $this->assertEqual(array($np1->uuid), $arr['field_project_nat_plan']);
+
+        exec('rm -rf /tmp/project');
+    }
+
+
+    function test_node_from_array() {
+        Country::node_create('Romania', 'RO');
+        Country::node_create('France', 'FR');
+        $mou = CMSUtils::vocabulary_get_or_create_term('MOU', VOC_INSTRUMENT_TYPE);
+        CMSLegalInstrument::node_create('INSTRUMENT 1', 'INSTRUMENT FULL', $mou->tid, '1999-03-23');
+        CMSLegalInstrument::node_create('INSTRUMENT 2', 'INSTRUMENT FULL', $mou->tid, '1999-03-23');
+        CMSUtils::vocabulary_get_or_create_term('Europe', VOC_REGION);
+        CMSUtils::vocabulary_get_or_create_term('Asia', VOC_REGION);
+        $eur = CMSUtils::vocabulary_get_or_create_term('EUR', VOC_CURRENCY);
+
+
+        $s1 = CMSSpecies::node_create('species1');
+        $doc1 = CMSDocument::node_create('document1');
+        $m1 = CMSMeeting::node_create('meeting1');
+        $pub1 = CMSPublication::node_create('publication1');
+        $np1 = CMSNationalPlan::node_create('national_plan1');
+
+        $f1 = 'file1.txt';
+        $f2 = 'file2.txt';
+        $prefix = 'test/';
+        CMSUtils::mkdir($prefix);
+        file_put_contents($prefix . $f1, 'TEST 0');
+        file_put_contents($prefix . $f2, 'TEST 1');
+
+        $arr = array(
+            'title' => 'PROJECT-TITLE',
+            'field_project_allotment_code' => 'Allotment code',
+            'field_project_folder' => 'Project folder',
+            'body' => array(
+                'value' => 'Project body',
+                'format' => 'html',
+                'summary' => 'SUMMARY'
+            ),
+            'field_project_summary' => 'Project summary',
+            'field_project_contributor' => array('Contributor 1', 'Contributor 2'),
+            'field_project_objective' => array('Objective 1', 'Objective 2'),
+            'field_project_conservation' => 'Conservation',
+            'field_project_impl_agency' => 'Implementing agency',
+            'field_project_collab_agency' => array('Agency 1', 'Agency 2'),
+            'field_project_start_date' => '1999-01-01 00:00:00',
+            'field_project_end_date' => '2011-01-01 00:00:00',
+            'field_region' => array('Europe', 'Asia'),
+            'field_country' => array('RO', 'FR'),
+            'field_instrument' => array('INSTRUMENT 1', 'INSTRUMENT 2'),
+            'field_project_funds_req_amount' => '12345678.89',
+            'field_project_funds_req_amount_c' => 'EUR',
+            'field_project_cofunding' => 'Co-funding',
+            'field_project_endorsement_form' => TRUE,
+            'field_project_taxonomic_group' => array('G1', 'G2'),
+            'field_project_activity' => array(
+                array(
+                    'field_project_activity_desc' => 'Activity 1',
+                    'field_project_activity_start' => '1999-01-01 00:00:00',
+                    'field_project_activity_end' => '1999-02-02 00:00:00',
+                    'field_project_activity_resp' => 'Responsibility 1',
+                    'field_project_activity_output' => 'Output 1',
+                ),
+                array(
+                    'field_project_activity_desc' => 'Activity 2',
+                    'field_project_activity_start' => '2000-01-01 00:00:00',
+                    'field_project_activity_end' => '2000-02-02 00:00:00',
+                    'field_project_activity_resp' => 'Responsibility 2',
+                    'field_project_activity_output' => 'Output 2',
+                ),
+            ),
+            'field_project_final_report' => TRUE,
+            'field_project_took_place' => TRUE,
+            'field_project_completed' => TRUE,
+            'field_project_file' => array(
+                array(
+                    'path' => "test/file1.txt",
+                    'description' => "file1",
+                    'md5' => "cdbccc49b1e388f9ae06e8259cf47923"
+                ),
+                array(
+                    'path' => "test/file2.txt",
+                    'description' => "file2",
+                    'md5' => "f676245d2b1ee5589cd0f19401fda420"
+                )
+            ),
+            'field_threats' => array('T1', 'T2')
+        );
+        $arr['field_project_species'] = array($s1->uuid);
+        $arr['field_project_document'] = array($doc1->uuid);
+        $arr['field_project_meeting'] = array($m1->uuid);
+        $arr['field_project_publication'] = array($pub1->uuid);
+        $arr['field_project_nat_plan'] = array($np1->uuid);
+
+        $node = CMSProject::node_from_array($arr, '/tmp');
+        $node = node_load($node->nid);
+        $this->assertEqual($arr['title'], $node->title);
+        $this->assertEqual($arr['field_project_allotment_code'], CMSBase::get_field_single_value($node, 'field_project_allotment_code'));
+        $this->assertEqual($arr['field_project_folder'], CMSBase::get_field_single_value($node, 'field_project_folder'));
+        $this->assertEqual($arr['body'], CMSBase::get_field_body($node));
+        $this->assertEqual($arr['field_project_summary'], CMSBase::get_field_single_value($node, 'field_project_summary'));
+        $this->assertEqual($arr['field_project_contributor'], CMSBase::get_field_list_value($node, 'field_project_contributor'));
+        $this->assertEqual($arr['field_project_objective'], CMSBase::get_field_list_value($node, 'field_project_objective'));
+        $this->assertEqual($arr['field_project_conservation'], CMSBase::get_field_single_value($node, 'field_project_conservation'));
+        $this->assertEqual($arr['field_project_impl_agency'], CMSBase::get_field_single_value($node, 'field_project_impl_agency'));
+        $this->assertEqual($arr['field_project_collab_agency'], CMSBase::get_field_list_value($node, 'field_project_collab_agency'));
+        $this->assertEqual($arr['field_project_start_date'], CMSBase::get_field_single_value($node, 'field_project_start_date'));
+        $this->assertEqual($arr['field_project_end_date'], CMSBase::get_field_single_value($node, 'field_project_end_date'));
+        $regions = CMSBase::get_field_taxonomic_terms_names($node, 'field_region', VOC_REGION);
+        $this->assertEqual($arr['field_region'], $regions);
+        $this->assertEqual($arr['field_country'], CMSBase::get_field_countries_codes($node, 'field_country'));
+        $instruments = CMSBase::get_field_instruments_names($node, 'field_instrument');
+        $this->assertEqual($arr['field_instrument'], $instruments);
+        $this->assertEqual('12345678.89', CMSBase::get_field_single_value($node, 'field_project_funds_req_amount'));
+        $this->assertEqual('EUR', CMSBase::get_field_taxonomic_term_name($node, 'field_project_funds_req_amount_c', VOC_CURRENCY));
+        $this->assertEqual($arr['field_project_cofunding'], CMSBase::get_field_single_value($node, 'field_project_cofunding'));
+        $this->assertTrue(CMSBase::get_field_boolean($node, 'field_project_endorsement_form'));
+        $terms = CMSBase::get_field_taxonomic_terms($node, 'field_project_taxonomic_group', VOC_PROJECT_TAXONOMIC_GROUP);
+        $this->assertEqual($arr['field_project_taxonomic_group'][0], $terms[0]->name);
+        $this->assertEqual($arr['field_project_taxonomic_group'][1], $terms[1]->name);
+
+        $activities = CMSBase::get_field_collection_items($node, 'field_project_activity');
+        reset($activities);
+        $activity = current($activities);
+
+        $this->assertEqual($arr['field_project_activity'][0]['field_project_activity_desc'],
+            CMSBase::get_field_single_value($activity, 'field_project_activity_desc')
+        );
+        $this->assertEqual($arr['field_project_activity'][0]['field_project_activity_start'],
+            CMSBase::get_field_single_value($activity, 'field_project_activity_start')
+        );
+        $this->assertEqual($arr['field_project_activity'][0]['field_project_activity_end'],
+            CMSBase::get_field_single_value($activity, 'field_project_activity_end')
+        );
+        $this->assertEqual($arr['field_project_activity'][0]['field_project_activity_resp'],
+            CMSBase::get_field_single_value($activity, 'field_project_activity_resp')
+        );
+        $this->assertEqual($arr['field_project_activity'][0]['field_project_activity_output'],
+            CMSBase::get_field_single_value($activity, 'field_project_activity_output')
+        );
+        $activity = next($activities);
+        $this->assertEqual($arr['field_project_activity'][1]['field_project_activity_desc'],
+            CMSBase::get_field_single_value($activity, 'field_project_activity_desc')
+        );
+        $this->assertEqual($arr['field_project_activity'][1]['field_project_activity_start'],
+            CMSBase::get_field_single_value($activity, 'field_project_activity_start')
+        );
+        $this->assertEqual($arr['field_project_activity'][1]['field_project_activity_end'],
+            CMSBase::get_field_single_value($activity, 'field_project_activity_end')
+        );
+        $this->assertEqual($arr['field_project_activity'][1]['field_project_activity_resp'],
+            CMSBase::get_field_single_value($activity, 'field_project_activity_resp')
+        );
+        $this->assertEqual($arr['field_project_activity'][1]['field_project_activity_output'],
+            CMSBase::get_field_single_value($activity, 'field_project_activity_output')
+        );
+
+        $this->assertTrue(CMSBase::get_field_boolean($node, 'field_project_final_report'));
+        $this->assertTrue(CMSBase::get_field_boolean($node, 'field_project_took_place'));
+        $this->assertTrue(CMSBase::get_field_boolean($node, 'field_project_completed'));
+
+        $docs = $node->field_project_file[$node->language];
+        $this->assertEqual(1, $docs[0]['fid']);
+        $this->assertEqual('file1', $docs[0]['description']);
+        $this->assertEqual('file1.txt', $docs[0]['filename']);
+        $this->assertEqual('public://project/file1.txt', $docs[0]['uri']);
+
+        $this->assertEqual(2, $docs[1]['fid']);
+        $this->assertEqual('file2', $docs[1]['description']);
+        $this->assertEqual('file2.txt', $docs[1]['filename']);
+        $this->assertEqual('public://project/file2.txt', $docs[1]['uri']);
+
+        $terms = CMSBase::get_field_taxonomic_terms($node, 'field_threats', VOC_THREATS);
+        $this->assertEqual($arr['field_threats'][0], $terms[0]->name);
+        $this->assertEqual($arr['field_threats'][1], $terms[1]->name);
+
+        // Test related content
+        $this->assertEqual(array($s1->uuid), CMSBase::get_entity_reference_by_uuid($node, 'field_project_species'));
+        $this->assertEqual(array($doc1->uuid), CMSBase::get_entity_reference_by_uuid($node, 'field_project_document'));
+        $this->assertEqual(array($m1->uuid), CMSBase::get_entity_reference_by_uuid($node, 'field_project_meeting'));
+        $this->assertEqual(array($pub1->uuid), CMSBase::get_entity_reference_by_uuid($node, 'field_project_publication'));
+        $this->assertEqual(array($np1->uuid), CMSBase::get_entity_reference_by_uuid($node, 'field_project_nat_plan'));
+    }
+
+
+    function test_node_from_json_string() {
+        Country::node_create('Uruguay', 'UY');
+        Country::node_create('Romania', 'RO');
+        $agreement = CMSUtils::vocabulary_get_or_create_term('agreement', VOC_INSTRUMENT_TYPE);
+        CMSLegalInstrument::node_create('CMS', 'CMS', $agreement->tid, '2012-01-01');
+        CMSLegalInstrument::node_create('AEWA', 'AEWA', $agreement->tid, '2012-01-01');
+
+        $subject = $this->get_json_array();
+        $json = json_decode($subject, TRUE);
+        $node = CMSProject::node_from_array($json, dirname(__FILE__) . DIRECTORY_SEPARATOR . 'test');
+        $this->assertNotNull($node);
+        $this->assertEqual('test', $node->title, 'Wrong title');
+        $body = CMSBase::get_field_body($node);
+        $this->assertEqual('project body', $body['value']);
+        $this->assertEqual('fullhtml', $body['format']);
+        $this->assertEqual('project summary', $body['summary']);
+        $this->assertEqual('allotment_code', CMSBase::get_field_single_value($node, 'field_project_allotment_code'));
+        $this->assertEqual('folder', CMSBase::get_field_single_value($node, 'field_project_folder'));
+        $this->assertEqual('summary', CMSBase::get_field_single_value($node, 'field_project_summary'));
+
+        $contrib = CMSBase::get_field_list_value($node, 'field_project_contributor');
+        $this->assertEqual(2, count($contrib));
+        $this->assertEqual('Contributor1', $contrib[0]);
+        $this->assertEqual('Contributor2', $contrib[1]);
+        $this->assertEqual('Conservation', CMSBase::get_field_single_value($node, 'field_project_conservation'));
+
+        $objective = CMSBase::get_field_list_value($node, 'field_project_objective');
+        $this->assertEqual(2, count($objective));
+        $this->assertEqual('Objective1', $objective[0]);
+        $this->assertEqual('Objective2', $objective[1]);
+        $this->assertEqual('ImplAgency', CMSBase::get_field_single_value($node, 'field_project_impl_agency'));
+
+        $collab = CMSBase::get_field_list_value($node, 'field_project_collab_agency');
+        $this->assertEqual(3, count($collab));
+        $this->assertEqual('Agency1', $collab[0]);
+        $this->assertEqual('Agency2', $collab[1]);
+        $this->assertEqual('Agency3', $collab[2]);
+        $this->assertEqual('1997-02-03 13:14:15', CMSBase::get_field_single_value($node, 'field_project_start_date'));
+        $this->assertEqual('1998-03-04 14:15:16', CMSBase::get_field_single_value($node, 'field_project_end_date'));
+
+        $regions = CMSBase::get_field_taxonomic_terms_names($node, 'field_region', VOC_REGION);
+        $this->assertEqual(2, count($regions));
+        $this->assertEqual('Latin America', $regions[0]);
+        $this->assertEqual('Asia', $regions[1]);
+
+        $countries = CMSBase::get_field_countries_codes($node, 'field_country');
+        $this->assertEqual(2, count($countries));
+        $this->assertEqual('UY', $countries[0]);
+        $this->assertEqual('RO', $countries[1]);
+
+        $instruments = CMSBase::get_field_instruments_names($node, 'field_instrument');
+        $this->assertEqual(2, count($instruments));
+        $this->assertEqual('CMS', $instruments[0]);
+        $this->assertEqual('AEWA', $instruments[1]);
+
+        $this->assertEqual('12345678.89', CMSBase::get_field_single_value($node, 'field_project_funds_req_amount'));
+        $this->assertEqual('USD', CMSBase::get_field_taxonomic_term_name($node, 'field_project_funds_req_amount_c', VOC_CURRENCY));
+
+        $this->assertEqual('cofunding', CMSBase::get_field_single_value($node, 'field_project_cofunding'));
+        $this->assertTrue(CMSBase::get_field_boolean($node, 'field_project_endorsement_form'));
+
+        $groups = CMSBase::get_field_taxonomic_terms_names($node, 'field_project_taxonomic_group', VOC_PROJECT_TAXONOMIC_GROUP);
+        $this->assertEqual(2, count($groups));
+        $this->assertEqual('Birds', $groups[0]);
+        $this->assertEqual('Animals', $groups[1]);
+
+        $activities = CMSBase::get_field_collection_items($node, 'field_project_activity');
+        $this->assertEqual(2, count($activities));
+        reset($activities);
+        $activity = current($activities);
+        $this->assertEqual('activity1', CMSBase::get_field_single_value($activity, 'field_project_activity_desc'));
+        $this->assertEqual('1997-02-03 13:14:15', CMSBase::get_field_single_value($activity, 'field_project_activity_start'));
+        $this->assertEqual('1998-03-04 14:15:16', CMSBase::get_field_single_value($activity, 'field_project_activity_end'));
+        $this->assertEqual('Responsibilities1', CMSBase::get_field_single_value($activity, 'field_project_activity_resp'));
+        $this->assertEqual('Report1', CMSBase::get_field_single_value($activity, 'field_project_activity_output'));
+        $activity = next($activities);
+        $this->assertEqual('activity2', CMSBase::get_field_single_value($activity, 'field_project_activity_desc'));
+        $this->assertEqual('1997-02-03 13:14:15', CMSBase::get_field_single_value($activity, 'field_project_activity_start'));
+        $this->assertEqual('1998-03-04 14:15:16', CMSBase::get_field_single_value($activity, 'field_project_activity_end'));
+        $this->assertEqual('Responsibilities2', CMSBase::get_field_single_value($activity, 'field_project_activity_resp'));
+        $this->assertEqual('Report2', CMSBase::get_field_single_value($activity, 'field_project_activity_output'));
+        $this->assertTrue(CMSBase::get_field_boolean($node, 'field_project_final_report'));
+        $this->assertTrue(CMSBase::get_field_boolean($node, 'field_project_took_place'));
+        $this->assertTrue(CMSBase::get_field_boolean($node, 'field_project_completed'));
+
+        $threats = CMSBase::get_field_taxonomic_terms_names($node, 'field_threats', VOC_THREATS);
+        $this->assertEqual(2, count($threats));
+        $this->assertEqual('term1', $threats[0]);
+        $this->assertEqual('term2', $threats[1]);
+
+        $documents = $node->field_project_file[$node->language];
+        $this->assertEqual(2, count($documents));
+        $this->assertEqual('document1.doc', $documents[0]['filename']);
+        $this->assertEqual('application/msword', $documents[0]['filemime']);
+        $this->assertEqual('public://project/document1.doc', $documents[0]['uri']);
+        $this->assertEqual('document1.pdf', $documents[1]['filename']);
+        $this->assertEqual('application/pdf', $documents[1]['filemime']);
+        $this->assertEqual('public://project/document1.pdf', $documents[1]['uri']);
+    }
+
+
+    private function get_json_array() {
+        return '{
+        "title": "test",
+        "body": {
+            "value": "project body",
+            "format": "fullhtml",
+            "summary": "project summary"
+        },
+        "field_project_allotment_code": "allotment_code",
+        "field_project_folder": "folder",
+        "field_project_summary": "summary",
+        "field_project_contributor": ["Contributor1", "Contributor2"],
+        "field_project_conservation": "Conservation",
+        "field_project_objective": ["Objective1", "Objective2"],
+        "field_project_impl_agency": "ImplAgency",
+        "field_project_collab_agency": [
+            "Agency1",
+            "Agency2",
+            "Agency3"
+        ],
+        "field_project_start_date": "1997-02-03 13:14:15",
+        "field_project_end_date": "1998-03-04 14:15:16",
+        "field_region": [
+            "Latin America",
+            "Asia"
+        ],
+        "field_country": [
+            "UY",
+            "Romania"
+        ],
+        "field_instrument": [
+            "CMS",
+            "AEWA"
+        ],
+        "field_project_funds_req_amount": "12345678.89",
+        "field_project_funds_req_amount_c": "USD",
+        "field_project_cofunding": "cofunding",
+        "field_project_endorsement_form": true,
+        "field_project_taxonomic_group": [
+            "Birds",
+            "Animals"
+        ],
+        "field_project_activity": [
+            {
+                "field_project_activity_desc": "activity1",
+                "field_project_activity_start": "1997-02-03 13:14:15",
+                "field_project_activity_end": "1998-03-04 14:15:16",
+                "field_project_activity_resp": "Responsibilities1",
+                "field_project_activity_output": "Report1"
+            },
+            {
+                "field_project_activity_desc": "activity2",
+                "field_project_activity_start": "1997-02-03 13:14:15",
+                "field_project_activity_end": "1998-03-04 14:15:16",
+                "field_project_activity_resp": "Responsibilities2",
+                "field_project_activity_output": "Report2"
+            }
+        ],
+        "field_project_final_report": true,
+        "field_project_took_place": true,
+        "field_project_completed": true,
+        "field_project_file": [
+            {
+                "path": "project/test/field_project_file/document1.doc",
+                "description": "",
+                "md5": "e42b88a03bcbbaf5b8ee0ff698f32f49"
+            },
+            {
+                "path": "project/test/field_project_file/document1.pdf",
+                "description": "",
+                "md5": "2716aa91ebfd9cd8fd9d9cb9a39b6d21"
+            }
+        ],
+        "field_threats": [
+            "term1",
+            "term2"
+        ]
+        }';
+    }
+
+
+    function test_project_amount() {
+        $node = CMSProject::node_create('TEST');
+        CMSBase::set_field_single_value($node, 'field_project_funds_req_amount', array('field_project_funds_req_amount' => '12345678.89'));
+        CMSBase::set_field_taxonomic_term($node, 'field_project_funds_req_amount_c', VOC_CURRENCY, array('field_project_funds_req_amount_c' => 'USD'));
+        node_save($node);
+        $node = node_load($node->nid);
+        $this->assertEqual(12345678.89, CMSBase::get_field_single_value($node, 'field_project_funds_req_amount'));
+        $this->assertEqual('USD', CMSBase::get_field_taxonomic_term_name($node, 'field_project_funds_req_amount_c', VOC_CURRENCY));
+    }
+
+
+    function test_get_projects_for_country() {
+        $ro = Country::node_create('Romania', 'RO');
+        $de = Country::node_create('Germany', 'DE');
+
+        $p1 = CMSProject::node_create('PROJECT 1');
+        $p2 = CMSProject::node_create('PROJECT 2');
+        $p3 = CMSProject::node_create('PROJECT 3');
+        $p1->field_country[$p1->language][0]['target_id'] = $ro->nid;
+        $p2->field_country[$p2->language][0]['target_id'] = $ro->nid;
+        $p3->field_country[$p3->language][0]['target_id'] = $ro->nid;
+
+        node_save($p1);
+        node_save($p2);
+        $p3->status = NODE_NOT_PUBLISHED;
+        node_save($p3);
+
+        $projects = CMSProject::get_projects_for_country($ro->nid);
+        $this->assertEqual(2, count($projects));
+        $this->assertTrue(array_key_exists($p1->nid, $projects));
+        $this->assertTrue(array_key_exists($p2->nid, $projects));
+
+        $projects = CMSProject::get_projects_for_country($de->nid);
+        $this->assertEqual(0, count($projects));
+
+        /* Pass object instead of integer - test for DB exception */
+        $ob = new stdClass();
+        $projects = CMSProject::get_projects_for_country($ob);
+        $this->assertEqual(0, count($projects));
+    }
+}

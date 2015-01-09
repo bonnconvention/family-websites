@@ -1,0 +1,922 @@
+<?php
+/**
+ * @file
+ * Code for the CMS Country feature.
+ */
+
+include_once 'cms_country.features.inc';
+/**
+ * @file
+ * Code for the country feature.
+ */
+if (!defined('ROLE_MANAGE_PARTY')) {
+    define('ROLE_MANAGE_PARTY', 'manage party');
+}
+
+if (!defined('VOC_PARTY_STATUS')) {
+    define('VOC_PARTY_STATUS', 'party_status');
+}
+define('FILTER_COUNTRY_INSTRUMENT_FIELD', 'field_instrument_target_id');
+
+module_load_include('module', 'cms');
+module_load_include('inc', 'cms_country', 'cms_country.api');
+
+/**
+ * Implements hook_menu_local_tasks_alter();
+ *
+ * Show 'Create country' button on Species listing view
+ *
+ * @param   array   $data
+ * @param   array   $router_item
+ * @param   string  $root_path
+ */
+function cms_country_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+    switch($root_path){
+        case Country::$bundle . '/listing' :
+            $item = menu_get_item('node/add/' . Country::$bundle);
+            $item['title'] = t('Create ' . Country::$bundle);
+            if ($item['access']) {
+                $data['actions']['output'][] = array(
+                    '#theme' => 'menu_local_action',
+                    '#link' => $item,
+                );
+            }
+            break;
+    }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function cms_country_menu() {
+    //menu for ajax call for history slider in Parties Range state page
+    //get parameter display_id (party_range_states_page or mous_signatories_range_states)
+    $items['country/party_range_states/%'] = array(
+        'page callback' => 'cms_country_party_range_states_ajax',
+        'page arguments' => array(2),
+        'type' => MENU_CALLBACK,
+        'access arguments' => array('access content'),
+    );
+
+    return $items;
+}
+
+function cms_country_views_default_views_alter(&$views) {
+    if (isset($views['view_countries'])) {
+        $handler = &$views['view_countries'];
+        $roles = user_roles();
+        $rids = array();
+        foreach($roles as $rid => $role) {
+            if($role == 'authenticated user') {
+                $rids[$rid] = $rid;
+            }
+        }
+        $handler->display['default']->display_options['access']['type'] = 'role';
+        $handler->display['default']->display_options['access']['role'] = array_filter($rids);
+    }
+    return $views;
+}
+
+/**
+ *  Implements hook_form_alter();
+ */
+function cms_country_form_alter(&$form, &$form_state, $form_id) {
+    switch ($form_id) {
+        case 'country_node_form' :
+            $breadcrumb = array();
+            $breadcrumb[] = l(t('Home'), '<front>');
+            $breadcrumb[] = l(t('Countries'), 'country/listing');
+            if (isset($form['nid']) && (is_numeric($form['nid']['#value']))) {
+                $breadcrumb[] = l($form['#node']->title, 'node/' . $form['#node']->nid);
+            }
+            drupal_set_breadcrumb($breadcrumb);
+
+            /*
+             * Make shared (reused) multiple value fields to be single value where it's needed
+             * see #2321
+             */
+            foreach($form['field_country_instrument_status'][LANGUAGE_NONE] as $idx => $field_coll_entry) {
+                if (!empty($form['field_country_instrument_status'][LANGUAGE_NONE][$idx]['field_instrument'][LANGUAGE_NONE]['#multiple'])) {
+                    $form['field_country_instrument_status'][LANGUAGE_NONE][$idx]['field_instrument'][LANGUAGE_NONE]['#multiple'] = FALSE;
+                }
+            }
+
+
+            break;
+        case 'views_exposed_form':
+            break;
+        case 'node_delete_confirm':
+            if ($form['#node']->type == 'country') {
+                $form['#submit'][] = '_country_redirect_after_delete';
+            }
+            break;
+    }
+
+    return $form;
+}
+
+function _country_redirect_after_delete(&$form, &$form_state) {
+    $form_state['redirect'] = 'country/listing';
+}
+
+
+/**
+ * Implement hook_node_view()
+ */
+function cms_country_node_view($node, $view_mode, $langcode) {
+
+    if(function_exists('cms_manage_node_access') && $node->type == Country::$bundle) {
+        cms_manage_node_access($node);
+    }
+
+    if ($node->type == 'country') {
+        if ($view_mode == 'full' && node_is_page($node)) {
+            if (is_theme_frontend()) {
+
+                //Add data to node used in front-end profile page
+                $path = drupal_get_path('theme', 'cms_frontend');
+                $langcode = field_language('node', $node, 'field_country_iso2');
+                $node->country_flag_path = '/'.$path.'/includes/iso2_flags/'
+                    .strtoupper($node->field_country_iso2[$langcode][0]['value']).'.gif';
+
+                $point['country'] = $node->title;
+                $point['iso2'] = $node->field_country_iso2[$langcode][0]['value'];
+
+                // Inject map center
+                drupal_add_js(array('gmap' => array('marker' => $point )), 'setting');
+
+                //Add support for Google maps
+                drupal_add_js('https://maps.googleapis.com/maps/api/js?&sensor=true', array(
+                    'type' => 'external', 'scope' => 'header',
+                    'group' => JS_DEFAULT, 'weight' => 1));
+
+                drupal_add_js('/' . drupal_get_path('theme', 'cms_frontend') . '/js/gmaps.js', array(
+                        'type' => 'external', 'scope' => 'footer',
+                        'group' => JS_DEFAULT, 'weight' => 10)
+                );
+            }
+        }
+    }
+
+    return $node;
+}
+
+function _country_get_instruments_render($legal_instrument, $view_mode) {
+    $countries = $legal_instrument->countries[$legal_instrument->language];
+    $classes = array('table', 'table-striped', 'table-bordered');
+    if (count($countries) > 10) {
+        $classes[] = 'dataTable';
+    }
+    $rows = array();
+    foreach($countries as $country) {
+        $row = $country['entity'];
+        $node_url = node_uri($row);
+
+        $display = array('settings' => array('format_type' => 'convention_date'), 'label' => 'hidden');
+        $ratification_date = field_view_field('field_collection_item', $row->status, 'field_country_ratification_date', $display);
+
+        $display = array('type' => 'taxonomy_term_reference_plain', 'label' => 'hidden');
+        $status = field_view_field('field_collection_item', $row->status, 'field_country_status', $display);
+
+        $display = array('label' => 'hidden');
+        $notes = field_view_field('field_collection_item', $row->status, 'field_country_notes', $display);
+
+        $rows[] = array(
+            'data' => array(
+                sprintf('<a href="/%s">%s</a>', $node_url['path'], $row->title),
+                drupal_render($status),
+                drupal_render($ratification_date),
+                drupal_render($notes)
+            )
+        );
+    }
+
+    return array(
+        '#theme' => 'table__country_template_legal_instrument',
+        '#weight' => 100, //@todo: computed
+        '#access' => TRUE, '#label_display' => 'hidden', '#view_mode' => $view_mode,
+        '#language' => $legal_instrument->language,
+        '#field_name' => Country::$field_legal_instrument_countries,
+        '#field_type' => 'entityreference',
+        '#entity_type' => 'node',
+        '#bundle' => Country::$bundle_instrument_module,
+        '#items' => $countries,
+        '#header' => array(t('Country name'), t('Status'), t('Date'), t('Notes')),
+        '#rows' => $rows,
+        '#attributes' => array('class' => $classes),
+        '#caption' => FALSE,
+        '#colgroups' => array(),
+        '#sticky' => TRUE,
+        '#empty' => t('There are no countries for this legal instrument'),
+        '#settings' => array()
+    ) + $countries;
+}
+
+
+/**
+ * Implementes hook_theme($existing, $type, $theme, $path)
+ */
+function cms_country_theme($existing, $type, $theme, $path) {
+    $base = array(
+        'file' => 'theme.inc',
+        'path' => $path . '/theme',
+    );
+    return array(
+        'table__country_template_legal_instrument' => $base + array(
+                'variables' => array(
+                    'header' => NULL,
+                    'rows' => NULL,
+                    'attributes' => array(),
+                    'caption' => NULL,
+                    'colgroups' => array(),
+                    'sticky' => TRUE,
+                    'empty' => '',
+                    'settings' => array()
+                )
+            )
+    );
+}
+
+function cms_country_views_pre_view(&$view, &$display_id, &$args) {
+    switch ($view->name) {
+        case 'front_end_countries':
+            if ($view->current_display == 'mous_signatories_range_states'
+                || $view->current_display == 'party_range_states_page') {
+                $arg = cms_domain_instrument_id();
+                if ($arg) {
+                    $args [0]= $arg;
+                }
+            }
+            break;
+    }
+}
+
+function cms_country_views_pre_render(&$view) {
+    switch ($view->name) {
+        case 'front_end_countries':
+            //Attach data to view for Parties Range States Page
+            if ($view->current_display == 'party_range_states_page'
+                || $view->current_display == 'mous_signatories_range_states') {
+
+                $view->range_states_ammap = Country::get_range_states_for_ammap($view);
+                $statuses = array();
+                foreach ($view->result as $result) {
+                    if (!empty($result->field_field_country_status[0]['raw']['tid'])) {
+                        $tid = $result->field_field_country_status[0]['raw']['tid'];
+                        if(!array_key_exists($tid, $statuses)) {
+                            $statuses[$tid] = $result->field_field_country_status[0]['raw']['taxonomy_term'];
+                        }
+                    }
+                }
+                uasort($statuses, 'cms_compare_term_weight');
+                $view->range_states_statuses = $statuses;
+
+            }
+            break;
+        default:
+            break;
+    }
+
+}
+
+/**
+ * Callback to return JSON parties range states map on slider change
+ */
+function cms_country_party_range_states_ajax($display_id) {
+    $result = array();
+    $view_bundle = views_get_view('front_end_countries');
+    $view_display = $display_id;
+
+    if ($view_bundle && $view_bundle->access($view_display)) {
+        $view_bundle->set_display($view_display);
+        $arg = cms_domain_instrument_id();
+        if ($arg) {
+            $view_bundle->set_arguments(array($arg));
+        }
+        $view_bundle->execute();
+        $result = Country::get_range_states_for_ammap($view_bundle);
+    }
+    drupal_json_output($result);
+}
+
+
+/**
+ * Country object
+ */
+class Country extends CMSBase {
+
+    public static $CACHE_ALL_OBJECTS = 'country_cache_all_countries';
+    public static $bundle = 'country';
+    public static $bundle_instrument_module = 'legal_instrument';
+    public static $field_legal_instrument_countries = 'countries';
+
+
+    /**
+     * Create new country
+     * @param string $name Common name in English
+     * @param string $iso2 ISO 3166-2 code (2-letter code)
+     * @param string $region Geographical region (taxonomic term)
+     * @param string $party_number CMS Party number (001, 133)
+     * @param string $entry_into_force Date when entering into force (YYYY-MM-DD)
+     * @param string $iso3 ISO 3166-3 code (3-letter code)
+     * @param string $official_name Country official name
+     * @return stdClass Drupal node object
+     */
+    static function node_create($name, $iso2, $region = '', $party_number = '',
+                                $entry_into_force = '', $iso3 = '', $official_name = '') {
+        if(empty($name) || empty($iso2)) {
+            CMSUtils::println('Cannot create a country without name (%s) and ISO2 (%s) code', $name, $iso2);
+            return NULL;
+        }
+        $node = self::drupal_node_create($name, self::$bundle);
+        self::set_field_single_value($node, 'field_country_iso2', array('field_country_iso2' => $iso2));
+        self::set_field_taxonomic_term($node, 'field_region', VOC_REGION, array('field_region' => $region));
+        self::set_field_single_value($node, 'field_country_party_number', array('field_country_party_number' => $party_number));
+        self::set_field_single_value($node, 'field_country_entry_into_force', array('field_country_entry_into_force' => $entry_into_force));
+        self::set_field_single_value($node, 'field_country_iso3', array('field_country_iso3' => $iso3));
+        self::set_field_single_value($node, 'field_country_official_name', array('field_country_official_name' => $official_name));
+        node_save($node);
+        self::cache_clear();
+        return $node;
+    }
+
+    public static function node_from_array($data) {
+        $node = self::drupal_node_create($data['title'], self::$bundle, FALSE);
+
+        if (!empty($data['uuid'])) {
+            $node->uuid = $data['uuid'];
+        }
+
+        if (!empty($data['status'])) {
+            $node->status = $data['status'];
+        }
+
+        self::set_field_single_value($node, 'field_country_official_name', $data);
+        self::set_field_single_value($node, 'field_country_iso2', $data);
+        self::set_field_single_value($node, 'field_country_iso3', $data);
+        self::set_field_single_value($node, 'field_country_party_number', $data);
+
+        $data['field_region'] = ucwords(strtolower($data['field_region']));
+        self::set_field_taxonomic_term($node, 'field_region', VOC_REGION, $data);
+
+        self::set_field_single_value($node, 'field_country_entry_into_force', $data);
+        self::set_instrument_status($node, $data);
+        self::set_field_boolean($node, 'field_country_member_to_stc', $data);
+        self::set_field_single_value($node, 'field_country_date_of_accession', $data);
+        self::set_field_single_value($node, 'field_country_date_of_acceptance', $data);
+        self::set_anual_contribution($node, $data);
+        self::set_arrears($node, $data);
+        self::set_voluntary_contrib($node, $data);
+
+        node_save($node);
+    }
+
+    public static function set_instrument_status(&$node, $data) {
+        if(!empty($data['field_country_instrument_status'])) {
+            $instruments = CMSLegalInstrument::get_mapped_instruments();
+            $instrument_cache = array();
+            foreach ($instruments as $title => $id) {
+                $instrument_cache[strtolower($title)] = $id;
+            }
+
+            foreach ($data['field_country_instrument_status'] as $index => $instrument) {
+                $instrument = (array)$instrument;
+                $instrument_name = strtolower(trim($instrument['field_instrument']));
+                if (!empty($instrument_name)) {
+                    if(array_key_exists($instrument_name, $instrument_cache)) {
+                        $c = array();
+                        $c['field_name'] = 'field_country_instrument_status';
+                        $c['field_instrument'][$node->language][0]['target_id'] = $instrument_cache[$instrument_name];
+
+                        $term = CMSUtils::vocabulary_get_or_create_term($instrument['field_country_status'], VOC_PARTY_STATUS);
+                        $c['field_country_status'][$node->language][0]['tid'] = $term->tid;
+                        $c['field_country_ratification_date'][$node->language][0]['value'] = $instrument['field_country_ratification_date'];
+                        $c['field_country_notes'][$node->language][0]['value'] = $instrument['field_country_notes'];
+
+                        $entity = entity_create('field_collection_item', $c);
+                        $entity->setHostEntity('node', $node);
+                    } else {
+                        echo sprintf("Could not identify instrument '%s' for country '%s'\n", $instrument_name, $data['title']);
+                    }
+                }
+            }
+        }
+    }
+
+    public static function set_anual_contribution(&$node, $data) {
+        if (!empty($data['field_country_anual_contribution'])) {
+            foreach ($data['field_country_anual_contribution'] as $index => $value) {
+                $c = array();
+                $c['field_name'] = 'field_country_anual_contribution';
+                $c['field_country_ac_year'][$node->language][0]['value'] = $value['field_country_ac_year'];
+                $c['field_country_ac_value'][$node->language][0]['value'] = $value['field_country_ac_value'];
+                $term = CMSUtils::vocabulary_get_or_create_term($value['field_country_ac_currency'], VOC_CURRENCY);
+                $c['field_country_ac_currency'][$node->language][0]['tid'] = $term->tid;
+
+                $entity = entity_create('field_collection_item', $c);
+                $entity->setHostEntity('node', $node);
+            }
+        }
+    }
+
+    public static function set_arrears(&$node, $data) {
+        if (!empty($data['field_country_arrears'])) {
+            foreach ($data['field_country_arrears'] as $index => $value) {
+                $c = array();
+                $c['field_name'] = 'field_country_arrears';
+                $c['field_country_arrears_year'][$node->language][0]['value'] = $value['field_country_arrears_year'];
+                $c['field_country_arrears_value'][$node->language][0]['value'] = $value['field_country_arrears_value'];
+                $term = CMSUtils::vocabulary_get_or_create_term($value['field_country_arrears_currency'], VOC_CURRENCY);
+                $c['field_country_arrears_currency'][$node->language][0]['tid'] = $term->tid;
+
+                $entity = entity_create('field_collection_item', $c);
+                $entity->setHostEntity('node', $node);
+            }
+        }
+    }
+
+    public static function set_voluntary_contrib(&$node, $data) {
+        if (!empty($data['field_country_voluntary_contrib'])) {
+            foreach ($data['field_country_voluntary_contrib'] as $index => $value) {
+                $c = array();
+                $c['field_name'] = 'field_country_voluntary_contrib';
+                $c['field_country_vc_year'][$node->language][0]['value'] = $value['field_country_vc_year'];
+                $c['field_country_vc_value'][$node->language][0]['value'] = $value['field_country_vc_value'];
+                $term = CMSUtils::vocabulary_get_or_create_term($value['field_country_vc_currency'], VOC_CURRENCY);
+                $c['field_country_vc_currency'][$node->language][0]['tid'] = $term->tid;
+
+                $entity = entity_create('field_collection_item', $c);
+                $entity->setHostEntity('node', $node);
+            }
+        }
+    }
+
+    /**
+     * Build an array from a country node to be saved as JSON string
+     *
+     * @param   stdClass   $node
+     * @return  array      $ret
+     */
+    public static function node_to_array($node) {
+        $ret = array(
+            'title' => $node->title,
+            'status' => $node->status,
+            'uuid' => CMSUtils::get_node_uuid($node),
+        );
+
+        self::get_field_single_value($node, 'field_country_official_name', $ret);
+        self::get_field_single_value($node, 'field_country_iso2', $ret);
+        self::get_field_single_value($node, 'field_country_iso3', $ret);
+        self::get_field_single_value($node, 'field_country_party_number', $ret);
+        $ret['field_region'] = self::get_field_taxonomic_term_name($node, 'field_region', VOC_REGION);
+        self::get_field_single_value($node, 'field_country_entry_into_force', $ret);
+        self::get_field_boolean($node, 'field_country_member_to_stc', $ret);
+        self::get_field_single_value($node, 'field_country_date_of_accession', $ret);
+        self::get_field_single_value($node, 'field_country_date_of_acceptance', $ret);
+        self::get_country_instrument_status($ret, $node);
+        self::get_country_anual_contribution($ret, $node);
+        self::get_country_arrears($ret, $node);
+        self::get_country_voluntary_contrib($ret, $node);
+
+        return $ret;
+    }
+
+    /**
+     * Get instrument status field collectionf for a specified country node
+     *
+     * @param   array      $ret
+     * @param   stdClass   $node
+     */
+    public static function get_country_instrument_status(&$ret, $node) {
+        $ret['field_country_instrument_status'] = array();
+        if (!empty($node->field_country_instrument_status[$node->language])) {
+            foreach($node->field_country_instrument_status[$node->language] as $row) {
+                $fc_array = array();
+                $fc = entity_load('field_collection_item', array($row['value']));
+                reset($fc); $fc = current($fc);
+                $fc_array['field_instrument'] = self::get_field_instrument_name($fc, 'field_instrument');
+                $fc_array['field_country_status'] = self::get_field_taxonomic_term_name($fc, 'field_country_status', VOC_PARTY_STATUS);
+                self::get_field_single_value($fc, 'field_country_ratification_date', $fc_array);
+                self::get_field_single_value($fc, 'field_country_notes', $fc_array);
+                $ret['field_country_instrument_status'][] = $fc_array;
+            }
+        }
+    }
+
+    /**
+     * Get anual contribution field collection for a specified country node
+     *
+     * @param   array      $ret
+     * @param   stdClass   $node
+     */
+    public static function get_country_anual_contribution(&$ret, $node) {
+        $ret['field_country_anual_contribution'] = array();
+        if (!empty($node->field_country_anual_contribution[$node->language])) {
+            foreach($node->field_country_anual_contribution[$node->language] as $row) {
+                $fc_array = array();
+                $fc = entity_load('field_collection_item', array($row['value']));
+                reset($fc); $fc = current($fc);
+                self::get_field_single_value($fc, 'field_country_ac_year', $fc_array);
+                self::get_field_single_value($fc, 'field_country_ac_value', $fc_array);
+                $fc_array['field_country_ac_currency'] = self::get_field_taxonomic_term_name($fc, 'field_country_ac_currency', VOC_CURRENCY);
+                $ret['field_country_anual_contribution'][] = $fc_array;
+            }
+        }
+    }
+
+    /**
+     * Get arrears field collection for a specified country node
+     *
+     * @param   array      $ret
+     * @param   stdClass   $node
+     */
+    public static function get_country_arrears(&$ret, $node) {
+        $ret['field_country_arrears'] = array();
+        if (!empty($node->field_country_arrears[$node->language])) {
+            foreach($node->field_country_arrears[$node->language] as $row) {
+                $fc_array = array();
+                $fc = entity_load('field_collection_item', array($row['value']));
+                reset($fc); $fc = current($fc);
+                self::get_field_single_value($fc, 'field_country_arrears_year', $fc_array);
+                self::get_field_single_value($fc, 'field_country_arrears_value', $fc_array);
+                $fc_array['field_country_arrears_currency'] = self::get_field_taxonomic_term_name($fc, 'field_country_arrears_currency', VOC_CURRENCY);
+                $ret['field_country_arrears'][] = $fc_array;
+            }
+        }
+    }
+
+    /**
+     * Get voluntary contrib for a specified country node
+     *
+     * @param   array      $ret
+     * @param   stdClass   $node
+     */
+    public static function get_country_voluntary_contrib(&$ret, $node) {
+        $ret['field_country_voluntary_contrib'] = array();
+        if (!empty($node->field_country_voluntary_contrib[$node->language])) {
+            foreach($node->field_country_voluntary_contrib[$node->language] as $row) {
+                $fc_array = array();
+                $fc = entity_load('field_collection_item', array($row['value']));
+                reset($fc); $fc = current($fc);
+                self::get_field_single_value($fc, 'field_country_vc_year', $fc_array);
+                self::get_field_single_value($fc, 'field_country_vc_value', $fc_array);
+                $fc_array['field_country_vc_currency'] = self::get_field_taxonomic_term_name($fc, 'field_country_vc_currency', VOC_CURRENCY);
+                $ret['field_country_voluntary_contrib'][] = $fc_array;
+            }
+        }
+    }
+
+    /**
+     * Query and retrieve a country by its ISO 3166-2 unique code.
+     * @param string $iso2 ISO 3166-2 code
+     * @return bool|stdClass FALSE if country doesn't exist or the country object
+     */
+    static function get_by_iso2($iso2) {
+        if(!empty($iso2)) {
+            $countries = self::list_keyed_by_iso2();
+            $i = strtolower($iso2);
+            if(array_key_exists($i, $countries)) {
+                return $countries[$i];
+            }
+        }
+        return FALSE;
+    }
+
+
+    /**
+     * Retrieve a country by its name (short name or official name)
+     * @param string $name Country name (case-insensitive)
+     * @return object Country object
+     */
+    static function get_by_name($name) {
+        return self::get_by_name_or_iso2($name);
+    }
+
+
+    /**
+     * Install countries from countries.json
+     */
+    static function import_default_countries() {
+        $path = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'cms_country.json';
+        $json = CMSUtils::read_json($path);
+        CMSUtils::println('Found %d countries ...', count($json));
+        $i = 0;
+        foreach($json as $c) {
+            $iso2 = strtolower($c->code2l);
+            $iso3 = strtolower($c->code3l);
+            if(!Country::get_by_iso2($iso2)) {
+                Country::node_create($c->name, $iso2, NULL, NULL, NULL, $iso3, $c->official_name);
+                $i++;
+                echo sprintf('%d ', $i);
+            }
+        }
+        echo "\n";
+        CMSUtils::println('Imported %d countries ...', $i);
+    }
+
+
+    /**
+     * Retrieve the list of countries having array keys the country ISO2l in all variants (normal, uppercase, lowercase)
+     * @return array Array, i.e. array('Ro' => $ob, 'RO' => $ob, 'ro' => $ob)
+     */
+    static function list_keyed_by_iso2() {
+        $ret = array();
+        $countries = self::get_all_objects();
+        foreach($countries as $country) {
+            $iso2 = self::get_field_single_value($country, 'field_country_iso2');
+            $ret[$iso2] = $country;
+            $ret[strtolower($iso2)] = $country;
+            $ret[strtoupper($iso2)] = $country;
+        }
+        return $ret;
+    }
+
+    /**
+     * Retrieve cached country name from the Drupal persistent cache
+     * @return array Associative array with iso2l => Country name
+     */
+    static function get_country_names_cached() {
+        $cache_name = 'cms_country_iso2l_name';
+        $cache = cache_get($cache_name);
+        if(!$cache) {
+            $cache = array();
+            $countries = self::get_all_objects();
+            foreach($countries as $country) {
+                $iso2 = self::get_field_single_value($country, 'field_country_iso2');
+                $cache[strtoupper($iso2)] = $country->title;
+            }
+            cache_set($cache_name, $cache, 'cache', time() + 3600);
+        } else {
+            $cache = $cache->data;
+        }
+        return $cache;
+    }
+
+
+    /**
+     * Retrieve the list of countries having array keys the country names in all variants (normal, uppercase, lowercase)
+     * @return array Array, i.e. array('Romania' => $ob, 'ROMANIA' => $ob, 'romania' => $ob)
+     */
+    static function list_keyed_by_name() {
+        $ret = array();
+        $countries = self::get_all_objects();
+        foreach($countries as $country) {
+            $name = $country->title;
+            $official_name = self::get_field_single_value($country, 'field_country_official_name');
+            $ret[$name] = $country;
+            $ret[strtolower($name)] = $country;
+            $ret[strtoupper($name)] = $country;
+            $ret[$official_name] = $country;
+            $ret[strtolower($official_name)] = $country;
+            $ret[strtoupper($official_name)] = $country;
+        }
+        return $ret;
+    }
+
+
+    /**
+     * Try to find a country by its name or ISO 2-letter. Case-insensitive.
+     * @param string $country Country name or ISO 2-letter code
+     * @return object
+     */
+    static function get_by_name_or_iso2($country) {
+        if(empty($country)) {
+            return NULL;
+        }
+        $ret = NULL;
+        $country = strtolower(trim($country));
+        $names = self::list_keyed_by_name();
+        $codes = self::list_keyed_by_iso2();
+        if(array_key_exists($country, $names)) {
+            $ret = $names[$country];
+        } else {
+            if(array_key_exists($country, $codes)) {
+                $ret = $codes[$country];
+            }
+        }
+        return $ret;
+    }
+
+
+    /**
+     * Retrieve all country objects from database
+     * @return array Array of country objects
+     */
+    static function get_all_objects() {
+        $cached_data = &drupal_static(self::$CACHE_ALL_OBJECTS);
+        if(empty($cached_data)) {
+            $query = new EntityFieldQuery();
+            $query = $query->entityCondition('entity_type', 'node')->propertyCondition('type', 'country')->execute();
+            if(isset($query['node'])) {
+                foreach($query['node'] as $row) {
+                    $cached_data[] = node_load($row->nid);
+                }
+            }
+        }
+        if($cached_data === NULL) {
+            $cached_data = array();
+        }
+        return $cached_data;
+    }
+
+    /**
+     * Invalidate the cache data for this class
+     */
+    static function cache_clear() {
+        drupal_static_reset(self::$CACHE_ALL_OBJECTS);
+    }
+
+
+    /**
+     * Retrieve the countries assigned to a legal instrument
+     *
+     * @param $id_instrument
+     * @return array
+     */
+    public static function get_countries_for_instrument($id_instrument) {
+        $ret = array();
+        if(!is_numeric($id_instrument)) {
+            watchdog('country', 'get_countries_for_instrument - parameter is not an integer, returning empty result');
+            return $ret;
+        }
+        $inner = new EntityFieldQuery();
+        $inner_r = $inner->entityCondition('entity_type', 'field_collection_item')
+            ->entityCondition('bundle', 'field_country_instrument_status')
+            ->fieldCondition('field_instrument', 'target_id', $id_instrument, '=')
+            ->execute();
+        if(!empty($inner_r['field_collection_item'])) {
+            $rows = field_collection_item_load_multiple(array_keys($inner_r['field_collection_item']));
+            $keys = array_keys($rows);
+
+            $query = new EntityFieldQuery();
+            $countries = $query->entityCondition('entity_type', 'node')
+                ->entityCondition('bundle', self::$bundle)
+                ->propertyCondition('status', NODE_PUBLISHED)
+                ->fieldCondition('field_country_instrument_status', 'value', $keys)
+                ->execute();
+            if(!empty($countries['node'])) {
+                $countries = $countries['node'];
+                $countries = node_load_multiple(array_keys($countries));
+                foreach($countries as &$country) {
+                    $v = field_get_items('node', $country, 'field_country_instrument_status');
+                    foreach($v as $st) {
+                        if(array_key_exists($st['value'], $rows)) {
+                            $country->status = $rows[$st['value']];
+                            $ret[] = $country;
+                        }
+                    }
+                }
+            }
+        }
+        return $ret;
+    }
+
+    public static function party_from_array($data) {
+        if (array_key_exists('field_country_iso2', $data)) {
+            $country = self::get_by_iso2($data['field_country_iso2']);
+        }elseif (array_key_exists('title', $data)) {
+            $country = self::get_by_name($data['title']);
+        }else {
+            CMSUtils::println('CMSCountry::party_from_array(): Cannot determine country without title or ISO2.');
+            return false;
+        }
+
+        if (!$country) {
+            CMSUtils::println('CMSCountry::party_from_array(): Cannot identify country from given title or ISO2.');
+            return false;
+        }
+
+        $official_name = self::get_field_single_value($country, 'field_country_official_name');
+        if (!$official_name){
+            self::set_field_single_value($country, 'field_country_official_name', $data);
+        }
+
+        if (!property_exists($country, 'uuid') || empty($country->uuid)) {
+            $country->uuid = $data['uuid'];
+        }
+
+        if (!self::get_field_taxonomic_term($country, 'field_region', VOC_REGION)) {
+            self::set_field_taxonomic_term($country, 'field_region', VOC_REGION, $data);
+        }
+
+        self::set_field_single_value($country, 'field_country_entry_into_force', $data);
+        self::set_country_instrument_status($country, $data);
+        self::set_field_boolean($country, 'field_country_member_to_stc', $data);
+        self::set_field_single_value($country, 'field_country_date_of_accession', $data);
+        self::set_field_single_value($country, 'field_country_date_of_acceptance', $data);
+
+        node_save($country);
+    }
+
+    public static function set_country_contribution_collection(&$node, $field, $prefix, $data) {
+        if (!empty($data[$field])) {
+            foreach ($data[$field] as $index => $field_collection) {
+                $field_collection = (array)$field_collection;
+                $rel = array();
+                $rel['field_name'] = $field;
+                if (array_key_exists($prefix . 'value') && !empty($data[$prefix . 'value'])) {
+                    $rel[$prefix . 'value'][$node->language][0]['value'] = $data[$prefix . 'value'];
+                }
+
+                if (array_key_exists($prefix . 'year') && !empty($data[$prefix . 'year'])) {
+                    $rel[$prefix . 'year'][$node->language][0]['value'] = $data[$prefix . 'year'];
+                }
+
+                if (array_key_exists($prefix . 'currency') && !empty($data[$prefix . 'currency'])) {
+                    $currency = CMSUtils::vocabulary_get_or_create_term($field_collection[$prefix . 'currency'], VOC_CURRENCY);
+                    if ($currency) {
+                        $rel[$prefix . 'currency'][$node->language][0]['tid'] = $currency->tid;
+                    }
+                }
+            }
+        }
+
+    }
+
+    public static function set_country_instrument_status(&$node, $data) {
+        if(!empty($data['field_country_instrument_status'])) {
+            foreach ($data['field_country_instrument_status'] as $index => $status) {
+                $status = (array)$status;
+                $rel = array();
+                $rel['field_name'] = 'field_country_instrument_status';
+                $instrument = CMSLegalInstrument::get_by_name($status['field_instrument']);
+                if($instrument) {
+                    $rel['field_instrument'][$node->language][0]['target_id'] = $instrument->nid;
+                }
+
+                $instrument_status = CMSUtils::vocabulary_get_or_create_term($status['field_country_status'], VOC_PARTY_STATUS);
+                if ($instrument_status) {
+                    $rel['field_country_status'][$node->language][0]['tid'] = $instrument_status->tid;
+                }
+
+                if (array_key_exists('field_country_ratification_date', $status) && !empty($status['field_country_ratification_date'])) {
+                    $rel['field_country_ratification_date'][$node->language][0]['value'] = $status['field_country_ratification_date'];
+                }
+
+                if (array_key_exists('field_country_notes', $status) && !empty($status['field_country_notes'])) {
+                    $rel['field_country_notes'][$node->language][0]['value'] = $status['field_country_notes'];
+                }
+
+                $entity = entity_create('field_collection_item', $rel);
+                $entity->field_name = 'field_country_instrument_status';
+                $entity->setHostEntity('node', $node);
+            }
+        }
+    }
+
+    /**
+     * Function used in view hook to get data for parties range state page page map
+     * @param $view
+     *
+     * @return array - $data returned should be used in template file by drupal_ammap_render_map() to render the map
+     * @author Dragos Dumitrescu
+     */
+    public static function get_range_states_for_ammap($view) {
+        if (empty($view->result)) {
+            return false;
+        }
+        $data = array();
+        $status_types = array();
+        $legend = array();
+        $years = array();
+
+        foreach ($view->result as $row) {
+            if (empty($row->field_field_country_status)){
+                continue;
+            }
+
+            $type = $row->field_field_country_status[0]['rendered']['#markup'];
+            if (!in_array($type, $status_types)) {
+                $status_types []= $type;
+                $legend[$type] = array (
+                    'name' => $type,
+                    'weight' => $row->field_field_country_status[0]['raw']['taxonomy_term']->weight
+                    );
+            }
+            $year = "";
+            if (isset($row->field_field_country_ratification_date[0])) {
+                $year = date( 'Y', strtotime($row->field_field_country_ratification_date[0]['raw']['value']));
+                $years[$year]= $year;
+            }
+            $customData = (!empty($type)) ? $type : '';
+            $customData .= (!empty($year)) ? " since $year" : '';
+            $data []= array(
+                'title' => (!empty($row->field_title_field[0]['raw']['value']))
+                        ? $row->field_title_field[0]['raw']['value'] : $row->node_title,
+                'iso2'  => strtoupper($row->field_field_country_iso2[0]['raw']['value']),
+                'customData'  => $customData,
+                'legend' => $type,
+                'url' => drupal_lookup_path('alias',"node/" . $row->nid),
+                'color' => '',
+                'year' => $year,
+            );
+        }
+        $years[date('Y')] = date('Y');
+        asort($years);
+        $return = array();
+        $return['data'] = $data;
+        $return['legend'] = $legend;
+        $return['steps'] = array_values($years);
+        return $return;
+    }
+}

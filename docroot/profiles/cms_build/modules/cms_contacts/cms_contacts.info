@@ -1,0 +1,21 @@
+name = "CMS Contacts"
+description = "CMS contacts module"
+package = CMS
+core = 7.x
+version = 7.x-3.2
+project = cms_contacts
+
+dependencies[] = datatables
+
+files[] = tests/cms_contacts.export.test
+files[] = tests/cms_contacts.helper.test
+files[] = tests/cms_contacts.test
+
+configure = admin/config/system/cms_contacts
+
+; Information added by fserver
+core = "7.x"
+datestamp = "1417524790"
+project = "cms_contacts"
+project status url = "http://fserver.eaudeweb.ro/fserver"
+version = "7.x-3.12"

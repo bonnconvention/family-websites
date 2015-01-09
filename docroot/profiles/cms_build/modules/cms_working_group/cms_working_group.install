@@ -1,0 +1,30 @@
+<?php
+
+module_load_include('php', 'cms', 'utils');
+
+/**
+ * Implements hook_uninstall()
+ * @todo Test this code
+ */
+function cms_working_group_uninstall() {
+}
+
+
+/**
+ * Implementes hook_install()
+ */
+function cms_working_group_install() {
+
+    // We clear the cache, otherwise we get PDOException that module is null (module seems is not fully initialized).
+    // @todo: Hopefully this can be be removed in the future
+    menu_rebuild();
+
+    $permissions = array(
+	'create working_group content' => TRUE,
+	'edit own working_group content' => TRUE,
+        'edit any working_group content' => TRUE,
+        'delete own working_group content' => TRUE,
+        'delete any working_group content' => TRUE
+    );
+    CMSUtils::role_add_permissions('administrator', $permissions);
+}

@@ -1,0 +1,11 @@
+name = CMS admin
+description = A CMS administration theme based on Seven.
+core = 7.x
+base theme = seven
+
+; Information added by fserver
+core = "7.x"
+datestamp = "1420652404"
+project = "cms_theme"
+project status url = "http://fserver.eaudeweb.ro/fserver"
+version = "7.x-7.46"

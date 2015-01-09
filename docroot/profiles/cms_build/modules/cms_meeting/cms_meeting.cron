@@ -1,0 +1,84 @@
+<?php
+
+define('MEETING_CACHE_FILENAME', 'meetings.json');
+
+/**
+ * Implementation of hook_cron_queue_info()
+ */
+function cms_meeting_cron_queue_info() {
+    $websites = CMSUtils::get_all_websites();
+    $queues = array();
+    foreach ($websites as $website_id => $website) {
+        $queues[$website_id . '_remote_meetings'] = array(
+            'worker callback' => 'get_remote_meetings_run',
+            'time' => 30,
+        );
+    }
+
+    return $queues;
+}
+
+/**
+ * Implementation of hook_cron()
+ */
+function cms_meeting_cron() {
+    $websites = CMSUtils::get_all_websites();
+
+    // Put everything in a queue for processing.
+    foreach($websites as $website_id => $website) {
+        $queue = DrupalQueue::get($website_id . '_remote_meetings');
+        $queue->createItem($website_id);
+    }
+}
+
+/**
+ * Worker Callback for the get_remote_meetings cron queue.
+ *
+ * @param   string   $item   Website ID from where we retrieve remote data
+ */
+function get_remote_meetings_run($item) {
+    $websites = CMSUtils::get_all_websites();
+    if (!array_key_exists($item, $websites)) {
+        drupal_set_message(t('Remote meetings could not be retrieved for %site', array('%site' => $item)), 'error');
+        drupal_exit();
+    }
+
+    $url = $websites[$item]['url'];
+    // Remote login API user
+    $cookie_file = CMSUtils::remote_login($url, $cron_job = TRUE);
+    $meetings = '';
+    if ($cookie_file) {
+        $ch = curl_init();
+        $curl_options = array(
+            CURLOPT_HEADER => 0,
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_COOKIEFILE => $cookie_file,
+            CURLOPT_URL => $url . '/api/meeting/list/' . $item,
+        );
+        curl_setopt_array($ch, $curl_options);
+
+        // Retrieve remote data
+        $meetings = curl_exec($ch);
+        curl_close($ch);
+        unset($ch);
+
+        $ch = curl_init();
+        $curl_options[CURLOPT_URL] = $url . '/user/logout';
+        curl_setopt_array($ch, $curl_options);
+        curl_exec($ch);
+        unset($ch);
+
+        unlink($cookie_file);
+    }
+
+
+    if ($meetings) {
+        $directory = drupal_get_path('module', 'cms') . _DS_ . 'remote_cache' . _DS_  . $item;
+        CMSUtils::mkdir($directory);
+        $cache_file = $directory . _DS_ . MEETING_CACHE_FILENAME;
+        CMSUtils::truncate_file($cache_file); // Remove old cached data
+        file_put_contents($cache_file, $meetings);
+    }
+
+    watchdog('meeting', 'Meetings retrieved from @website_title', array('@website_title' => $websites[$item]['title']));
+}

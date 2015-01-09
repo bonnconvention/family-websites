@@ -1,0 +1,291 @@
+<?php
+
+/**
+ * @file
+ * Block module that display random species
+ *
+ * @author Radu Ciofringeanu
+ *
+ */
+
+module_load_include('php', 'cms', 'utils');
+
+/**
+ * Implements hook_help().
+ */
+function random_species_help($path, $arg) {
+    switch ($path) {
+        case 'admin/config/media/random_species':
+            return '<p>' . t('This module allows you to select a particular species '
+                    . 'or one random. For the random selected, '
+                    . 'you can specify whether to show only those that have an image set. '
+                    . 'Otherwise, the pictures will be displayed from Arkive.') . '</p>';
+    }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function random_species_menu() {
+    $items = array();
+    $items['admin/config/media/random_species'] = array(
+        'title' => 'Random Species',
+        'description' => 'Display block with random species',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('random_species_form'),
+        'access arguments' => array('access administration pages'),
+        'type' => MENU_NORMAL_ITEM,
+    );
+    return $items;
+}
+
+/**
+ * Page callback: Form 
+ *
+ * @see random_species_menu()
+ */
+function random_species_form($form, &$form_state) {
+    //get all species
+    $species = random_species_get_all_species();
+
+    //array of species
+    $options = array();
+    foreach ($species as $result) {
+        $options[$result->nid] = $result->node_title;
+    }
+
+    //species dropdown
+    $form['random_species_title'] = array(
+        '#type' => 'select',
+        '#title' => t('Species'),
+        '#default_value' => variable_get('random_species_title', ""),
+        '#options' => $options,
+        '#description' => t('List of species'),
+        '#empty_option' => '-- Random --',
+    );
+
+    //only species with an image defined
+    $form['random_species_image'] = array(
+        '#type' => 'checkbox',
+        '#title' => 'Display only species that have an image defined',
+        '#description' => 'It will apply only for random species',
+        '#default_value' => variable_get('random_species_image', 0),
+    );
+
+    //cache settings
+    $form['random_species_cache'] = array(
+        '#type' => 'select',
+        '#title' => 'Cache time',
+        '#description' => 'Specify when the block will refresh his value',
+        '#default_value' => variable_get('random_species_cache', "1"),
+        '#options' => array(
+            1 => 'one day',
+            7 => 'one week',
+            30 => 'one month',
+        ),
+    );
+    
+    $form['#submit'][] = 'random_species_form_handler';
+
+    return system_settings_form($form);
+}
+
+/*
+ * Custom submit form handler
+ * Clear random_species cache
+ */
+function random_species_form_handler($form, &$form_state){
+    CMSUtils::domain_cache_clear_all('random_species', 'cache');    
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function random_species_block_info() {
+    $blocks['random_species'] = array(
+        // The name that will appear in the block list.
+        'info' => t('Random species'),
+        // Default setting.
+        'cache' => DRUPAL_CACHE_CUSTOM,
+    );
+    return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ * Prepares the contents of the block.
+ */
+function random_species_block_view($delta = '') {  
+    $species = random_species_get_species();
+    
+    switch ($delta) {
+        case 'random_species':
+            if (user_access('access content')) {
+                $block['content'] = theme('random_species',$species);
+            }
+            return $block;
+    }
+}
+
+/**
+ * Get all species
+ */
+function random_species_get_all_species() {    
+    $view = views_get_view_result('front_end_species', 'random_species', random_species_get_instrument(domain_get_domain()['domain_id']));
+    
+    return $view;
+}
+
+/**
+ * Get selected species or a random one 
+ */
+function random_species_get_species() {    
+    $result = '';
+    $species_id = variable_get('random_species_title');
+    
+    $species_values = array();
+    
+    if(!empty($species_id)){ //one selected species
+        $result = random_species_get_selected_species($species_id);
+        if(isset($result) && !empty($result)){
+            $species_values = random_species_set_values_for_selected_species($result);
+        }        
+    }elseif(variable_get('random_species_image')){ //random with cck
+        if ($cache = CMSUtils::domain_cache_get('random_species', 'cache'))
+            $species_values = $cache->data;
+        else
+            $species = random_species_get_species_with_cck_image();
+        if (isset($species) && !empty($species)) {                        
+            $species_values = random_species_set_values_random_with_cck($species);
+        }        
+    }else{ //random - all species: select the first one that have image in cck or arkive
+        if ($cache = CMSUtils::domain_cache_get('random_species', 'cache'))
+            $species_values = $cache->data;
+        else
+            $species = random_species_get_selected_species();          
+        if(isset($species) && !empty($species)){
+            $species_values = random_species_set_values_random_species($species);
+        }      
+    }
+    
+    return $species_values;
+}
+
+/**
+ * Set values for species in the case: one selected species
+ */
+function random_species_set_values_for_selected_species($result){
+    $values = array_shift($result); 
+    
+    $species_values['nid'] = $values->nid;
+    $species_values['title'] = $values->node_title;
+    $species_values['image_type'] = 'cck';
+    //get images from cck field
+    $images = $values->field_field_species_images;
+    if(empty($images)){ //get images from arkive
+        $species_values['image_type'] = 'arkive';
+        $images = CMSUtils::get_images_from_arkive($species_values['title']);
+    }
+    $species_values['images'] = $images;   
+    
+    return $species_values;
+}
+
+/**
+ * Set values for species chosen random and with images from just cck
+ */
+function random_species_set_values_random_with_cck($result) {
+    $species_values = array();
+    $values = array_shift($result);
+        
+    $species_values['images'] = $values->field_field_species_images;
+    $species_values['image_type'] = 'cck';
+    $species_values['nid'] = $values->nid;
+    $species_values['title'] = $values->node_title;
+    //Save values in the cache
+    CMSUtils::domain_cache_set('random_species', $species_values, 'cache', time() + variable_get('random_species_cache')*24*3600);               
+   
+    return $species_values;
+}
+
+/**
+ * Set values for species chosen random
+ * The image can be from cck or from arkive
+ */
+function random_species_set_values_random_species($result){
+    $images = ''; $counter = 0; $species_values = array();
+    foreach ($result as $item){
+        if($counter > 100)
+            break;
+        
+        //get images form cck field
+        $images = $item->field_field_species_images;
+        $image_type = 'cck';
+        //get images from arkive
+        if(empty($images)){             
+            $image_type = 'arkive';
+            $images = CMSUtils::get_images_from_arkive($item->node_title);
+        }
+        
+        //set values
+        $species_values['images'] = $images;
+        $species_values['image_type'] = $image_type;
+        $species_values['nid'] = $item->nid;
+        $species_values['title'] = $item->node_title;
+        if(!empty($images)){                        
+            // Save values in the cache 
+            CMSUtils::domain_cache_set('random_species', $species_values, 'cache', time() + variable_get('random_species_cache')*24*3600);
+            break;
+        }
+        $counter++;
+    }
+    
+    return $species_values;    
+}
+
+/*
+ * Get a random species that have an image cck field set
+ */
+function random_species_get_species_with_cck_image(){            
+    //get species from a view page
+    $view = views_get_view_result('front_end_species', 'random_species_with_images', random_species_get_instrument(domain_get_domain()['domain_id']));
+    shuffle($view);          
+                
+    return $view;        
+}
+
+/*
+ * Get selected species
+ */
+function random_species_get_selected_species($species_id = 0){    
+    $view = views_get_view_result('front_end_species', 'random_species', random_species_get_instrument(domain_get_domain()['domain_id']));
+    if (!empty($species_id)){ //selected species
+        $view = array_filter($view, function($item) use($species_id){
+            return ($item->nid == $species_id);        
+        });
+    }else //random species
+        shuffle($view);          
+                
+    return $view;
+}
+
+/**
+ * Register theme
+ */
+function random_species_theme(){
+    $module_path = drupal_get_path('module', 'random_species');
+    return array(
+        'random_species' => array(
+            'path' => $module_path,
+            'variables' => array('items' => null),
+            'template' => 'random_species',
+         ),
+    );
+}
+
+/**
+ * Get instrument by domanin
+ */
+function random_species_get_instrument($domain_id){
+    return CMSBase::$domain_instrument[$domain_id]['instrument'];
+}

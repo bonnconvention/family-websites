@@ -1,0 +1,44 @@
+<?php
+
+module_load_include('php', 'cms', 'utils');
+
+/**
+ * Implements hook_uninstall()
+ * @todo Test this code
+ */
+function cms_award_uninstall() {
+    CMSUtils::vocabulary_delete(VOC_SPONSORS);
+}
+
+
+/**
+ * Implementes hook_install()
+ */
+function cms_award_install() {
+    $vocs = array('Sponsors' => VOC_SPONSORS);
+
+    foreach($vocs as $name => $machine_name) {
+        CMSUtils::vocabulary_create($name, $machine_name);
+    }
+
+    // We clear the cache, otherwise we get PDOException that module is null (module seems is not fully initialized).
+    // @todo: Hopefully this can be be removed in the future
+    menu_rebuild();
+
+    $permissions = array(
+        'create award content' => TRUE,
+        'edit own award content' => TRUE,
+        'edit any award content' => TRUE,
+        'delete own award content' => TRUE,
+        'delete any award content' => TRUE,
+
+        'search content' => TRUE,
+        'use advanced search' => TRUE,
+    );
+
+    $vocs = array(VOC_SPONSORS);
+    foreach($vocs as $machine_name) {
+        CMSUtils::set_vocabulary_permissions($permissions, $machine_name, 'award', 'administrator');
+    }
+    CMSUtils::role_add_permissions('administrator', $permissions);
+}

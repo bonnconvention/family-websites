@@ -1,0 +1,579 @@
+<?php
+/**
+ * @file
+ * Code for the Document feature.
+ */
+
+include_once 'cms_document.features.inc';
+
+define('ROLE_MANAGE_DOCUMENT', 'manage document');
+
+define('VOC_DOCUMENT_TYPE', 'document_type');
+define('VOC_DOCUMENT_STATUS', 'document_status');
+define('VOC_DOCUMENT_SUBMITTER', 'document_submitter');
+define('VOC_DOCUMENT_THREATS', 'threats');
+
+define('TYPE_PLAN', 'Plan');
+define('TYPE_NATIONAL_REPORT', 'National report');
+define('FILTER_DOCUMENT_INSTRUMENT_FILTER', 'field_instrument_target_id');
+
+module_load_include('module', 'cms');
+
+/**
+ * Implements hook_menu_local_tasks_alter();
+ *
+ * Show 'Create document' button on Species listing view
+ *
+ * @param   array   $data
+ * @param   array   $router_item
+ * @param   string  $root_path
+ */
+function cms_document_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+    switch($root_path){
+        case CMSDocument::$bundle . '/listing' :
+            $item = menu_get_item('node/add/' . CMSDocument::$bundle);
+            $item['title'] = t('Create ' . CMSDocument::$bundle);
+            if ($item['access']) {
+                $data['actions']['output'][] = array(
+                    '#theme' => 'menu_local_action',
+                    '#link' => $item,
+                );
+            }
+            break;
+    }
+}
+
+/**
+ * Implementes hook_theme($existing, $type, $theme, $path)
+ */
+function cms_document_theme($existing, $type, $theme, $path) {
+    $base = array(
+        'file' => 'theme.inc',
+        'path' => $path . '/theme',
+    );
+    return array(
+        'table__documents_template_instrument' => $base + array(
+                'variables' => array(
+                    'header' => NULL,
+                    'rows' => NULL,
+                    'attributes' => array(),
+                    'caption' => NULL,
+                    'colgroups' => array(),
+                    'sticky' => TRUE,
+                    'empty' => '',
+                    'settings' => array()
+                )
+            )
+    );
+}
+
+function cms_document_views_default_views_alter(&$views) {
+    if (isset($views['documents'])) {
+        $handler = &$views['documents'];
+        $roles = user_roles();
+        $rids = array();
+        foreach($roles as $rid => $role) {
+            if($role == 'authenticated user') {
+                $rids[$rid] = $rid;
+            }
+        }
+        $handler->display['default']->display_options['access']['type'] = 'role';
+        $handler->display['default']->display_options['access']['role'] = array_filter($rids);
+    }
+    return $views;
+}
+
+/**
+ * Implements hook_node_view();
+ */
+function cms_document_node_view($node, $view_mode, $langcode) {
+    if(function_exists('cms_manage_node_access') && $node->type == CMSDocument::$bundle) {
+        cms_manage_node_access($node);
+    }
+
+    switch ($node->type) {
+        case 'country':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                if (is_theme_admin()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'national_reports', 'documents', 'country_national_reports');
+                } else if (is_theme_frontend()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'national_reports', 'front_end_documents', 'country_national_reports');
+                }
+            }
+            break;
+        case 'document':
+
+            break;
+        case 'legal_instrument':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                if (is_theme_admin()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'national_reports', 'documents', 'instrument_national_reports');
+                    CMSBase::set_related_content_from_views($node, 'plans', 'documents', 'instrument_plans');
+                } else if (is_theme_frontend()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'national_reports', 'front_end_documents', 'instrument_national_reports');
+                    CMSBase::set_related_content_from_views($node, 'plans', 'front_end_documents', 'instrument_plans');
+                }
+            }
+            break;
+        case 'meeting':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                if (is_theme_admin()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'documents', 'meeting_documents_list_reorder', 'meeting_documents_fe');
+                } else if (is_theme_frontend()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'documents', 'meeting_documents_list_reorder', 'meeting_documents_fe');
+                }
+            }
+            break;
+        case 'project':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                if (is_theme_admin()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'national_reports', 'documents', 'project_national_reports');
+                    CMSBase::set_related_content_from_views($node, 'plans', 'documents', 'project_plans');
+                    CMSBase::set_related_content_from_views($node, 'other_documents', 'documents', 'project_other_documents');
+                } else if (is_theme_frontend()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'national_reports', 'front_end_documents', 'project_national_reports');
+                    CMSBase::set_related_content_from_views($node, 'plans', 'front_end_documents', 'project_plans');
+                    CMSBase::set_related_content_from_views($node, 'other_documents', 'front_end_documents', 'project_other_documents');
+                }
+            }
+            break;
+        case 'publication':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                if (is_theme_admin()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'national_reports', 'documents', 'publication_national_reports');
+                    CMSBase::set_related_content_from_views($node, 'plans', 'documents', 'publication_plans');
+                } else if (is_theme_frontend()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'national_reports', 'front_end_documents', 'publication_national_reports');
+                    CMSBase::set_related_content_from_views($node, 'plans', 'front_end_documents', 'publication_plans');
+                }
+            }
+            break;
+        case 'species':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                if (is_theme_admin()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'national_reports', 'documents', 'species_national_reports');
+                    CMSBase::set_related_content_from_views($node, 'plans', 'documents', 'species_plans');
+                    CMSBase::set_related_content_from_views($node, 'other_documents', 'documents', 'species_other_documents');
+                } else if (is_theme_frontend()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'national_reports', 'front_end_documents', 'species_national_reports');
+                    CMSBase::set_related_content_from_views($node, 'plans', 'front_end_documents', 'species_plans');
+                    CMSBase::set_related_content_from_views($node, 'other_documents', 'front_end_documents', 'species_other_documents');
+                }
+            }
+            break;
+    }
+}
+
+/**
+ * Implements hook_form_alter();
+ */
+function cms_document_form_alter(&$form, &$form_state, $form_id) {
+    switch ($form_id) {
+        case 'document_node_form' :
+            $form['field_document_publish_date']['#disabled'] = TRUE;
+
+            $breadcrumb = array();
+            $breadcrumb[] = l(t('Home'), '<front>');
+            $breadcrumb[] = l(t('Documents'), 'document/listing');
+            if (isset($form['nid']) && (is_numeric($form['nid']['#value']))) {
+                $breadcrumb[] = l($form['#node']->title, 'node/' . $form['#node']->nid);
+            }
+            drupal_set_breadcrumb($breadcrumb);
+            $path = drupal_get_path('theme', 'cms_manage');
+            drupal_add_js("$path/js/document.js");
+
+            // Show / Hide files depending on Is Private Checkbox.
+            $form['field_document_files'] += array(
+              '#states' => array(
+                'invisible' => array(
+                  'input[name^="field_is_private"]' => array('checked' => TRUE),
+                ),
+                'visible' => array(
+                  'input[name^="field_is_private"]' => array('checked' => FALSE),
+                ),
+              ),
+            );
+            $form['field_document_private_files'] += array(
+              '#states' => array(
+                'invisible' => array(
+                  'input[name^="field_is_private"]' => array('checked' => FALSE),
+                ),
+                'visible' => array(
+                  'input[name^="field_is_private"]' => array('checked' => TRUE),
+                ),
+              ),
+            );
+            break;
+        case 'views_exposed_form':
+            break;
+        case 'node_delete_confirm':
+            if ($form['#node']->type == 'document') {
+                $form['#submit'][] = '_document_redirect_after_delete';
+            }
+            break;
+    }
+
+    return $form;
+}
+
+function _document_redirect_after_delete(&$form, &$form_state) {
+    $form_state['redirect'] = 'document/listing';
+}
+
+
+function cms_document_node_presave($node) {
+    if ($node->type == 'document' && $node->op == 'Save') {
+        $v = field_get_items('node', $node, 'field_document_publish_date');
+        if(empty($v[0])) {
+            $langcode = field_language('node', $node, 'field_document_publish_date');
+            // When Drupal saves the form, field_document_publish_date is
+            // disabled, but still adds one element "0" to the array, saving
+            // an invalid date. Unset below to avoid this issue.
+            unset($node->field_document_publish_date[$langcode][0]);
+        }
+        CMSDocument::set_pub_date($node);
+    }
+}
+
+
+/**
+ * Implements hook_field_extra_fields()
+ *
+ * @return mixed Extra fields information
+ */
+function cms_document_field_extra_fields() {
+    $extra['node'][CMSDocument::$bundle_instrument_module]['display'] = array(
+        'national_reports' => array(
+            'label' => t('National reports'),
+            'description' => t('Injects into CMS Instrument content type the list of national reports for the CMS Instrument'),
+            'weight' => 100,
+        ),
+    );
+    $extra['node'][CMSDocument::$bundle_instrument_module]['display'] = array(
+        'plans' => array(
+            'label' => t('Plans'),
+            'description' => t('Injects into CMS Instrument content type the list of plans for the CMS Instrument'),
+            'weight' => 100,
+        ),
+    );
+    return $extra;
+}
+
+/**
+ * This class contains various utility functions related to publication
+ * module that can be reused in other parts of the document.
+ */
+class CMSDocument extends CMSBase {
+
+    public static $bundle = 'document';
+    public static $bundle_instrument_module = 'legal_instrument';
+    public static $field_documents_instrument = 'documents';
+    public static $field_national_reports_instrument = 'national_reports';
+    public static $field_plans_instrument = 'plans';
+
+    static $related_fields = array(
+        'species' => 'field_document_species',
+        'meeting' => 'field_document_meeting',
+        'project' => 'field_document_project',
+        'publication' => 'field_document_publication',
+    );
+
+    static $false_related_fields = array(
+    );
+
+    /**
+     * Create a new CMS Document node instance.
+     *
+     * @param bool $save If TRUE, object is saved into database
+     * @return stdClass The node object initialized
+     */
+    static function node_create($title, $save = TRUE) {
+        return self::drupal_node_create($title, 'document', $save);
+    }
+
+    /**
+     * Retrieve CMS Country keyed by entity_id
+     * @return array Country node or NULL
+     */
+    static function get_document_by_uid($uid) {
+        $c = db_select('field_data_field_document_uid', 'a')
+            ->fields('a', array('entity_id'))
+            ->condition('a.field_document_uid_value', $uid)
+            ->execute()->fetchObject();
+        if($c) {
+            return node_load($c->entity_id);
+        }
+    }
+
+    /**
+     * Set the legal instruments for a node
+     *
+     * @param stdClass $node Reference to the node to update
+     * @param array $data Data to get information from (ex. JSON). Must contain key field_instrument
+     * @param type $cache_instruments (Optional) Pre-cached data with Legal instruments as array 'name' => nid.
+     */
+    public static function set_instruments(&$node, $data, $cache_instruments = array()) {
+        $node->field_instrument[$node->language] = array();
+        if(!empty($data['field_instrument'])) {
+            if(empty($cache_instruments)) {
+                $cache_instruments = CMSLegalInstrument::get_mapped_instruments();
+            }
+
+            $instruments = array();
+            foreach($data['field_instrument'] as $instrument_name) {
+                if(array_key_exists($instrument_name, $cache_instruments)) {
+                    $instruments[] = $cache_instruments[$instrument_name];
+                } else {
+                    CMSUtils::println('CMSDocument::set_instruments(): Could not find instrument %s', $instrument_name);
+                }
+            }
+            CMSUtils::set_node_list_value($node, 'field_instrument', $instruments, 'target_id');
+        }
+    }
+
+
+    /**
+     * Retrieve the instrument names from a node
+     *
+     * @param stdClass $node Drupal project node
+     * @param array $instrument_cache (Optional) Instrument cache (id | name) to avoid query for each call
+     * @return array Array of strings with instrument names
+     */
+    public static function get_instruments($node, $instrument_cache = array()) {
+        $ret = array();
+        $instruments = self::get_field_list_target_id($node, 'field_instrument');
+        if(!empty($instruments)) {
+            if(empty($instrument_cache)) {
+                $instrument_cache = CMSLegalInstrument::get_mapped_instruments($title_as_key = FALSE);
+            }
+            foreach($instruments as $id) {
+                if(array_key_exists($id, $instrument_cache)) {
+                    $ret[] = $instrument_cache[$id];
+                } else {
+                    CMSUtils::println("CMSDocument::get_instruments(): Instrument with id: %d does not exist!", $id);
+                }
+            }
+        }
+        return $ret;
+    }
+    /**
+     * Set field_document_publish_date with earliest date from attachements
+     * WARNING - just sets the date, doesn't save the node
+     *
+     * @param node $node Drupal document node
+     *
+     * @return bool  if any modification has been made
+     **/
+    public static function set_pub_date(&$node)
+    {
+        $langcode = field_language('node', $node, 'field_document_publish_date');
+        $modified = FALSE;
+        if(!empty($node->field_document_files)){
+            $min_date = date('Y-m-d H:i:s',strtotime('+10 year',time()));
+            if (!empty($node->field_document_files[$langcode])) {
+                foreach ($node->field_document_files[$langcode] as $file) {
+                    if (!empty($file['field_document_file_publish_date'][$langcode][0]['value'])) {
+                        $date = $file['field_document_file_publish_date'][$langcode][0]['value'];
+                        if (!empty($date) && strtotime($min_date) > strtotime($date)) {
+                            $min_date = $date;
+                            $modified = TRUE;
+                        }
+                    }
+                }
+                if ($modified) {
+                    $node->field_document_publish_date[$langcode][0]['value'] = $min_date;
+                }
+            }
+        }
+        return $modified;
+    }
+
+
+    /**
+     * Create a new document from a JSON array.
+     * Data may come from JSON or other sources, encoded as array:
+     * {
+     *      'title' => 'test',
+     *      ...
+     * }
+     *
+     * @param array $data Array with object properties
+     * @param boolean $save (Optional) Save the node into database
+     * @return object Unsaved node
+     * @see CMSProject::set_instruments
+     */
+    public static function node_from_array($data, $files_path_prefix = '') {
+        $ret = NULL;
+        if(empty($data['title'])) {
+            CMSUtils::println('CMSDocument::node_from_array(): Cannot import document without title');
+            return $ret;
+        }
+        $node = CMSDocument::node_create($data['title']);
+        if (!empty($data['uuid'])) {
+            $node->uuid = $data['uuid'];
+        }
+        if (isset($data['status']) && in_array($data['status'],array(0,1))) {
+            $node->status = $data['status'];
+        }
+        self::set_field_single_value($node, 'field_document_number', $data);
+        self::set_field_single_value($node, 'field_document_publish_date', $data);
+        if (isset($data['field_document_type'])) {
+            if (is_array($data['field_document_type'])) {
+                self::set_field_taxonomic_terms($node, 'field_document_type', VOC_DOCUMENT_TYPE, $data);
+            }else {
+                self::set_field_taxonomic_term($node, 'field_document_type', VOC_DOCUMENT_TYPE, $data);
+            }
+        }
+
+        self::set_field_taxonomic_term($node, 'field_document_status', VOC_DOCUMENT_STATUS, $data);
+        self::set_field_taxonomic_term($node, 'field_document_submitted_by', VOC_DOCUMENT_SUBMITTER, $data);
+        if (isset($data['field_threats'])) {
+            if (is_array($data['field_threats'])) {
+                self::set_field_taxonomic_terms($node, 'field_threats', VOC_DOCUMENT_THREATS, $data);
+            }else {
+                self::set_field_taxonomic_term($node, 'field_threats', VOC_DOCUMENT_THREATS, $data);
+            }
+        }
+        $instrument['field_instrument'] = array($data['field_instrument']);
+        self::set_field_instruments($node, 'field_instrument', $instrument);
+
+        if(!empty($data['field_document_files'])) {
+            foreach ($data['field_document_files'] as $index => $document) {
+                $c = array();
+                self::import_field_collection_files($c, 'field_document_files','field_document_file', $document, self::$bundle, $files_path_prefix, 'node', $node->language);
+
+                if((!empty($document['field_document_file_language'])) && (!empty($c))) {
+                    $term = CMSUtils::vocabulary_get_or_create_term($document['field_document_file_language'], VOC_LANGUAGES);
+                    if(!empty($term)) {
+                        $c['field_document_file_language'][$node->language][0]['tid'] = $term->tid;
+                    } else {
+                        CMSUtils::println("CMSBase::set_field_taxonomic_term: Cannot find term %s", $document['field_document_file_language']);
+                    }
+                } else {
+                    CMSUtils::println("Notification: field_document_file_language is not set for file %s", $document['field_document_file']);
+                }
+                if(!empty($document['field_document_file_publish_date'])) {
+                    $c['field_document_file_publish_date'][$node->language][0]['value'] = $document['field_document_file_publish_date'];
+                }
+                $entity = entity_create('field_collection_item', $c);
+                $entity->field_name = 'field_document_files';
+                $entity->setHostEntity('node', $node);
+            }
+        }
+
+        foreach(self::$related_fields as $field_name) {
+            self::set_entity_reference_by_uuid($node, $field_name, $data);
+        }
+
+        node_save($node);
+
+        return $node;
+    }
+
+    public static function node_to_array($node, $export_base_dir) {
+        $ret = array(
+            'title' => $node->title,
+            'status' => $node->status,
+            'uuid' => CMSUtils::get_node_uuid($node)
+        );
+        self::get_field_single_value($node, 'field_document_number', $ret);
+        $ret['field_document_type'] = self::get_field_taxonomic_terms_names($node, 'field_document_type', VOC_DOCUMENT_TYPE);
+        $ret['field_document_status'] = self::get_field_taxonomic_term_name($node, 'field_document_status', VOC_DOCUMENT_STATUS);
+        self::get_field_single_value($node, 'field_document_publish_date', $ret);
+        $ret['field_instrument'] = self::get_field_instrument_name($node, 'field_instrument');
+        $ret['field_document_submitted_by'] = self::get_field_taxonomic_term_name($node, 'field_document_submitted_by', VOC_DOCUMENT_SUBMITTER);
+        $ret['field_document_files'] = self::export_document_files($node, $export_base_dir);
+        $ret['field_threats'] = self::get_field_taxonomic_terms_names($node, 'field_threats', VOC_DOCUMENT_THREATS);
+
+        foreach(self::$related_fields as $field_name) {
+            $ret[$field_name] = self::get_entity_reference_by_uuid($node, $field_name);
+        }
+
+        return $ret;
+    }
+
+    public static function export_document_files($node, $dest_dir = '') {
+        CMSUtils::mkdir($dest_dir);
+
+        $ret = array();
+        if (isset($node->field_document_files) && ($node->field_document_files != NULL) && (!empty($node->field_document_files))) {
+            foreach($node->field_document_files[$node->language] as $index => $field){
+                $field_collection = entity_load('field_collection_item', array($field['value']));
+                $file = $field_collection[$field['value']]->field_document_file[$node->language][0];
+
+                if (!empty($file)) {
+                    $slug = CMSUtils::slug($node->title);
+                    $rel_path = $node->type . DIRECTORY_SEPARATOR . $field_name;
+                    $pub_dir = $dest_dir . DIRECTORY_SEPARATOR . $rel_path;
+                    CMSUtils::mkdir($pub_dir);
+
+                    $filename = $file['filename'];
+                    $dest = $pub_dir . DIRECTORY_SEPARATOR . $filename;
+                    $f = file_stream_wrapper_get_instance_by_uri($file['uri']);
+                    copy($f->realpath(), $dest);
+
+                    $arr = array(
+                        'field_document_file' => $rel_path . DIRECTORY_SEPARATOR . $filename,
+                        'description' => (!empty($file['description'])) ? $file['description'] : '',
+                        'md5' => md5_file($dest),
+                        'uuid' => (!empty($file['uuid'])) ? $file['uuid'] : '',
+
+                    );
+                    if(!empty($file['title'])) { // For images
+                        $arr['title'] = $file['title'];
+                    }
+
+                    $ret[$index] = $arr;
+
+                    if (isset($field_collection[$field['value']]->field_document_file_language) && (!empty($field_collection[$field['value']]->field_document_file_language))) {
+                        $ret[$index]['field_document_file_language'] = self::get_field_taxonomic_term_name($field_collection[$field['value']], 'field_document_file_language', VOC_LANGUAGES, $node->language);
+                    }
+                    if (isset($field_collection[$field['value']]->field_document_file_publish_date) && (!empty($field_collection[$field['value']]->field_document_file_publish_date))) {
+                        $ret[$index]['field_document_file_publish_date'] = self::get_field_single_value($field_collection[$field['value']], 'field_document_file_publish_date', $ret[$index]);
+                    }
+                }
+            }
+        }
+
+        return $ret;
+    }
+
+    public static function get_documents_for_instrument($id_instrument, $type = '') {
+        $ret = array();
+        if(!is_numeric($id_instrument)) {
+            watchdog('document', 'get_documents_for_instrument() - $id_instrument is not an integer, returning empty result');
+            return $ret;
+        }
+
+        $type_term = taxonomy_get_term_by_name($type, VOC_DOCUMENT_TYPE);
+        $type_tid = ($type_term) ? key($type_term) : 0;
+
+        if ($type_tid) {
+            $query = new EntityFieldQuery();
+            $query = $query
+                ->entityCondition('entity_type', 'node')
+                ->propertyCondition('type', self::$bundle)
+                ->propertyCondition('status', NODE_PUBLISHED)
+                ->fieldCondition('field_instrument', 'target_id', $id_instrument, '=')
+                ->fieldCondition('field_document_type', 'tid', $type_tid, '=')
+                ->execute();
+            if(!empty($query['node'])) {
+                $ret = node_load_multiple(array_keys($query['node']));
+            }
+        }
+
+        return $ret;
+    }
+}

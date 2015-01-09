@@ -1,0 +1,33 @@
+About {"url":"about\/introduction","lang":"und"}
+-Introduction {"url":"about\/introduction","lang":"und"}
+-Parties and Range States {"url":"party-range-states","lang":"und"}
+-How to become a Party {"url":"about\/how-to-become-a-party","lang":"und"}
+-Organizational Structure {"url":"about\/organizational-structure","lang":"und"}
+-Secretariat {"url":"about\/secretariat","lang":"und"}
+-The CMS Family {"url":"<front>","lang":"und"}
+Documents {"url":"documents\/agreement-text","expanded":true,"lang":"und"}
+-Agreement Text {"url":"documents\/agreement-text","lang":"und"}
+-Meeting of Parties {"url":"meetings\/meetings-of-parties","lang":"und"}
+-Standing Committee {"url":"meetings\/standing-committee","lang":"und"}
+-Advisory Committee {"url":"meetings\/advisory-committee","lang":"und"}
+-National Reports {"url":"documents\/national-reports","lang":"und"}
+-Strategic Plan {"url":"documents\/strategic-plan","lang":"und"}
+-Action Plans {"url":"documents\/action-plans","lang":"und"}
+Activities {"url":"working-groups","lang":"und"}
+-Working Groups {"url":"working-groups","lang":"und"}
+-Projects {"url":"projects","lang":"und"}
+-Small Grants {"url":"projects\/small-grants","lang":"und"}
+-Campaigns {"url":"campaigns","lang":"und"}
+-Awards {"url":"awards","lang":"und"}
+Species {"url":"species","lang":"und"}
+-Species List {"url":"species","lang":"und"}
+-Threats {"url":"species\/threats","lang":"und"}
+-Benefits {"url":"species\/benefits","lang":"und"}
+Publications {"url":"publications\/newsletter","lang":"und"}
+-Newsletter {"url":"publications\/newsletter","hidden":true,"lang":"und"}
+-Scientific {"url":"publications\/scientific","lang":"und"}
+-Leaflets and Brochures {"url":"publications\/leaflets-brochures","lang":"und"}
+CMS instruments {"url":"cms-instruments\/agreements","lang":"und"}
+-Agreements {"url":"cms-instruments\/agreements","lang":"und"}
+-Memoranda of Understanding {"url":"cms-instruments\/mou","lang":"und"}
+-Special Species Initiatives {"url":"cms-intruments\/special-initiatives","lang":"und"}

@@ -1,0 +1,130 @@
+<?php
+/**
+ * Implements hook_cron().
+ *
+ */
+
+function sync_ldap_subscribers_cron() {
+    watchdog('ldap_subscribers', 'Start sync ldap subscribers');
+
+	$CMS_UUID = 'f0b4ae05-8d04-4814-b01f-064c94da5a23';
+	$AEWA_UUID = 'dbce2ddc-648e-4302-be84-47d0aa36ad66';
+	$ASCOBANS_UUID = '0b41fac4-6198-439a-a335-f7405f352681';
+
+	//$CMS_NEWSLETTER = 'Test Newsletter category';
+	$CMS_NEWSLETTER = 'CMS newsletter - LDAP';
+	$AEWA_NEWSLETTER = 'AEWA newsletter - LDAP';
+	$ASCOBANS_NEWSLETTER = 'ASCOBANS newsletter - LDAP';
+
+	$profile = variable_get('current_profile', 'cms');
+	$ldap = CMSContactsLDAP::get_instance();
+	$emails = array();
+
+    watchdog('ldap_subscribers', 'SYNC ldap subscribers ' . $profile);
+
+	switch ($profile) {
+		case 'cms':
+			delete_all_subscribers($CMS_NEWSLETTER);
+			$emails = $ldap->ldap_get_emails_of_list_members($CMS_UUID, 'Bulletin');
+			import_ldap_subscribers($emails,$CMS_NEWSLETTER);
+			break;
+		case 'aewa':
+			delete_all_subscribers($AEWA_NEWSLETTER);
+                $emails = $ldap->ldap_get_emails_of_list_members($AEWA_UUID, 'E-newsletter recipient');
+			import_ldap_subscribers($emails,$AEWA_NEWSLETTER);
+			break;
+		case 'ascobans':
+			delete_all_subscribers($ASCOBANS_NEWSLETTER);
+			$emails = $ldap->ldap_get_emails_of_list_members($ASCOBANS_UUID, 'Newsletter');
+			import_ldap_subscribers($emails,$ASCOBANS_NEWSLETTER);
+			break;
+		default:
+			CMSUtils::println('Profile %s does not exists!', $profile);
+	}
+}
+
+/*
+ * Delete all subscribers of the category
+ * @param string $newsletter_category - the newsletter category name
+ */
+
+function delete_all_subscribers($newsletter_category) {
+	$term = taxonomy_get_term_by_name($newsletter_category);
+	$ldap_newsletter_tid = 1750; // Test Newsletter category
+
+    if (!empty($term) && current($term)->vocabulary_machine_name == 'newsletter'){
+        $ldap_newsletter_tid = current($term)->tid;
+        CMSUtils::println('Newsletter found - term id : %s', $ldap_newsletter_tid);
+    } else {
+        CMSUtils::println('Newsletter name %s does not exists or is not a term of newsletter vocabulary!', $newsletter_category);
+        return;
+    }
+
+	$subscribers = simplenews_get_subscriptions_by_list($ldap_newsletter_tid);
+
+	foreach ($subscribers as $subscriber) {
+		simplenews_subscriber_delete($subscriber);
+	}
+}
+
+
+/**
+ * Subscribe emails from ldap to newsletter
+ * Used for sync subscribers from ldap @simplenews_ldap_newsletter
+ *
+ * @param array() $emails - list of emails from ldap
+ * @param $newsletter_category - name of the newsletter category
+ *
+ */
+
+function import_ldap_subscribers($emails, $newsletter_category) {
+	$term = taxonomy_get_term_by_name($newsletter_category);
+	$ldap_newsletter_tid = 1750; // Test Newsletter category
+
+    if (!empty($term) && current($term)->vocabulary_machine_name == 'newsletter'){
+        $ldap_newsletter_tid = current($term)->tid;
+        CMSUtils::println('Newsletter found - term id : %s', $ldap_newsletter_tid);
+    } else {
+        CMSUtils::println('Newsletter name %s does not exists or is not a term of newsletter vocabulary!', $newsletter_category);
+        return;
+    }
+
+    if (!empty($emails)){
+    	foreach ($emails as $e) {
+    		$email = strtolower($e);
+    		$subscriber = simplenews_subscriber_load_by_mail($email);
+
+    		// if subscriber already exists don't add
+        	if (!$subscriber) {
+            	$subscriber = (object) array(
+                	'activated' => 1, //is active
+                	'mail' => $email,
+                	'uid' => 0, //is anonymus
+                	'language' => '', //nothing
+                	'changes' => serialize(array()) //nothing
+            	);
+            	simplenews_subscriber_save($subscriber);
+            	CMSUtils::println('NEW: E-mail %s was subscribed - subscriber created!', $email);
+        	} else {
+            	CMSUtils::println('OLD: E-mail %s is already subscribed!', $email);
+        	}
+
+	        if (!simplenews_user_is_subscribed($subscriber->mail, $ldap_newsletter_tid) && $ldap_newsletter_tid) {
+    	        $subscription = (object) array(
+					'snid' => $subscriber->snid, //id of the subscriber that i've just inserted
+					'tid' => $ldap_newsletter_tid, //tid of category that is to subscribe
+					'status' => 1, // 1 - subscribed
+					'timestamp' => 0, // now();
+					'source' => 'LDAP subscriber'
+				);
+				simplenews_subscription_save($subscription);
+				CMSUtils::println('NEW: E-mail %s was subscribed to the ldap_newsletter_category!', $email);
+			} else {
+				CMSUtils::println('OLD: E-mail %s is already subscribed subscribed to the ldap newslettercategory.', $email);
+			}
+    	}
+    } else {
+    	CMSUtils::println('WARNING: Email list is empty! - 0 ldap subscribers to newsletter.');
+        return;
+    }
+}

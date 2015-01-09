@@ -1,0 +1,84 @@
+<?php
+
+module_load_include('php', 'cms', 'utils');
+
+if(!defined('ROLE_CONTENT_MANAGER')) {
+    define('ROLE_CONTENT_MANAGER', 'content manager');
+}
+
+/**
+ * Implements hook_uninstall()
+ */
+function cms_news_uninstall() {
+
+}
+
+
+/**
+ * Implementes hook_install()
+ */
+function cms_news_install() {
+
+    CMSUtils::vocabulary_create('News type', VOC_NEWS_TYPE);
+
+    $role = CMSUtils::get_or_create_role(ROLE_CONTENT_MANAGER);
+    if(!empty($role)) {
+        $rid = $role->rid;
+        $permissions = array(
+            'create news content' => TRUE,
+            'edit own news content' => TRUE,
+            'edit any news content' => TRUE,
+            'delete own news content' => TRUE,
+            'delete any news content' => TRUE,
+
+            'search content' => TRUE,
+            'use advanced search' => TRUE,
+        );
+
+        // We clear the cache, otherwise we get PDOException that module is null (module seems is not fully initialized).
+        // @todo: Hopefully this can be be removed in the future
+        menu_rebuild();
+
+        CMSUtils::set_vocabulary_permissions($permissions, VOC_NEWS_TYPE, 'news', ROLE_CONTENT_MANAGER);
+
+        user_role_change_permissions($rid, $permissions);
+        CMSUtils::role_add_permissions('administrator', $permissions);
+    } else {
+        watchdog('news', "Unable to load role name '@role'", array("@role" => ROLE_CONTENT_MANAGER), WATCHDOG_WARNING);
+    }
+
+}
+
+/**
+ * Fix unpublished news (set instrument and publish them)
+ */
+function cms_news_update_7001() {
+
+    $instrument = 0;
+    $instance = CMSUtils::get_current_profile();
+    if ($instance == 'cms') {
+        $instrument = 1;
+    } elseif($instance == 'aewa') {
+        $instrument = 2;
+    }
+    if($instrument > 0) {
+        $query = new EntityFieldQuery();
+        $query->entityCondition('entity_type', 'node')
+            ->entityCondition('bundle', 'news')
+            ->propertyCondition('status', 0);
+        $result = $query->execute();
+        if (isset($result['node'])) {
+            $news_items_nids = array_keys($result['node']);
+            $news_items = entity_load('node', $news_items_nids);
+            foreach($news_items as $n) {
+                if($n->name == 'Natalie Epler') {
+                    $n->field_instrument[LANGUAGE_NONE][0]['target_id'] = $instrument;
+                    $n->field_news_type[LANGUAGE_NONE][0]['tid'] = ($instance == 'cms') ? 1671 : 1412;
+                    $n->status = 1;
+                    node_save($n);
+                }
+            }
+        }
+    }
+    return t("News are now published.");
+}

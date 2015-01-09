@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the ASCOBANS Views feature.
+ */
+
+include_once 'ascobans_views.features.inc';

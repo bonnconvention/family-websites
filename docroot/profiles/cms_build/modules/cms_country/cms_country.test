@@ -1,0 +1,224 @@
+<?php
+
+/**
+ * SimpleTest cases for Country module
+ */
+class CountryWebTestCase extends CMSWebTestCase {
+
+
+    public static function getInfo() {
+        return array(
+            'name' => 'Country Test',
+            'description' => 'Verify functionality of country module.',
+            'group' => 'CMS Tests'
+        );
+    }
+
+
+    function setUp() {
+        parent::setUp('legal_instrument', 'country', 'date_popup', 'taxonomy');
+        self::$bundle = Country::$bundle;
+    }
+
+
+    function test_security_role_anonymous() {
+        $node = Country::node_create('Albania', 'AL', 'Europe', '001', '2001-02-15', 'ALB', 'Republic of Albania');
+        $this->assertEqual(1, $node->nid);
+
+        $this->try_anonymous_role($node->nid, 'Albania', 'countries/listing', 'node/add/country');
+        $this->ensure_access_denied_for_vocabulary(VOC_REGION, 'Anonymous');
+    }
+
+    function test_security_role_authenticated() {
+        $node = Country::node_create('Albania', 'AL', 'Europe', '001', '2001-02-15', 'ALB', 'Republic of Albania');
+        $this->assertEqual(1, $node->nid);
+
+        $this->try_authenticated_role($node->nid, 'Albania', 'countries/listing', 'node/add/country');
+        $this->ensure_access_denied_for_vocabulary(VOC_REGION, self::$role_authenticated);
+    }
+
+    function test_security_role_manager() {
+        $post = array(
+            'title' => 'Albania',
+            'field_country_iso2[und][0][value]' => 'AL',
+        );
+
+        $this->try_manager_role(ROLE_MANAGE_PARTY, $post, 'countries/listing', 'node/add/country');
+        $this->ensure_access_for_vocabulary(VOC_REGION, ROLE_MANAGE_PARTY, 1);
+    }
+
+    function test_security_role_administrator() {
+        $post = array(
+            'title' => 'Albania',
+            'field_country_iso2[und][0][value]' => 'AL',
+        );
+
+        $this->try_administrator_role($post, 'countries/listing', 'node/add/country');
+        $this->ensure_access_for_vocabulary(VOC_REGION, self::$role_administrator, 1);
+    }
+
+
+    function test_node_create() {
+        $node = Country::node_create('Albania', 'AL', 'Europe', '001', '2001-02-15', 'ALB', 'Republic of Albania');
+        $node = node_load($node->nid);
+        $this->assertEqual('Albania', $node->title);
+        $this->assertEqual('AL', CMSBase::get_field_single_value($node, 'field_country_iso2'));
+        $this->assertEqual('Europe', CMSBase::get_field_taxonomic_term_name($node, 'field_region', VOC_REGION));
+        $this->assertEqual('001', CMSBase::get_field_single_value($node, 'field_country_party_number'));
+        $this->assertEqual('2001-02-15 00:00:00', CMSBase::get_field_single_value($node, 'field_country_entry_into_force'));
+        $this->assertEqual('ALB', CMSBase::get_field_single_value($node, 'field_country_iso3'));
+        $this->assertEqual('Republic of Albania', CMSBase::get_field_single_value($node, 'field_country_official_name'));
+    }
+
+
+    function test_get_by_iso2() {
+        $node = Country::node_create('Albania', 'AL', 'Europe', '001', '2001-02-15', 'ALB', 'Republic of Albania');
+
+        $albania = node_load($node->nid);
+        $this->assertNotNull($albania);
+        $this->assertEqual($node->nid, $albania->nid);
+        $this->assertEqual('Albania', $albania->title);
+
+        $country = Country::get_by_iso2('al');
+        $this->assertNotNull($country);
+        $this->assertEqual($albania->nid, $country->nid);
+    }
+
+
+    function test_list_keyed_by_name() {
+        $c1 = Country::node_create('Albania', 'AL', 'Europe', '001', '2001-02-15', 'ALB', 'Republic of Albania');
+        $c2 = Country::node_create('Romania', 'RO', 'Europe', '002', '2002-03-16', 'ROU', 'Romania');
+
+        $countries = Country::list_keyed_by_name();
+        $this->assertEqual(9, count(array_keys($countries)));
+        $this->assertTrue(array_key_exists('Albania', $countries));
+        $this->assertTrue(array_key_exists('ALBANIA', $countries));
+        $this->assertTrue(array_key_exists('albania', $countries));
+        $this->assertTrue(array_key_exists('Republic of Albania', $countries));
+        $this->assertTrue(array_key_exists('REPUBLIC OF ALBANIA', $countries));
+        $this->assertTrue(array_key_exists('republic of albania', $countries));
+        $this->assertTrue(array_key_exists('Romania', $countries));
+        $this->assertTrue(array_key_exists('ROMANIA', $countries));
+        $this->assertTrue(array_key_exists('romania', $countries));
+
+        $al = $countries['albania'];
+        $ro = $countries['romania'];
+        $this->assertEqual($c1->nid, $al->nid);
+        $this->assertEqual($c2->nid, $ro->nid);
+    }
+
+
+    function test_list_keyed_by_iso2() {
+        $c1 = Country::node_create('Albania', 'Al', 'Europe', '001', '2001-02-15', 'Alb', 'Republic of Albania');
+        $c2 = Country::node_create('Romania', 'Ro', 'Europe', '002', '2002-03-16', 'RoU', 'Romania');
+
+        $countries = Country::list_keyed_by_iso2();
+        $this->assertEqual(6, count(array_keys($countries)));
+        $this->assertTrue(array_key_exists('AL', $countries));
+        $this->assertTrue(array_key_exists('al', $countries));
+        $this->assertTrue(array_key_exists('RO', $countries));
+        $this->assertTrue(array_key_exists('ro', $countries));
+
+        $al = $countries['al'];
+        $ro = $countries['ro'];
+        $this->assertEqual($c1->nid, $al->nid);
+        $this->assertEqual($c2->nid, $ro->nid);
+    }
+
+
+    function test_get_by_name_or_iso2() {
+        $al = Country::node_create('Albania', 'Al', 'Europe', '001', '2001-02-15', 'Alb', 'Republic of Albania');
+        $ob = Country::get_by_name_or_iso2('albania');
+        $this->assertEqual($al->nid, $ob->nid);
+
+        $ob = Country::get_by_name_or_iso2('ALBANIA');
+        $this->assertEqual($al->nid, $ob->nid);
+
+        $ob = Country::get_by_name_or_iso2('AlBaNiA');
+        $this->assertEqual($al->nid, $ob->nid);
+
+        $ob = Country::get_by_name_or_iso2('AL');
+        $this->assertEqual($al->nid, $ob->nid);
+
+        $ob = Country::get_by_name_or_iso2('al');
+        $this->assertEqual($al->nid, $ob->nid);
+
+        $ob = Country::get_by_name_or_iso2('Al');
+        $this->assertEqual($al->nid, $ob->nid);
+    }
+
+
+    function test_get_by_name() {
+        $al = Country::node_create('Albania', 'Al', 'Europe', '001', '2001-02-15', 'Alb', 'Republic of Albania');
+        $ob = Country::get_by_name('albania');
+        $this->assertEqual($al->nid, $ob->nid);
+
+        $ob = Country::get_by_name_or_iso2('ALBANIA');
+        $this->assertEqual($al->nid, $ob->nid);
+
+        $ob = Country::get_by_name_or_iso2('AlBaNiA');
+        $this->assertEqual($al->nid, $ob->nid);
+    }
+
+
+    function test_cache() {
+        Country::node_create('Romania', 'RO');
+        $all = Country::get_all_objects();
+        $this->assertEqual(1, count($all));
+
+        Country::node_create('Bulgaria', 'BG');
+        $all = Country::get_all_objects();
+        $this->assertEqual(2, count($all));
+
+        $this->assertNotNull(Country::get_by_iso2('BG'));
+        $this->assertNotNull(Country::get_by_name('Bulgaria'));
+    }
+
+
+    function test_get_all_objects() {
+        $countries = Country::get_all_objects();
+        $this->assertEqual(array(), $countries);
+
+        Country::node_create('Deutschland', 'DE');
+        $countries = Country::get_all_objects();
+        $this->assertEqual(1, count($countries));
+    }
+
+
+    function test_get_countries_for_instrument() {
+        $ro = Country::node_create('Romania', 'RO');
+        $de = Country::node_create('Deutschland', 'DE');
+
+        $agreement = CMSUtils::vocabulary_get_or_create_term('agreement', VOC_INSTRUMENT_STATUS);
+        $i1 = CMSLegalInstrument::node_create('Instrument 1', 'Instrument #1', $agreement->tid, '2012-11-23');
+
+        $term_party = CMSUtils::vocabulary_get_or_create_term('Party', VOC_PARTY_STATUS);
+
+        $c = array(
+            'field_name' => 'field_country_instrument_status',
+            'field_instrument' => array($i1->language => array(0 => array ('target_id' => $i1->nid))),
+            'field_country_status' => array($i1->language => array(0 => array ('tid' => $term_party->tid))),
+            'field_country_notes' => array($i1->language => array(0 => array ('value' => 'sample text'))),
+        );
+        $entity = entity_create('field_collection_item', $c);
+        $entity->setHostEntity('node', $ro);
+        node_save($ro);
+
+        $entity = entity_create('field_collection_item', $c);
+        $entity->setHostEntity('node', $de);
+        node_save($de);
+
+        $countries = Country::get_countries_for_instrument($i1->nid);
+        $this->assertEqual(2, count($countries));
+
+        $row0 = $countries[0]->status;
+        $this->assertEqual($i1->nid, $row0->field_instrument[$i1->language][0]['target_id']);
+        $this->assertEqual($term_party->tid, $row0->field_country_status[$i1->language][0]['tid']);
+        $this->assertEqual('sample text', $row0->field_country_notes[$i1->language][0]['value']);
+
+        $row1 = $countries[1]->status;
+        $this->assertEqual($i1->nid, $row1->field_instrument[$i1->language][0]['target_id']);
+        $this->assertEqual($term_party->tid, $row1->field_country_status[$i1->language][0]['tid']);
+        $this->assertEqual('sample text', $row1->field_country_notes[$i1->language][0]['value']);
+    }
+}

@@ -1,0 +1,201 @@
+/* Colour theme for terrestrial MOU portals */
+
+/* HEADER */
+.search-area-and-logos {
+background: url("../images/header_wave_terrestrial.png") 80% 0% no-repeat;
+}
+
+.global-menu {
+border-bottom: 1px solid #0D5601;
+}
+
+.global-menu > li {
+background: #0D5601;
+}
+
+.global-menu a {
+color: #FFF;
+}
+
+.global-menu > .active-trail {
+background: #0D5601 url("../images/arrow_hex6D9933.png") 49% 110% no-repeat;
+}
+
+.global-menu .dropdown-menu a {
+color: #FFF;
+}
+
+.global-menu .active-trail,
+.global-menu a:hover,
+.global-menu .dropdown-menu .active-trail,
+.submenu a:hover {
+color: #FFD200;
+}
+
+.global-menu .dropdown-menu ul .active-trail,
+.global-menu .dropdown-menu ul a:hover {
+color: #0D5601;
+}
+
+.global-menu > li > ul {
+background-color: #6D9933;
+}
+
+.global-menu > li > ul > li > ul {
+background-color: #A7C285;
+}
+
+.global-menu > li > ul .active-trail.dropdown-submenu {
+background: #6D9933 url("../images/arrow_hexA7C285.png") 49% 110% no-repeat;
+}
+
+
+/* NEWS slideshow */
+.view-news-slideshow .views-field-title,
+.view-news-slideshow .views-field-title-field {
+background-image: -webkit-linear-gradient(top, rgba(13, 86, 1, 0), rgba(13, 86, 1, 0.7));
+background-image: -moz-linear-gradient(top, rgba(13, 86, 1, 0), rgba(13, 86, 1, 0.7));
+background-image: -o-linear-gradient(top, rgba(13, 86, 1, 0), rgba(13, 86, 1, 0.7));
+background-image: linear-gradient(to bottom, rgba(13, 86, 1, 0), rgba(13, 86, 1, 0.7));
+}
+
+.view-news-slideshow .jcarousel-skin-default .jcarousel-navigation {
+background: rgba(13, 86, 1, 0.7);
+}
+
+.view-news-slideshow .jcarousel-skin-default .jcarousel-navigation li a:hover {
+background: url("../images/cms_news_hover.png") no-repeat;
+}
+
+.view-news-slideshow .views-field-title a:hover,
+.view-news-slideshow .views-field-title-field a:hover,
+.view-news-slideshow .view-footer a:hover {
+color: #FFD116;
+}
+
+
+/* TABBED MENU on homepage */
+.ui-tabs-nav li.ui-state-active,
+.ui-tabs-nav li.ui-state-active:hover,
+.block-quicktabs .ui-accordion-header.ui-state-active {
+border-top: 4px solid #FFD116;
+}
+
+.ui-tabs .ui-state-default:hover {
+background: #DDD;
+}
+
+.ui-tabs .ui-state-default,
+.block-quicktabs .ui-accordion-header.ui-state-default {
+background: #f9f9f9;
+}
+
+
+/* homepage CALENDAR */
+.view-calendar table .mini-day-on a:hover {
+border: 2px solid #FFD116;
+}
+
+
+/* buttons */
+.btn-primary {
+background-color: #6D9933;
+border-color: #6D9933;
+}
+
+.btn-primary:hover {
+background-color: #0D5601;
+border-color: #0D5601;
+}
+
+.search-results h3 a,
+.view-front-end-news h2 a,
+.view-front-end-working-groups h2 a,
+.view-front-end-campaigns h2 a,
+.view-front-end-awards h2 a {
+color: #6D9933;
+}
+
+.view-front-end-news .node-readmore,
+.view-front-end-working-groups .node-readmore,
+.view-front-end-campaigns .node-readmore,
+.view-front-end-awards .node-readmore,
+.page-search-site .facetapi-limit-link,
+.page-taxonomy .node-teaser .node-readmore {
+background: #deeaad;
+}
+
+
+/* SPECIES slideshow */
+.carousel-control.right,
+.carousel-control.left {
+background: #6D9933;
+}
+
+
+/* FIXES */
+.global-menu.nav-show-level-2 {
+margin-bottom: 36px;
+}
+
+.global-menu.nav-show-level-3 {
+margin-bottom: 74px;
+}
+
+
+/* NEWS profile */
+.profile blockquote p {
+color: #5E9732;
+}
+
+
+/* MOBILE */
+@media (max-width: 800px) {
+  body .search-area-and-logos {
+  background-image: none;
+  }
+
+  .global-menu-bar,
+  .sidebar-offcanvas {
+  background: #0D5601;
+  }
+
+  .navbar-default .navbar-toggle .icon-bar {
+  background: #FFF;
+  }
+
+  .navbar-default .navbar-toggle,
+  .navbar-default .navbar-toggle:hover,
+  .navbar-default .navbar-toggle:focus {
+  background: #0D5601;
+  border-color: #FFF;
+  }
+
+  .sidebar-offcanvas nav > ul ul {
+  background-color: #6D9933;
+  }
+
+  .sidebar-offcanvas nav > ul li h2 a {
+  border-bottom: 1px solid #333;
+  }
+
+  .sidebar-offcanvas nav > ul ul li h2 a,
+  .sidebar-offcanvas nav > ul li.last ul h2 a {
+  color: #FFF;
+  border-bottom: 1px solid #555;
+  }
+
+  .sidebar-offcanvas nav > ul li.opened > h2 > a {
+  color: #FFD200;
+  }
+
+  .sidebar-offcanvas nav > ul ul ul {
+  background-color: #A7C285;
+  }
+
+  .sidebar-offcanvas nav > ul ul ul li h2 a {
+  color: #FFF;
+  border-bottom: 1px solid #777;
+  }
+
+}

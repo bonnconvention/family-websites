@@ -1,0 +1,107 @@
+/* Table Styles */
+
+table caption {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.1;
+  margin: 10px 0;
+  text-align: left;
+}
+
+
+/* Form Styles */
+
+input[type="file"] {
+  display: inline-block;
+}
+
+.form-required {
+  color: #ff0000;
+}
+
+
+/* Chosen Styles */
+
+.chosen-container {
+  width: 100% !important;
+}
+
+
+/* Panel Styles */
+
+.panel-group .panel {
+  overflow: visible;
+}
+
+
+/* Carousel Styles */
+
+.project-carousel,
+.publication-carousel,
+.species-carousel {
+  background-color: #fff;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  overflow: hidden;
+}
+
+.project-carousel img,
+.publication-carousel img,
+.species-carousel img {
+  margin: 0 auto;
+}
+
+
+/* CMS Instruments */
+
+.view-legal-instrument-listing.view-display-id-legal_instrument_listing th.views-field-field-instrument-status {
+  width: 30%;
+}
+
+i.loading-image {
+  background: transparent url(../images/ajax-loader.gif) no-repeat scroll center center;
+  display: inline-block;
+  height: 16px;
+  position: relative;
+  vertical-align: middle;
+  width: 16px;
+}
+
+span.published-icon,
+span.unpublished-icon {
+  display: block;
+  height: 16px;
+  margin: 0 auto;
+  width: 16px;
+}
+
+span.published-icon {
+  background: url(../images/icon_ok.gif) center no-repeat;
+}
+
+span.unpublished-icon {
+  background: url(../images/icon_no.gif) center no-repeat;
+}
+
+/* Menu bootstrap for nolink */
+.navbar-default .navbar-nav>li>span {
+    position: relative;
+    display: block;
+    padding: 15px 15px;
+    line-height: 20px;
+    color: #777;
+    background-color: #e7e7e7;
+    cursor: pointer;
+}
+
+/* Contacts */
+#contacts-listing_wrapper {
+    margin-top: 10px;
+}
+
+#instrument-fieldset-wrapper .panel-body { padding: 25px; }
+#instrument-fieldset-wrapper .row:last-child { border: 0; }
+
+.node-meeting-form .form-item-event-calendar-date-und-0-value2-time {
+    display: none;
+}

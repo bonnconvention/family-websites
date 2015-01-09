@@ -1,0 +1,52 @@
+Index: image_field_caption.module
+===================================================================
+--- image_field_caption.module	(revision 585)
++++ image_field_caption.module	(working copy)
+@@ -95,6 +95,20 @@
+     '#weight' => 12,
+   );
+ 
++  $formats = filter_formats();
++  foreach ($formats as $format) {
++    $options[$format->format] = $format->name;
++  }
++
++  $form['image_field_caption_format'] = array(
++    '#type' => 'select',
++    '#title' => t('Default Caption Input Format'),
++    '#default_value' => isset($instance['settings']['image_field_caption_format']) ? $instance['settings']['image_field_caption_format'] : filter_default_format(),
++    '#description' => t('Choose the default input format for the caption.'),
++    '#weight' => 12.1,
++    '#options' => $options,
++  );
++
+   return $form;
+ }
+ 
+@@ -107,6 +121,10 @@
+     foreach (element_children($element) as $delta) {
+       // Add all extra functionality provided by the image widget.
+       $element[$delta]['#process'][] = 'image_field_caption_widget_process';
++      if (!isset($settings['image_field_caption_format'])) {
++        $settings['image_field_caption_format'] = filter_default_format();
++      }
++      $element[$delta]['#settings'] = $settings;
+     }
+   }
+ }
+@@ -118,14 +136,13 @@
+  */
+ function image_field_caption_widget_process($element, &$form_state, $form) {
+   $item = $element['#value'];
+-
+   // Add the additional alt and title fields.
+   $element['image_field_caption'] = array(
+     '#title' => t('Caption'),
+     '#type' => 'text_format',
+     '#default_value' => isset($item['image_field_caption']) ? $item['image_field_caption']['value'] : '',
+     '#access' => (bool) $item['fid'],
+-    '#format' => isset($item['image_field_caption']) ? $item['image_field_caption']['format'] : NULL,
++    '#format' => isset($item['image_field_caption']) ? $item['image_field_caption']['format'] : $element['#settings']['image_field_caption_format'],
+   );
+ 
+   return $element;

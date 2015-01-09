@@ -1,0 +1,63 @@
+<?php
+
+
+/**
+ * Implements hook_uninstall()
+ * @todo Test this code
+ */
+function cms_publication_uninstall() {
+    user_role_delete(ROLE_MANAGE_PUBLICATION);
+
+    CMSUtils::vocabulary_delete(VOC_PUBLICATION_TYPES);
+    CMSUtils::vocabulary_delete(VOC_PUBLICATION_AUTHORS);
+
+    # Remove the 'Publications' menu
+    $mlid = db_select('menu_links' , 'ml')
+            ->condition('ml.link_path' , '<front>')
+            ->condition('ml.link_title' , 'Publications')
+            ->condition('ml.has_children' , '1')
+            ->condition('ml.expanded' , '1')
+            ->fields('ml' , array('mlid'))
+            ->execute()
+            ->fetchField();
+    if(!empty($mlid)) {
+        menu_link_delete($mlid);
+    }
+}
+
+
+/**
+ * Implements hook_install()
+ */
+function cms_publication_install() {
+    CMSPublication::vocabulary_create('Publication types', VOC_PUBLICATION_TYPES);
+    CMSPublication::vocabulary_create('Publication authors', VOC_PUBLICATION_AUTHORS);
+
+    CMSPublication::role_create(ROLE_MANAGE_PUBLICATION);
+    // We clear the cache, otherwise we get PDOException that module is null (module seems is not fully initialized).
+    // @todo: Hopefully this can be be removed in the future
+    menu_rebuild();
+
+    $role = user_role_load_by_name(ROLE_MANAGE_PUBLICATION);
+    if(!empty($role->rid)) {
+        $rid = $role->rid;
+        $permissions = array(
+            'create publication content' => TRUE,
+            'edit own publication content' => TRUE,
+            'edit any publication content' => TRUE,
+            'delete own publication content' => TRUE,
+            'delete any publication content' => TRUE,
+
+            'search content' => TRUE,
+            'use advanced search' => TRUE,
+        );
+
+        CMSUtils::set_vocabulary_permissions($permissions, VOC_PUBLICATION_TYPES, 'publication', ROLE_MANAGE_PUBLICATION);
+        CMSUtils::set_vocabulary_permissions($permissions, VOC_PUBLICATION_AUTHORS, 'publication', ROLE_MANAGE_PUBLICATION);
+        CMSUtils::set_vocabulary_permissions($permissions, VOC_LANGUAGES, 'publication', ROLE_MANAGE_PUBLICATION);
+        user_role_change_permissions($rid, $permissions);
+        CMSUtils::role_add_permissions('administrator', $permissions);
+    } else {
+        watchdog('publication', "Unable to load role name '@role'", array("@role" => ROLE_MANAGE_PUBLICATION), WATCHDOG_WARNING);
+    }
+}

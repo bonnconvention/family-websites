@@ -1,0 +1,15 @@
+name = Sync LDAP Subscribers
+description = Sync LDAP subscribers to newsletter
+package = CMS
+core = 7.x
+
+dependencies[] = cms
+dependencies[] = simplenews
+dependencies[] = cms_contacts
+
+; Information added by fserver
+core = "7.x"
+datestamp = "1420734842"
+project = "cms"
+project status url = "http://fserver.eaudeweb.ro/fserver"
+version = "7.x-7.34"

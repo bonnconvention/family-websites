@@ -1,0 +1,24 @@
+News {"url":"news","lang":"und"}
+-News {"url":"news","lang":"und"}
+-Press releases {"url":"news","lang":"und"}
+-Op ed {"url":"news","lang":"und"}
+-Notifications {"url":"news","lang":"und"}
+-Media Watch {"url":"news","lang":"und"}
+Meetings & Events {"url":"meetings\/meetings-of-parties","lang":"und"}
+-Meeting of the Parties {"url":"meetings\/meetings-of-parties","lang":"und"}
+-Standing Committee {"url":"meetings\/standing-committee","lang":"und"}
+-Advisory Committee {"url":"meetings\/advisory-committee","lang":"und"}
+-All other meetings & events {"url":"meetings\/related-meetings","lang":"und"}
+Education & Awareness {"url":"campaigns","lang":"und"}
+-Capacity Building {"url":"education\/capacity-building","lang":"und"}
+-Communication, Education, Public Awareness {"url":"education\/awareness","lang":"und"}
+-Campaigns {"url":"campaigns","lang":"und"}
+Related Links {"url":"<front>","lang":"und"}
+-The CMS Family {"url":"<front>","lang":"und"}
+-E-community login {"url":"<front>","lang":"und"}
+-Workspace login {"url":"<front>","lang":"und"}
+Contact {"url":"<front>","lang":"und"}
+-Secretariat {"url":"<front>","lang":"und"}
+-Focal Points {"url":"<front>","lang":"und"}
+-Standing Committee members {"url":"<front>","lang":"und"}
+-Advisory Committee members {"url":"<front>","lang":"und"}

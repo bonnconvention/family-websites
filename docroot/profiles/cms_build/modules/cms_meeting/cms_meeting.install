@@ -1,0 +1,76 @@
+<?php
+
+include_once drupal_get_path('module', 'cms') . '/utils.php';
+
+/**
+ * Implements hook_uninstall()
+ */
+function cms_meeting_uninstall() {
+    user_role_delete(ROLE_MANAGE_MEETINGS);
+
+    CMSUtils::vocabulary_delete(VOC_MEETING_KIND);
+    CMSUtils::vocabulary_delete(VOC_MEETING_TYPE);
+    CMSUtils::vocabulary_delete(VOC_MEETING_STATUS);
+
+    CMSUtils::remove_menu_and_submenu('main-menu', 'Meetings', '<front>');
+}
+
+function cms_meeting_install () {
+    $role = CMSUtils::get_or_create_role(ROLE_MANAGE_MEETINGS);
+
+    CMSUtils::vocabulary_create('Meeting kind', VOC_MEETING_KIND);
+    CMSUtils::vocabulary_create('Meeting type', VOC_MEETING_TYPE);
+    CMSUtils::vocabulary_create('Meeting status', VOC_MEETING_STATUS);
+
+    menu_rebuild();
+
+    if(!empty($role)) {
+        $rid = $role->rid;
+        $permissions = array(
+            'create meeting content' => TRUE,
+            'edit own meeting content' => TRUE,
+            'edit any meeting content' => TRUE,
+            'delete own meeting content' => TRUE,
+            'delete any meeting content' => TRUE,
+
+            'search content' => TRUE,
+            'use advanced search' => TRUE,
+        );
+
+        CMSUtils::set_vocabulary_permissions($permissions, VOC_MEETING_KIND, 'meeting', ROLE_MANAGE_MEETINGS);
+        CMSUtils::set_vocabulary_permissions($permissions, VOC_MEETING_TYPE, 'meeting', ROLE_MANAGE_MEETINGS);
+        CMSUtils::set_vocabulary_permissions($permissions, VOC_MEETING_STATUS, 'meeting', ROLE_MANAGE_MEETINGS);
+
+        user_role_change_permissions($rid, $permissions);
+
+        CMSUtils::role_add_permissions('administrator', $permissions);
+    } else {
+        watchdog('meeting', "Unable to load role name '@role'", array("@role" => ROLE_MANAGE_MEETINGS), WATCHDOG_WARNING);
+    }
+}
+
+function cms_meeting_update_7007() {
+    $role = CMSUtils::get_or_create_role(ROLE_MANAGE_MEETINGS);
+    $rid = $role->rid;
+
+    $permissions = array(
+        'create meeting content' => TRUE,
+        'edit own meeting content' => TRUE,
+        'edit any meeting content' => TRUE,
+        'delete own meeting content' => TRUE,
+        'delete any meeting content' => TRUE,
+        'search content' => TRUE,
+        'use advanced search' => TRUE,
+    );
+
+    CMSUtils::set_vocabulary_permissions($permissions, VOC_MEETING_KIND, 'meeting', ROLE_MANAGE_MEETINGS);
+    CMSUtils::set_vocabulary_permissions($permissions, VOC_MEETING_TYPE, 'meeting', ROLE_MANAGE_MEETINGS);
+    CMSUtils::set_vocabulary_permissions($permissions, VOC_MEETING_STATUS, 'meeting', ROLE_MANAGE_MEETINGS);
+
+    user_role_change_permissions($rid, $permissions);
+
+    $role = CMSUtils::get_or_create_role('administrator');
+    user_role_change_permissions($role->rid, $permissions);
+
+    return t('Meeting permissions updated');
+}

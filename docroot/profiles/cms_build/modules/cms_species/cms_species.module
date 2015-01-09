@@ -1,0 +1,1970 @@
+<?php
+/**
+ * @file
+ * Code for the CMS Species feature.
+ */
+
+include_once 'cms_species.features.inc';
+
+/**
+ * @file
+ * Code for the Species feature.
+ */
+module_load_include('inc', 'cms_species', 'cms_species.features');
+module_load_include('cron', 'cms_species', 'cms_species');
+module_load_include('inc', 'cms_species', 'cms_species.api');
+module_load_include('php', 'cms', 'utils');
+
+define('ROLE_MANAGE_SPECIES', 'manage species');
+define('VOC_THREATS', 'threats');
+
+define('VOC_SPECIES_CLASS', 'species_class');
+define('VOC_SPECIES_GENUS', 'species_genus');
+define('VOC_SPECIES_ORDER', 'species_order');
+define('VOC_SPECIES_FAMILY', 'species_family');
+define('VOC_SPECIES_SPECIES', 'species_species');
+define('VOC_SPECIES_SUBSPECIES', 'species_subspecies');
+define('VOC_SPECIES_AUTHOR', 'species_author');
+define('VOC_SPECIES_POPUPATION_NAME', 'species_population_name');
+define('VOC_SPECIES_AEWA_COUNTRY_STATUS', 'aewa_country_status');
+define('VOC_SPECIES_AEWA_STATUS_A', 'aewa_status_column_a');
+define('VOC_SPECIES_AEWA_STATUS_B', 'aewa_status_column_b');
+define('VOC_SPECIES_AEWA_STATUS_C', 'aewa_status_column_c');
+define('FILTER_SPECIES_INSTRUMENT_FIELD', 'field_instrument_target_id');
+
+module_load_include('module', 'cms');
+
+/**
+ * Implements hook_menu();
+ *
+ * Define species specific menu items
+ *
+ * @return  array   $items
+ */
+function cms_species_menu() {
+    $items = array();
+
+    /**
+     * Menu item for species API
+     */
+    $items['api/species'] = array(
+        'page callback' => 'api_species',
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK,
+    );
+
+    $items['get/species'] = array(
+        'page callback' => 'get_species',
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK,
+    );
+
+    $items['node/%node/species_family_display'] = array(
+        'title' => t('Family display'),
+        'type' => MENU_LOCAL_TASK,
+        'page callback' => 'cms_species_family_display',
+        'page arguments' => array(1),
+        'access callback' => 'cms_species_family_display_access',
+        'access arguments' => array(1),
+    );
+
+    $items['ajax/species/orders'] = array(
+        'page callback' => 'cms_species_ajax_orders_callback',
+        'page arguments' => array(),
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK,
+    );
+
+    $items['ajax/species/families'] = array(
+        'page callback' => 'cms_species_ajax_families_callback',
+        'page arguments' => array(),
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK,
+    );
+
+    $items['api/list/%/%'] = array(
+        'page callback' => 'api_species_list',
+        'page arguments' => array(2, 3),
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK,
+        'file' => 'cms_species.api.inc'
+    );
+
+    $items['species/list/%'] = array(
+        'page callback' => 'cms_species_list_from_cache',
+        'page arguments' => array(2),
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK,
+        'file' => 'cms_species.api.inc',
+    );
+
+    return $items;
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter();
+ *
+ * Show 'Create species' button on Species listing view
+ *
+ * @param   array   $data
+ * @param   array   $router_item
+ * @param   string  $root_path
+ */
+function cms_species_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+    switch($root_path){
+        case CMSSpecies::$bundle . '/listing' :
+            $item = menu_get_item('node/add/' . CMSSpecies::$bundle);
+            $item['title'] = t('Create ' . CMSSpecies::$bundle);
+            if ($item['access']) {
+                $data['actions']['output'][] = array(
+                    '#theme' => 'menu_local_action',
+                    '#link' => $item,
+                );
+            }
+            break;
+    }
+}
+
+/**
+ * Permission access to 'manage document'
+ * @param stdClass $node Drupal node
+ * @return bool TRUE if user has permission to update the node
+ */
+function cms_species_family_display_access($node) {
+    if(!empty($node->type) && $node->type == 'species') {
+
+        return node_access('update', $node);
+    }
+    return FALSE;
+}
+
+/**
+ * Implementes hook_theme($existing, $type, $theme, $path)
+ */
+function cms_species_theme($existing, $type, $theme, $path) {
+    $base = array(
+        'file' => 'theme.inc',
+        'path' => $path . '/theme',
+    );
+    return array(
+        'species_family_display_template' => array(
+            'template' => 'species/species-family-display',
+            'arguments' => array(),
+            'path' => drupal_get_path('theme', 'cms_manage') . '/templates/',
+        ),
+        'table__species_template_country' => $base + array(
+            'variables' => array(
+                'header' => NULL,
+                'rows' => NULL,
+                'attributes' => array(),
+                'caption' => NULL,
+                'colgroups' => array(),
+                'sticky' => TRUE,
+                'empty' => '',
+                'settings' => array()
+            )
+        ),
+        'table__species_template_instrument' => $base + array(
+            'variables' => array(
+                'header' => NULL,
+                'rows' => NULL,
+                'attributes' => array(),
+                'caption' => NULL,
+                'colgroups' => array(),
+                'sticky' => TRUE,
+                'empty' => '',
+                'settings' => array()
+            )
+        ),
+    );
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function cms_species_form_alter(&$form, &$form_state, $form_id) {
+    switch ($form_id) {
+        /**
+         * Fix country names for Add/Edit form
+         */
+        case 'species_node_form' :
+            $current_profile = CMSUtils::get_current_profile();
+            if (!isset($_SESSION['current_profile']) || ($_SESSION['current_profile'] != $current_profile)) {
+                $_SESSION['current_profile'] = $current_profile;
+            }
+
+            $form['title']['#required'] = FALSE;
+            $countries = countries_get_countries();
+            $options = array('_none' => '- None -');
+            foreach ($countries as $country) {
+                $options[$country->cid] = $country->name;
+            }
+            $langcode = (isset($form['#language']) && (!empty($form['#language']))) ? $form['#language'] : LANGUAGE_NONE;
+
+            $form['field_species_range_states'][$langcode]['#options'] = $options;
+
+            if ($current_profile == 'aewa') {
+                if (isset($form['field_aewa_population_status']) && (!empty($form['field_aewa_population_status'][$langcode]))) {
+                    foreach ($form['field_aewa_population_status'][$langcode] as $index => $element) {
+                        if (is_numeric($index)) {
+                            $form['field_aewa_population_status'][$langcode][$index]['remove_button']['#prefix'] = "<div class='clearifx'><br /></div>";
+                            $form['field_aewa_population_status'][$langcode][$index]['remove_button']['#suffix'] = "<div class='clearifx'><br /></div>";
+                        }
+                    }
+                }
+
+                if (array_key_exists('field_species_range_states', $form)) {
+                    foreach ($form['field_species_range_states'][$langcode] as $index => $value) {
+                        if (is_numeric($index)){
+                            unset($form['field_species_range_states'][$langcode][$index]['field_species_range_state_status']);
+                        }
+                    }
+                }
+            }
+
+            $node =  $form['#node'];
+            $default_value = array();
+            $experts_options = array();
+            $langcode = field_language('node', $node, 'field_species_experts');
+
+            if (!empty($node->field_species_experts[$langcode])) {
+                foreach ($node->field_species_experts[$langcode] as $index => $expert) {
+                    $default_value[] = $expert['value'];
+                }
+            }
+            $experts_options = CMSContactBase::get_contacts_as_options();
+            asort($experts_options);
+            $form['field_species_experts'] = array(
+                '#type' => 'select',
+                '#title' => t('Experts'),
+                '#multiple' => TRUE,
+                '#options' => $experts_options,
+                '#default_value' => $default_value,
+            );
+            /**
+             * Callback function to manipulate field_species_experts data before DB insert
+             */
+            $form['#submit'][] = 'cms_species_alter_experts_submit';
+
+            $breadcrumb = array();
+            $breadcrumb[] = l(t('Home'), '<front>');
+            $breadcrumb[] = l(t('Species'), 'species/listing');
+
+            # Update breadcrumb on the edit form
+            if (isset($form['nid']) && (is_numeric($form['nid']['#value']))) {
+                $breadcrumb[] = l($form['#node']->title, 'node/' . $node->nid);
+            }
+
+            drupal_set_breadcrumb($breadcrumb);
+
+            $js_path = drupal_get_path("theme", "cms_manage") . DIRECTORY_SEPARATOR . "js" . DIRECTORY_SEPARATOR . "species.js";
+            drupal_add_library('system', 'ui.autocomplete');
+            drupal_add_js($js_path);
+
+            /*
+             * Make shared (reused) multiple value fields to be single value where it's needed
+             * see #2321
+             */
+
+            foreach($form['field_species_range_states'][LANGUAGE_NONE] as $idx => $field_coll_entry) {
+                if (!empty($form['field_species_range_states'][LANGUAGE_NONE][$idx]['field_country'][LANGUAGE_NONE]['#multiple'])) {
+                    $form['field_species_range_states'][LANGUAGE_NONE][$idx]['field_country'][LANGUAGE_NONE]['#multiple'] = FALSE;
+                }
+            }
+
+            foreach($form['field_species_status_per_country'][LANGUAGE_NONE] as $idx => $field_coll_entry) {
+                if (!empty($form['field_species_status_per_country'][LANGUAGE_NONE][$idx]['field_country'][LANGUAGE_NONE]['#multiple'])) {
+                    $form['field_species_status_per_country'][LANGUAGE_NONE][$idx]['field_country'][LANGUAGE_NONE]['#multiple'] = FALSE;
+                }
+            }
+
+            foreach($form['field_species_instruments'][LANGUAGE_NONE] as $idx => $field_coll_entry) {
+                if (!empty($form['field_species_instruments'][LANGUAGE_NONE][$idx]['field_instrument'][LANGUAGE_NONE]['#multiple'])) {
+                    $form['field_species_instruments'][LANGUAGE_NONE][$idx]['field_instrument'][LANGUAGE_NONE]['#multiple'] = FALSE;
+                }
+            }
+
+            foreach($form['field_species_pop'][LANGUAGE_NONE] as $idx => $field_coll_entry) {
+                if (!empty($form['field_species_pop'][LANGUAGE_NONE][$idx]['field_instrument'][LANGUAGE_NONE]['#multiple'])) {
+                    $form['field_species_pop'][LANGUAGE_NONE][$idx]['field_instrument'][LANGUAGE_NONE]['#multiple'] = FALSE;
+                }
+            }
+
+            break;
+
+        /**
+         * Alter dropdowns from exposed filter to support graceful degradation
+         */
+        case 'views_exposed_form':
+            if ($form['#id'] == 'views-exposed-form-species-admin-species-listing') {
+                $path = drupal_get_path('theme', 'cms_manage');
+                drupal_add_js("$path/js/form.js");
+
+                $form['#tree'] = TRUE;
+
+                $class_values['All'] = t('Any');
+                $class_values = $class_values + CMSSpecies::get_classes();
+                $class_selected = isset($_GET['tid']) ? $_GET['tid'] : key($class_values);
+
+                $form['tid'] = array(
+                    '#type' => 'select',
+                    '#options' => $class_values,
+                    '#default_value' => $class_selected,
+                );
+
+                $order_values['All'] = t('Any');
+                $order_values = $order_values + CMSSpecies::get_orders_by_class($class_selected);
+                $order_selected = isset($_GET['tid_1']) ? $_GET['tid_1'] : key($order_values);
+                $form['tid_1'] = array(
+                    '#type' => 'select',
+                    '#options' => $order_values,
+                    '#default_value' => $order_selected,
+                );
+
+                $family_values['All'] = t('Any');
+                $family_values = $family_values + CMSSpecies::get_families_by_order($order_selected);
+                $family_selected = isset($_GET['tid_2']) ? $_GET['tid_2'] : key($family_values);
+                $form['tid_2'] = array(
+                    '#type' => 'select',
+                    '#options' => $family_values,
+                    '#default_value' => $family_selected,
+                );
+
+            }
+
+            if ($form['#id'] == 'views-exposed-form-front-end-species-species-list'
+                || $form['#id'] == 'views-exposed-form-front-end-species-mous-species-list') {
+
+                //Add appendix filter
+                if (isset($form['field_species_appendix_1_date_value'])
+                    && isset($form['field_species_appendix_2_date_value'])) {
+
+                    $path = drupal_get_path('module', 'cms_species');
+                    drupal_add_js("$path/includes/species.js");
+
+                    $appendix = array (
+                        '0' => '- ' . t('Any') . ' -',
+                        '1' => t('Appendix 1'),
+                        '2' => t('Appendix 2'),
+                    );
+
+                    $current_appendix = 0;
+                    if (isset($_GET['appendix_filter'])
+                        && array_key_exists($_GET['appendix_filter'], $appendix)) {
+                        $current_appendix = $_GET['appendix_filter'];
+                    }
+
+                    $form['appendix_filter'] = array(
+                        '#type' => 'select',
+                        '#prefix' => '<div id="dropdown-appendix">',
+                        '#suffix' => '</div>',
+                        '#options' => $appendix,
+                        '#default_value' => '0',
+                        '#value' => $current_appendix,
+                    );
+                    $form['#info']['filter-appendix_filter'] = array(
+                        'value' => 'appendix_filter',
+                        'label' => t('Appendix'),
+                    );
+                }
+            }
+
+            break;
+        case 'node_delete_confirm':
+            if ($form['#node']->type == 'species') {
+                $form['#submit'][] = '_species_redirect_after_delete';
+            }
+            break;
+    }
+
+    return $form;
+}
+
+/**
+ * Set form redirect path after a species has been deleted
+ *
+ * @param   array   $form
+ * @param   array   $form_state
+*/
+function _species_redirect_after_delete(&$form, &$form_state) {
+    $form_state['redirect'] = 'species/listing';
+}
+
+/**
+ * Alter species experts field submit callback to save only 'uid' attribute
+ * of an LDAP entry
+ *
+ * @param   array   $form
+ * @param   array   $form_state
+*/
+function cms_species_alter_experts_submit(&$form, &$form_state) {
+    $values = $form_state['values'];
+    $language = $values['language'];
+    if (array_key_exists('field_species_experts', $values)) {
+        if (!empty($values['field_species_experts'])) {
+            $experts = $values['field_species_experts'];
+            $count = 0;
+            foreach ($experts as $uid => $expert) {
+                $form_state['values']['field_species_experts'][$language][$count]['value'] = $uid;
+                $count += 1;
+            }
+        }else {
+            $form_state['values']['field_species_experts'][$language] = array();
+        }
+    }else {
+        $form_state['values']['field_species_experts'][$language] = array();
+    }
+}
+
+/**
+ * Implements hook_node_presave();
+ *
+ * Automatically set species title which has the form '<GENUS> <SPECIES> <SUBSPECIES>'
+ * Retrieve IUCN Red List status and URL for the specified species
+ * Set relation with different content types
+ *
+ * @param   stdClass    $node
+ */
+function cms_species_node_presave($node) {
+    if (($node->type == "species")) {
+
+        $iucn_data = CMSSpecies::get_species_iucn_data($node->title);
+        if (!empty($iucn_data)) {
+            $langcode = field_language('node', $node, 'field_species_iucn_status');
+            if ((!isset($node->field_species_iucn_status)) || (empty($node->field_species_iucn_status[$langcode]))) {
+                $node->field_species_iucn_status[$langcode][0]['value'] = $iucn_data['field_species_iucn_status'];
+            }
+            if ((!isset($node->field_species_iucn_web_srv)) || (empty($node->field_species_iucn_web_srv[$langcode]))) {
+                $node->field_species_iucn_web_srv[$langcode][0]['value'] = $iucn_data['field_species_iucn_web_srv'];
+            }
+        }
+    }
+}
+
+/**
+ * Implements hook_views_default_views_alter();
+ *
+ * @param   stdClass    $views
+ *
+ * @return  stdClass    $views
+*/
+function cms_species_views_default_views_alter(&$views) {
+    if (isset($views['species_admin'])) {
+        $handler = &$views['species_admin'];
+        $roles = user_roles();
+        $rids = array();
+        foreach($roles as $rid => $role) {
+            if($role == 'authenticated user') {
+                $rids[$rid] = $rid;
+            }
+        }
+        $handler->display['default']->display_options['access']['type'] = 'role';
+        $handler->display['default']->display_options['access']['role'] = array_filter($rids);
+    }
+    return $views;
+}
+
+/**
+ * Implements hook_node_view();
+ *
+ * Automatically retrive species' image gallery from Arkive.org website
+ * Get experts information from LDAP database
+ *
+ * @param   stdClass    $node
+ * @param   string      $view_mode
+ * @param   string      $langcode
+ */
+function cms_species_node_view($node, $view_mode, $langcode) {
+    if(function_exists('cms_manage_node_access') && $node->type == CMSSpecies::$bundle) {
+        cms_manage_node_access($node);
+    }
+    switch ($node->type) {
+        case 'country':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                if (is_theme_admin()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'species', 'species_admin', 'country_species');
+                } else if (is_theme_frontend()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'species', 'front_end_species', 'country_species');
+                }
+            }
+            break;
+        case 'document':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                if (is_theme_admin()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'species', 'species_admin', 'document_species');
+                } else if (is_theme_frontend()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'species', 'front_end_species', 'document_species');
+                }
+            }
+            break;
+        case 'legal_instrument':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                if (is_theme_admin()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'species', 'species_admin', 'instrument_species');
+                } else if (is_theme_frontend()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'species', 'front_end_species', 'instrument_species');
+                }
+            }
+            break;
+        case 'meeting':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                if (is_theme_admin()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'species', 'species_admin', 'meeting_species');
+                } else if (is_theme_frontend()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'species', 'front_end_species', 'meeting_species');
+                }
+            }
+            break;
+        case 'project':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                if (is_theme_admin()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'species', 'species_admin', 'project_species');
+                } else if (is_theme_frontend()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'species', 'front_end_species', 'project_species');
+                }
+            }
+            break;
+        case 'publication':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                if (is_theme_admin()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'species', 'species_admin', 'publication_species');
+                } else if (is_theme_frontend()) {
+                    //Set related data used in template
+                    CMSBase::set_related_content_from_views($node, 'species', 'front_end_species', 'publication_species');
+                }
+            }
+            break;
+        case 'species':
+            if ($view_mode == 'full' && node_is_page($node)) {
+                $node->gallery = CMSUtils::get_images_from_arkive($node->title);
+
+                $node->experts = array();
+                //        if (isset($node->field_species_experts) && (!empty($node->field_species_experts))) {
+                //            $agent = CMSContacts::agent();
+                //            foreach ($node->field_species_experts[$node->language] as $expert) {
+                //                $contact = $agent->search_user($expert['value']);
+                //                $node->experts[] = $contact;
+                //            }
+                //        }
+
+                if (is_theme_frontend()) {
+                    //set data for ammap profile map - front-end
+                    if (CMSUtils::get_current_profile() == 'aewa') {
+                        $node->ammap_data = CMSSpecies::get_aewa_countries_status_for_ammap($node);
+                    } else {
+                        $node->ammap_data = CMSSpecies::get_range_states_for_ammap($node);
+                    }
+                }
+            }
+            break;
+    }
+}
+
+/**
+ * Get species orders by class
+ *
+ * If a class is specified return orders for class else return all orders.
+ *
+ * @return   string
+ */
+function cms_species_ajax_orders_callback() {
+    global $user;
+    $args = arg();
+
+    $orders = array();
+    if (count($args) == 4 && ($user->uid)) {
+        $class_selected = arg(3);
+        $orders = CMSSpecies::get_orders_by_class($class_selected);
+    }else {
+        $orders = CMSSpecies::get_orders_by_class();
+    }
+
+    echo json_encode($orders);
+    drupal_exit();
+}
+
+/**
+ * Get species families by order and class
+ *
+ * @return   string
+ */
+function cms_species_ajax_families_callback() {
+    global $user;
+    $args = arg();
+
+    $families = array();
+    if (count($args) == 5 && ($user->uid)) {
+        $order_selected = arg(4);
+        $families = CMSSpecies::get_families_by_order($order_selected);
+    }else {
+        $class = arg(3);
+        $orders = CMSSpecies::get_orders_by_class($class);
+        foreach ($orders as $order) {
+            $family = CMSSpecies::get_families_by_order($order);
+            foreach ($family as $value) {
+                array_push($families, $value);
+            }
+        }
+        $families = drupal_map_assoc($families);
+    }
+
+    echo json_encode($families);
+    drupal_exit();
+}
+
+/**
+ * Species family display page.
+ */
+function cms_species_family_display($node) {
+    global $user;
+
+    $current_profile = CMSUtils::get_current_profile();
+
+    if (!empty($node) && $user->uid) {
+
+        if (!node_access('view', $node)) {
+            drupal_access_denied();
+            drupal_exit();
+        }
+        if ($node->type != 'species') {
+            drupal_not_found();
+            drupal_exit();
+        }
+
+        if ($current_profile != 'aewa') {
+            $node->field_aewa_population_status = array();
+            $node->field_species_status_per_country = array();
+        }
+
+        $view = node_view($node);
+
+        drupal_set_title($node->title);
+
+        $breadcrumb = array();
+        $breadcrumb[] = l(t('Home'), '<front>');
+        $breadcrumb[] = l(t('Species'), 'species/listing');
+        $breadcrumb[] = l($node->title, 'node/' . $node->nid);
+        drupal_set_breadcrumb($breadcrumb);
+        return theme('species_family_display_template', array('content' => $view,
+                                                              'node' => $node,
+                                                              'slug' => CMSUtils::slug($node->title)));
+    }else {
+        drupal_access_denied();
+        drupal_exit();
+    }
+}
+
+
+/**
+ * Get specified species in HTML or JSON
+ */
+function api_species() {
+    global $user;
+
+    $args = arg();
+    $allowed_extensions = array('html', 'json');
+
+    if ((count($args) == 3) && ($user->uid)) {
+        $parts = pathinfo($args[2]);
+        $type = $parts['extension'];
+        $species_slug = $parts['filename'];
+        $scientific_name = CMSUtils::unslugify($species_slug);
+
+        if (in_array($type, $allowed_extensions) ) {
+            $function = 'api_species_' . $type;
+            $function($scientific_name);
+        }else {
+            drupal_not_found();
+        }
+    }else {
+        drupal_access_denied();
+    }
+
+    drupal_exit();
+}
+
+/**
+ * Get specified species from remote server in JSON format
+ *
+ * Used in Species Family Display
+ */
+function get_species() {
+    global $user;
+
+    $args = arg();
+    $websites = CMSUtils::get_all_websites();
+    $data = array();
+    if ((count($args) == 4) && ($user->uid)) {
+        $website = $args[2];
+        $url = $websites[$website]['url'];
+        $cookie_file = CMSUtils::remote_login($url);
+        if ($cookie_file) {
+            $species = $args[3];
+            if (substr($species, -4) == 'json') {
+                $ch = curl_init();
+                $curl_options = array(
+                    CURLOPT_HEADER => 0,
+                    CURLOPT_RETURNTRANSFER => 1,
+                    CURLOPT_COOKIEFILE => $cookie_file,
+                    CURLOPT_URL => $url . '/manage/api/species/' . $species
+                );
+
+                curl_setopt_array($ch, $curl_options);
+                $JSON_species = curl_exec($ch);
+                curl_close($ch);
+                unset($ch);
+                unlink($cookie_file);
+
+                $species_data = json_decode($JSON_species, true);
+                $images = $species_data['field_species_images'];
+                $species_data['field_species_images'] = array(); // Do not import image (stored on remote instance)
+                $node = CMSSpecies::node_from_array($species_data, FALSE, FALSE);
+                $view = node_view($node);
+                $template_path = drupal_get_path('theme', 'cms_manage') . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'api-species.tpl.php';
+
+                echo theme_render_template($template_path,
+                    array('content' => $view,
+                          'images' => $images));
+            }else {
+                drupal_not_found();
+            }
+        }else {
+            drupal_access_denied();
+        }
+    }else {
+        drupal_access_denied();
+    }
+
+    drupal_exit();
+}
+
+/**
+ * API function to render HTML for specified species
+ */
+function api_species_html($scientific_name) {
+    $nid = db_query('SELECT nid FROM {node} WHERE title = :scientific_name AND type = :type',
+        array(':scientific_name' => $scientific_name,
+              ':type' => 'species'))->fetchField();
+    $db_node = node_load($nid);
+    $template_path = drupal_get_path('theme', 'cms_manage') . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'node--species.tpl.php';
+    $view = node_view($db_node);
+
+    echo theme_render_template($template_path, array('content' => $view));
+    drupal_exit();
+}
+
+/**
+ * Build JSON with specified species details
+ */
+function api_species_json($scientific_name) {
+    $node = array();
+    $nid = db_query('SELECT nid FROM {node} WHERE title = :scientific_name AND type = :type',
+        array(':scientific_name' => $scientific_name,
+              ':type' => 'species'))->fetchField();
+
+    if (($db_node = node_load($nid)) && ($db_node->type == 'species')) {
+        $node = CMSSpecies::node_to_array($db_node);
+    }
+
+    echo json_encode($node);
+    drupal_exit();
+}
+
+/**
+ * Implements hook_field_extra_fields()
+ *
+ * @return mixed Extra fields information
+ */
+function cms_species_field_extra_fields() {
+    $extra['node'][CMSSpecies::$bundle_country_module]['display'] = array(
+        'species' => array(
+            'label' => t('Species'),
+            'description' => t('Injects into country content type the list of species for the country'),
+            'weight' => 100,
+        ),
+    );
+    $extra['node'][CMSSpecies::$bundle_instrument_module]['display'] = array(
+        'species' => array(
+            'label' => t('Species'),
+            'description' => t('Injects into CMS Instrument content type the list of species for the CMS Instrument'),
+            'weight' => 100,
+        ),
+    );
+    return $extra;
+}
+
+
+/**
+ * Utility methods specific to species.
+ */
+class CMSSpecies extends CMSBase {
+
+    static $bundle = 'species';
+    static $bundle_country_module = 'country';
+    static $bundle_instrument_module = 'legal_instrument';
+    static $field_species_country = 'species';
+    static $field_species_instrument = 'species';
+    static $false_related_fields = array(
+        'field_species_plans' => 'document',
+        'field_species_national_report' => 'document',
+    );
+
+    static $related_fields = array(
+        'meeting' => 'field_species_meeting',
+        'project' => 'field_species_project',
+        'publication' => 'field_species_publication',
+        'document' => 'field_species_document'
+    );
+
+    /**
+     * Create a new CMS Publication node instance. Name is taken from publication module.
+     * @param bool $save If TRUE, object is saved into database
+     *
+     * @return object The node object initialized
+     */
+    public static function node_create($title, $save = TRUE) {
+        global $user;
+
+        $node = new stdClass();
+        $node->type = 'species';
+        node_object_prepare($node);
+        $node->title = $title;
+        $node->language = CMSUtils::get_default_language();
+        $node->status = 1;
+        $node->uid = $user->uid;
+        $node->changed = $_SERVER['REQUEST_TIME'];
+        $node->created = $_SERVER['REQUEST_TIME'];
+
+        $node = node_submit($node);
+
+        if($save) {
+            node_save($node);
+        }
+
+        return $node;
+    }
+
+    /**
+     * Build an array from the publication node to be saved as JSON string
+     *
+     * @param stdClass $node Drupal publication node
+     * @param string $export_dir Path to directory where attached files (fields field_publication_attachment and field_publication_image) will be exported
+     * @param array $instrument_cache (Optional) Dictonary with instrumet cache (id|name) - to avoid multiple queries when exporting. If empty, will query instruments
+     * @return mixed Dictionary with publication fields
+     *
+     * @todo   Create functions for field collection items
+     */
+    public static function node_to_array($node, $export_dir='') {
+        if(empty($node->title)) {
+            error_log("CMSSpecies::node_to_array() Cannot export species without title. Aborting ...\n");
+            return array();
+        }
+        $ret = array(
+            'title' => $node->title,
+            'nid' => $node->nid,
+            'status' => $node->status,
+            'uuid' => CMSUtils::get_node_uuid($node)
+        );
+
+        $ret['field_species_class'] = self::get_field_taxonomic_term_name($node, 'field_species_class', VOC_SPECIES_CLASS);
+        $ret['field_species_order'] = self::get_field_taxonomic_term_name($node, 'field_species_order', VOC_SPECIES_ORDER);
+        $ret['field_species_family'] = self::get_field_taxonomic_term_name($node, 'field_species_family', VOC_SPECIES_FAMILY);
+        $ret['field_species_genus'] = self::get_field_taxonomic_term_name($node, 'field_species_genus', VOC_SPECIES_GENUS);
+        $ret['field_species_species'] = self::get_field_taxonomic_term_name($node, 'field_species_species', VOC_SPECIES_SPECIES);
+        $ret['field_species_subspecies'] = self::get_field_taxonomic_term_name($node, 'field_species_subspecies', VOC_SPECIES_SUBSPECIES);
+        self::get_field_single_value($node, 'field_species_scientific_order', $ret);
+        $ret['field_species_author'] = self::get_field_taxonomic_term_name($node, 'field_species_author', VOC_SPECIES_AUTHOR);
+        self::get_field_single_value($node, 'field_species_name_en', $ret);
+        self::get_field_single_value($node, 'field_species_name_fr', $ret);
+        self::get_field_single_value($node, 'field_species_name_es', $ret);
+        self::get_field_single_value($node, 'field_species_name_de', $ret);
+        self::get_field_single_value($node, 'field_species_former_name', $ret);
+        self::get_field_single_value($node, 'field_species_appendix_1_date', $ret);
+        self::get_field_single_value($node, 'field_species_appendix_2_date', $ret);
+        self::get_field_boolean($node, 'field_species_concerted_action', $ret);
+        self::get_field_boolean($node, 'field_species_cooperative_action', $ret);
+        self::get_field_single_value($node, 'field_species_pop_global', $ret);
+        self::get_field_single_value($node, 'field_species_pop_global_date', $ret);
+        self::get_field_single_value($node, 'field_species_critical_sites', $ret);
+        self::get_field_single_value($node, 'field_species_iucn_status', $ret);
+        self::get_field_single_value($node, 'field_species_iucn_web_srv', $ret);
+        self::get_field_single_value($node, 'field_species_notes', $ret);
+        self::get_field_list_value($node, 'field_species_synonyms', $ret);
+        self::get_field_list_value($node, 'field_species_experts', $ret);
+
+        $ret['field_species_range_states'] = array();
+        if (!empty($node->field_species_range_states[$node->language])) {
+            foreach($node->field_species_range_states[$node->language] as $row) {
+                $fc_array = array();
+                $fc = entity_load('field_collection_item', array($row['value']));
+                reset($fc); $fc = current($fc);
+                $fc_array['field_country'] =  self::get_field_country_code($fc, 'field_country');
+                self::get_field_single_value($fc, 'field_species_territories', $fc_array);
+                self::get_field_single_value($fc, 'field_species_range_state_status', $fc_array);
+                $ret['field_species_range_states'][] = $fc_array;
+            }
+        }
+        self::get_field_single_value($node, 'field_species_range_states_notes', $ret);
+
+        if (!empty($node->field_species_status_per_country[$node->language])) {
+            $ret['field_species_status_per_country'] = array();
+            foreach($node->field_species_status_per_country[$node->language] as $row) {
+                $fc_array = array();
+                $fc = entity_load('field_collection_item', array($row['value']));
+                reset($fc); $fc = current($fc);
+                $fc_array['field_country'] =  self::get_field_country_code($fc, 'field_country');
+                $fc_array['field_species_aewa_status'] = self::get_field_taxonomic_term_name($fc, 'field_species_aewa_status', VOC_SPECIES_AEWA_COUNTRY_STATUS);
+                $ret['field_species_status_per_country'][] = $fc_array;
+            }
+        }
+
+        $ret['field_species_pop'] = array();
+        if (!empty($node->field_species_pop[$node->language])) {
+            foreach($node->field_species_pop[$node->language] as  $row) {
+                $fc_array = array();
+                $fc = entity_load('field_collection_item', array($row['value']));
+                reset($fc); $fc = current($fc);
+                $fc_array['field_instrument'] = self::get_field_instrument_name($fc, 'field_instrument');
+                $fc_array['field_species_pop_v'] = self::get_field_taxonomic_term_name($fc, 'field_species_pop_v', VOC_SPECIES_POPUPATION_NAME);
+                $ret['field_species_pop'][] = $fc_array;
+            }
+        }
+
+        $ret['field_species_pop_size'] = array();
+        if (!empty($node->field_species_pop_size[$node->language])) {
+            foreach($node->field_species_pop_size[$node->language] as  $row) {
+                $fc_array = array();
+                $fc = entity_load('field_collection_item', array($row['value']));
+                reset($fc); $fc = current($fc);
+                $fc_array['field_species_pop_size_r'] = self::get_field_taxonomic_term_name($fc, 'field_species_pop_size_r', VOC_SPECIES_POPUPATION_NAME);
+                self::get_field_single_value($fc, 'field_species_pop_size_i', $fc_array);
+                self::get_field_single_value($fc, 'field_species_pop_size_q', $fc_array);
+                self::get_field_single_value($fc, 'field_species_pop_size_e', $fc_array);
+                self::get_field_single_value($fc, 'field_species_pop_size_ref', $fc_array);
+                self::get_field_single_value($fc, 'field_species_pop_size_n', $fc_array);
+                self::get_field_single_value($fc, 'field_species_pop_trend_i', $fc_array);
+                self::get_field_single_value($fc, 'field_species_pop_trend_q', $fc_array);
+                self::get_field_single_value($fc, 'field_species_pop_trend_t', $fc_array);
+                self::get_field_single_value($fc, 'field_species_pop_trend_ref', $fc_array);
+                self::get_field_single_value($fc, 'field_species_pop_trend_n', $fc_array);
+                $ret['field_species_pop_size'][] = $fc_array;
+            }
+        }
+
+        self::get_field_single_value($node, 'field_species_standard_reference', $ret);
+        $ret['field_species_images'] = self::export_field_files($node, 'field_species_images', $export_dir);
+
+        $ret['field_species_threats'] = array();
+        if (!empty($node->field_species_threats[$node->language])) {
+            foreach($node->field_species_threats[$node->language] as  $row) {
+                $fc_array = array();
+                $fc = entity_load('field_collection_item', array($row['value']));
+                reset($fc); $fc = current($fc);
+                $fc_array['field_threats'] = self::get_field_taxonomic_term_name($fc, 'field_threats', VOC_THREATS);
+                self::get_field_single_value($fc, 'field_species_threat_notes', $fc_array);
+                $ret['field_species_threats'][] = $fc_array;
+            }
+        }
+
+
+        $ret['field_species_instruments'] = array();
+        if (!empty($node->field_species_instruments[$node->language])) {
+            foreach($node->field_species_instruments[$node->language] as  $row) {
+                $fc_array = array();
+                $fc = entity_load('field_collection_item', array($row['value']));
+                reset($fc); $fc = current($fc);
+                $fc_array['field_species_instrument'] = self::get_field_instrument_name($fc, 'field_species_instrument');
+                self::get_field_single_value($fc, 'field_species_instrument_date', $fc_array);
+                $ret['field_species_instruments'][] = $fc_array;
+            }
+        }
+
+        $ret['field_aewa_population_status'] = array();
+        if (!empty($node->field_aewa_population_status[$node->language])) {
+            foreach($node->field_aewa_population_status[$node->language] as $st_index => $value) {
+                $ob = field_collection_item_load($value['value']);
+                $population_name = (property_exists($ob, 'field_aewa_pop_status_name') && (!empty($ob->field_aewa_pop_status_name))) ? taxonomy_term_load($ob->field_aewa_pop_status_name[$node->language][0]['tid']) : '';
+                $ret['field_aewa_population_status'][$st_index]['field_aewa_pop_status_name'] = (property_exists($population_name, 'name')) ? $population_name->name : '';
+
+                $ret['field_aewa_population_status'][$st_index]['field_aewa_pop_status_col_a'] = array();
+                if (property_exists($ob, 'field_aewa_pop_status_col_a')) {
+                    foreach ($ob->field_aewa_pop_status_col_a[$node->language] as $index => $col_a_fc) {
+                        $col_a = field_collection_item_load($col_a_fc['value']);
+                        $status = @taxonomy_term_load($col_a->field_pop_status_col_a_status[$node->language][0]['tid']);
+                        $ret['field_aewa_population_status'][$st_index]['field_aewa_pop_status_col_a'][$index]['field_pop_status_col_a_status'] = ($status) ? $status->name : '';
+                        $ret['field_aewa_population_status'][$st_index]['field_aewa_pop_status_col_a'][$index]['field_pop_status_col_a_unknown'] = ($col_a->field_pop_status_col_a_unknown[$node->language][0]['value']);
+                        $ret['field_aewa_population_status'][$st_index]['field_aewa_pop_status_col_a'][$index]['field_pop_status_col_a_hunting'] = ($col_a->field_pop_status_col_a_hunting[$node->language][0]['value']);
+                    }
+                }
+
+                $ret['field_aewa_population_status'][$st_index]['field_aewa_pop_status_col_b'] = array();
+                if (property_exists($ob, 'field_aewa_pop_status_col_b')) {
+                    foreach ($ob->field_aewa_pop_status_col_b[$node->language] as $index => $col_b_fc) {
+                        $col_b = field_collection_item_load($col_b_fc['value']);
+                        $status = @taxonomy_term_load($col_b->field_pop_status_col_b_status[$node->language][0]['tid']);
+                        $ret['field_aewa_population_status'][$st_index]['field_aewa_pop_status_col_b'][$index]['field_pop_status_col_b_status'] = ($status) ? $status->name : '';
+                        $ret['field_aewa_population_status'][$st_index]['field_aewa_pop_status_col_b'][$index]['field_pop_status_col_b_unknown'] = ($col_b->field_pop_status_col_b_unknown[$node->language][0]['value']);
+                        $ret['field_aewa_population_status'][$st_index]['field_aewa_pop_status_col_b'][$index]['field_pop_status_col_b_hunting'] = ($col_b->field_pop_status_col_b_hunting[$node->language][0]['value']);
+                    }
+                }
+
+                $ret['field_aewa_population_status'][$st_index]['field_aewa_pop_status_col_c'] = array();
+                if (property_exists($ob, 'field_aewa_pop_status_col_c')) {
+                    foreach ($ob->field_aewa_pop_status_col_c[$node->language] as $index => $col_c_fc) {
+                        $col_c = field_collection_item_load($col_c_fc['value']);
+                        $status = @taxonomy_term_load($col_c->field_pop_status_col_c_status[$node->language][0]['tid']);
+                        $ret['field_aewa_population_status'][$st_index]['field_aewa_pop_status_col_c'][$index]['field_pop_status_col_c_status'] = ($status) ? $status->name : '';
+                        $ret['field_aewa_population_status'][$st_index]['field_aewa_pop_status_col_c'][$index]['field_pop_status_col_c_unknown'] = ($col_c->field_pop_status_col_c_unknown[$node->language][0]['value']);
+                        $ret['field_aewa_population_status'][$st_index]['field_aewa_pop_status_col_c'][$index]['field_pop_status_col_c_hunting'] = ($col_c->field_pop_status_col_c_hunting[$node->language][0]['value']);
+                    }
+                }
+            }
+        }
+
+        foreach(self::$related_fields as $field_name) {
+            $ret[$field_name] = self::get_entity_reference_by_uuid($node, $field_name);
+        }
+        foreach(self::$false_related_fields as $field_name => $type) {
+            $ret[$field_name] = self::get_entity_reference_by_uuid($node, $field_name);
+        }
+
+        return $ret;
+    }
+
+
+    /**
+     * Create species node from JSON string
+     *
+     * @return   object   $node
+     */
+    public static function node_from_array($species, $debug = FALSE, $save = TRUE, $path_prefix = ''){
+        $instruments = CMSLegalInstrument::get_mapped_instruments();
+        $instrument_cache = array();
+        foreach ($instruments as $title => $id) {
+            $instrument_cache[strtolower($title)] = $id;
+        }
+        if (gettype($species) != 'array') {
+            $species = json_decode($species, TRUE);
+        }
+        $node = CMSSpecies::node_create($species['title'], FALSE);
+        if (!empty($species['nid'])) {
+            $node->nid = $species['nid'];
+        }
+        if (!empty($species['uuid'])) {
+            $node->uuid = $species['uuid'];
+        }
+        if (isset($species['status']) && in_array($species['status'],array(0,1))) {
+            $node->status = $species['status'];
+        }
+        $parts = explode(' ', $species['title']);
+        if (!isset($species['field_species_genus']) && !isset($species['field_species_species'])) {
+            self::set_field_taxonomic_term($node, 'field_species_genus', VOC_SPECIES_GENUS, array('field_species_genus' => $parts[0]));
+            self::set_field_taxonomic_term($node, 'field_species_species', VOC_SPECIES_SPECIES, array('field_species_species' => $parts[1]));
+        } else {
+            self::set_field_taxonomic_term($node, 'field_species_genus', VOC_SPECIES_GENUS, $species);
+            self::set_field_taxonomic_term($node, 'field_species_species', VOC_SPECIES_SPECIES, $species);
+        }
+
+        if (isset($species['field_species_subspecies']) && (!empty($species['field_species_subspecies']))) {
+            self::set_field_taxonomic_term($node, 'field_species_subspecies', VOC_SPECIES_SUBSPECIES, $species);
+            $subspecies = self::get_field_taxonomic_term_name($node, 'field_species_subspecies', VOC_SPECIES_SUBSPECIES);
+            if ($subspecies) {
+                $node->title .= ' ' . $species['field_species_subspecies'];
+            }
+        }
+
+        CMSSpecies::set_action($node, $species, 'cooperative');
+        CMSSpecies::set_action($node, $species, 'concerted');
+        self::set_field_taxonomic_term($node, 'field_species_class', VOC_SPECIES_CLASS, $species);
+        self::set_field_taxonomic_term($node, 'field_species_order', VOC_SPECIES_ORDER, $species);
+        self::set_field_taxonomic_term($node, 'field_species_family', VOC_SPECIES_FAMILY, $species);
+        self::set_field_single_value($node, 'field_species_scientific_order', $species);
+
+        self::set_field_taxonomic_term($node, 'field_species_author', VOC_SPECIES_AUTHOR, $species);
+        self::set_field_single_value($node, 'field_species_name_en', $species);
+        $common_name = $node->field_species_name_en[$node->language][0]['value'];
+        if (preg_match("/'S/", $common_name)) {
+            $node->field_species_name_en[$node->language][0]['value'] = preg_replace("/'S/", "'s", $common_name);
+        }
+        self::set_field_single_value($node, 'field_species_name_fr', $species);
+        self::set_field_single_value($node, 'field_species_name_es', $species);
+        self::set_field_single_value($node, 'field_species_name_de', $species);
+        self::set_field_single_value($node, 'field_species_former_name', $species);
+        CMSSpecies::set_appendix($node, $species);
+        self::set_field_single_value($node, 'field_species_pop_global', $species);
+        CMSSpecies::set_pop_global_date($node, $species);
+
+        CMSUtils::set_node_simple_value($node, 'field_species_critical_sites', $species, 'field_species_critical_sites');
+        CMSSpecies::set_iucn_status($node, $species);
+        CMSUtils::set_node_simple_value($node, 'field_species_notes', $species, 'field_species_notes');
+        CMSUtils::set_node_simple_value($node, 'field_species_range_states_notes', $species, 'field_species_range_states_notes');
+        self::set_field_single_value($node, 'field_species_standard_reference', $species);
+        self::import_field_files($node, 'field_species_images', $species, self::$bundle, $path_prefix);
+        CMSSpecies::set_species_population_instrument($node, $species, $save);
+        CMSSpecies::set_species_population_size($node, $species, $save);
+        CMSSpecies::set_species_range_states($node, $species, $save);
+        CMSSpecies::set_instruments($node, $species, $save, $instrument_cache);
+        CMSSpecies::set_species_threats($node, $species, $save);
+        self::set_field_list_value($node, 'field_species_synonyms', $species);
+        self::set_field_list_value($node, 'field_species_experts', $species);
+
+        /**
+         * Available only for AEWA species
+         */
+        CMSSpecies::set_species_aewa_status_per_country($node, $species, $save);
+        //CMSSpecies::set_species_aewa_population_status($node, $species, $save);
+
+        foreach(self::$related_fields as $field_name) {
+            self::set_entity_reference_by_uuid($node, $field_name, $species);
+        }
+        foreach(self::$false_related_fields as $field_name => $type) {
+            self::set_entity_reference_by_uuid($node, $field_name, $species);
+        }
+
+
+        if($save) { // FALSE when Family view, so that Field collection below are only used to store fake data from remote
+            node_save($node);
+        }
+
+        return $node;
+    }
+
+    /**
+     * Set taxonomy term for a species node
+     *
+     * @param   object   $node
+     * @param   string   $term_name
+     * @param   string   $vocabulary_name
+     * @param   boolean  $save
+     */
+    public static function set_taxonomy_term(&$node, $field_name, $term_name, $vocabulary_name, $save = TRUE) {
+        if ($term_name) {
+            $vocabulary_object = taxonomy_vocabulary_machine_name_load($vocabulary_name);
+            $vid = $vocabulary_object->vid;
+            $term = taxonomy_get_term_by_name($term_name);
+
+            if (($term == array()) || ($term[key($term)]->vid != $vid)) {
+                taxonomy_term_save((object) array(
+                    'name' => $term_name,
+                    'vid' => $vid,
+                ));
+                $term = taxonomy_get_term_by_name($term_name);
+            }
+
+            $tid = key($term);
+
+            /**
+             * Change switch to a more general statement
+             */
+            switch ($field_name) {
+                case 'field_species_class':
+                    $node->field_species_class[$node->language][0]['tid'] = $tid;
+                    break;
+                case 'field_species_order':
+                    $node->field_species_order[$node->language][0]['tid'] = $tid;
+                    break;
+                case 'field_species_family':
+                    $node->field_species_family[$node->language][0]['tid'] = $tid;
+                    break;
+                case 'field_species_genus':
+                    $node->field_species_genus[$node->language][0]['tid'] = $tid;
+                    break;
+                case 'field_species_species':
+                    $node->field_species_species[$node->language][0]['tid'] = $tid;
+                    break;
+                case 'field_species_subspecies':
+                    $node->field_species_subspecies[$node->language][0]['tid'] = $tid;
+                    break;
+                case 'field_species_author':
+                    $node->field_species_author[$node->language][0]['tid'] = $tid;
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Get taxonomy term name by ID from a specified vocabulary
+     *
+     * @param   integer   $tid
+     * @param   string    $vocabulary_name
+     * @return  strong
+     */
+    public static function get_taxonomy_term_name($node, $field, $vocabulary_name) {
+        $field_value = $node->$field;
+        if (isset($field_value) && (!empty($field_value))) {
+            if (isset($field_value[$node->language][0]['tid'])) {
+                $tid = $field_value[$node->language][0]['tid'];
+                $term = taxonomy_term_load($tid);
+
+                if (($term !== array()) && ($term->vocabulary_machine_name == $vocabulary_name)) {
+                    return $term->name;
+                }
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * Set the legal instruments for a species node
+     *
+     * @param object $node Reference to the node to update
+     * @param array $data Data to get information from (ex. JSON). Must contain key field_species_instruments
+     * @param type $cache_instruments (Optional) Pre-cached data with Legal instruments as array 'name' => nid.
+     */
+    public static function set_instruments(&$node, $species, $save = TRUE, $instrument_cache = array()) {
+        if(!empty($species['field_species_instruments'])) {
+            foreach ($species['field_species_instruments'] as $index => $instrument) {
+                $instrument = (array)$instrument;
+                $instrument_name = strtolower(trim($instrument['field_instrument']));
+                if (!empty($instrument_name)) {
+                    if(array_key_exists($instrument_name, $instrument_cache)) {
+                        if ($save) {
+                            $c = array();
+                            $c['field_name'] = 'field_species_instruments';
+                            $c['field_instrument'][$node->language][0]['target_id'] = $instrument_cache[$instrument_name];
+                            if (isset($instrument['field_species_instrument_date']) && (!empty($instrument['field_species_instrument_date']))) {
+                                $c['field_species_instrument_date'][$node->language][0]['value'] = $instrument['field_species_instrument_date'];
+                            }
+                            $entity = entity_create('field_collection_item', $c);
+                            $entity->setHostEntity('node', $node);
+                        }else {
+                            $node->field_species_instruments[$node->language][$index]['field_species_instrument'] = $instrument_name;
+                            $node->field_species_instruments[$node->language][$index]['field_species_instrument_date'] = $instrument['field_species_instrument_date'];
+                        }
+                    } else {
+                        echo sprintf("Could not identify instrument '%s' for species '%s'\n", $instrument_name, $species['title']);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Retrieve the instrument names from a node
+     *
+     * @param stdClass $node Drupal publicatio node
+     * @param array $instrument_cache (Optional) Instrument cache (id | name) to avoid query for each call
+     * @return array Array of strings with instrument names
+     */
+    public static function get_instruments($node, $instrument_cache = array()) {
+        $ret = array();
+        $instruments = CMSUtils::get_node_list_value($node, 'field_species_instruments', 'target_id');
+        if(!empty($instruments)) {
+            if(empty($instrument_cache)) {
+                $instrument_cache = CMSLegalInstrument::get_mapped_instruments($title_as_key = FALSE);
+            }
+            foreach($instruments as $id) {
+                if(array_key_exists($id, $instrument_cache)) {
+                    $ret[] = $instrument_cache[$id];
+                } else {
+                    error_log("CMSSpecies::get_instruments(): Instrument with id: $id does not exist!");
+                }
+            }
+        }
+        return $ret;
+    }
+
+    /**
+     * Set the Appendix 1/2 for a species node
+     *
+     * @param object $node Reference to the node to update
+     * @param array $data Data to get information from (ex. JSON). Must contain key field_species_appendix_1 and field_species_appendix_2
+     */
+    public static function set_appendix(&$node, $data) {
+        if (array_key_exists('field_species_appendix_1_date', $data) && !empty($data['field_species_appendix_1_date']) && ($data['field_species_appendix_1_date'] != '1970')) {
+            $value = (strlen($data['field_species_appendix_1_date']) > 4) ? $data['field_species_appendix_1_date'] : sprintf('%s-01-01T00:00:00', $data['field_species_appendix_1_date']);
+            self::set_field_single_value($node, 'field_species_appendix_1_date', array('field_species_appendix_1_date' => $value));
+        }
+
+        if (array_key_exists('field_species_appendix_2_date', $data) && !empty($data['field_species_appendix_2_date']) && ($data['field_species_appendix_2_date'] != '1970')) {
+            $value = (strlen($data['field_species_appendix_2_date']) > 4) ? $data['field_species_appendix_2_date'] : sprintf('%s-01-01T00:00:00', $data['field_species_appendix_2_date']);
+            self::set_field_single_value($node, 'field_species_appendix_2_date', array('field_species_appendix_2_date' => $value));
+        }
+    }
+
+
+    public static function set_action(&$node, $data, $type) {
+        $field = 'field_species_' . $type . '_action';
+        self::set_field_boolean($node, $field, $data);
+    }
+
+
+    public static function set_iucn_status(&$node, $data) {
+        if(empty($data['field_species_iucn_status']) || empty($data['field_species_iucn_web_srv'])) {
+            $response = CMSSpecies::get_species_iucn_data($node->title);
+            $status = $response['field_species_iucn_status'];
+            $url = $response['field_species_iucn_web_srv'];
+        }
+
+        $status = !empty($data['field_species_iucn_status']) ? $data['field_species_iucn_status'] : $status;
+        $url = !empty($data['field_species_iucn_web_srv']) ? $data['field_species_iucn_web_srv'] : $url;
+        self::set_field_single_value($node,'field_species_iucn_status', array('field_species_iucn_status' => strtolower($status)));
+        self::set_field_single_value($node,'field_species_iucn_web_srv', array('field_species_iucn_web_srv' => $url));
+    }
+
+
+    public static function set_pop_global_date(&$node, $data) {
+        if ($data['field_species_pop_global_date'] != "1970") {
+            if(!empty($data['field_species_pop_global_date'])) {
+                if(strtotime($data['field_species_pop_global_date'])) {
+                    $value=$data['field_species_pop_global_date'];
+                }else {
+                    $value = sprintf('%s-01-01T00:00:00', $data['field_species_pop_global_date']);
+                }
+
+            } else {
+                $value=NULL;
+            }
+            self::set_field_single_value($node, 'field_species_pop_global_date', array('field_species_pop_global_date' => $value));
+        }
+    }
+
+
+    /**
+     * Get species data from IUCN website
+     *
+     * @param String $species_name The name of species
+     * @return Array Species data associative array (field_species_iucn_status and field_species_iucn_web_srv)
+     */
+    public static function get_species_iucn_data($species_name) {
+        $title = trim(strtolower($species_name));
+        if (empty($title)) {
+            return array();
+        }
+
+        $title_arr = explode(" ", $title);
+        $sub_species = "";
+        // If the name exceed two words, then it is a sub species
+        if (count($title_arr) > 2) {
+            $sub_species = array_pop($title_arr);
+        }
+        // Join by dash (API url)
+        $url_title = CMSUtils::slug($species_name);
+        $species_index_url = "http://api.iucnredlist.org/index/species/" . $url_title . ".json";
+        // Retrieve species data from url
+        $species_index_json = file_get_contents($species_index_url);
+        $species_index_data = json_decode($species_index_json, true);
+
+        $species_data = array();
+        if (is_array($species_index_data) && count($species_index_data) > 0) {
+            foreach ($species_index_data as $index) {
+                if (empty($sub_species)) {
+                    // Update species data for infra_rank is null
+                    if (!is_null($index['infra_rank'])) {
+                        continue;
+                    }
+                } else {
+                    if (!($index['infra_name'] == $sub_species && $index['infra_rank'] == "ssp.")) {
+                        continue;
+                    }
+                }
+
+                // IUCN status
+                $species_data['field_species_iucn_status'] = strtolower($index['category']);
+                // IUCN link
+                $species_data['field_species_iucn_web_srv'] = strtolower("http://www.iucnredlist.org/details/" . $index['species_id']);
+                break;
+            }
+        }
+
+        return $species_data;
+    }
+
+    public static function set_species_population_instrument(&$node, $species, $save = true, $property = 'field_species_pop') {
+        if(!empty($species[$property])) {
+            foreach ($species[$property] as $index => $population) {
+                $population = (array)$population;
+                if ($save) {
+                    $rel = array();
+                    $rel['field_name'] = 'field_species_pop';
+                    $instrument = CMSLegalInstrument::get_by_name($population['field_instrument']);
+                    if($instrument) {
+                        $rel['field_instrument'][$node->language][0]['target_id'] = $instrument->nid;
+                    }
+
+                    $population_name = CMSUtils::vocabulary_get_or_create_term($population['field_species_pop_v'], VOC_SPECIES_POPUPATION_NAME);
+                    if ($population_name) {
+                        $rel['field_species_pop_v'][$node->language][0]['tid'] = $population_name->tid;
+                    }
+
+                    $entity = entity_create('field_collection_item', $rel);
+                    $entity->field_name = 'field_species_pop';
+                    $entity->setHostEntity('node', $node);
+                }else {
+                    $node->field_species_pop[$node->language][$index] = $population;
+                }
+            }
+        }
+    }
+
+    /**
+     * Add population size to a Drupal species node.
+     *
+     * @param object $node The Drupal node
+     * @param array $species Array with all species attributes
+     * @param string $property Actual property holding data inside the $species array
+     */
+    public static function set_species_population_size(&$node, $species, $save = true, $property = 'field_species_pop_size') {
+        if(!empty($species[$property])) {
+            foreach ($species[$property] as $index => $population) {
+                $population = (array)$population;
+                if ($save) {
+                    $rel = array();
+                    $rel['field_name'] = $property;
+
+                    $v = empty($population['field_species_pop_size_e']) ? '' : $population['field_species_pop_size_e'];
+                    $rel['field_species_pop_size_e'][$node->language][0]['value'] = $v;
+
+                    $v = empty($population['field_species_pop_size_i']) ? '' : $population['field_species_pop_size_i'];
+                    $rel['field_species_pop_size_i'][$node->language][0]['value'] = $v;
+
+                    $v = empty($population['field_species_pop_size_q']) ? '' : $population['field_species_pop_size_q'];
+                    $rel['field_species_pop_size_q'][$node->language][0]['value'] = $v;
+
+                    if (!empty($population['field_species_pop_size_r'])) {
+                        $population_name = CMSUtils::vocabulary_get_or_create_term($population['field_species_pop_size_r'], 'species_population_name', TRUE);
+                        $v = $population_name->tid;
+                        $rel['field_species_pop_size_r'][$node->language][0]['tid'] = $v;
+                    }
+
+                    $v = empty($population['field_species_pop_size_ref']) ? '' : $population['field_species_pop_size_ref'];
+                    $rel['field_species_pop_size_ref'][$node->language][0]['value'] = $v;
+
+                    $v = empty($population['field_species_pop_size_n']) ? '' : $population['field_species_pop_size_n'];
+                    $rel['field_species_pop_size_n'][$node->language][0]['value'] = $v;
+
+                    $v = empty($population['field_species_pop_trend_t']) ? '' : $population['field_species_pop_trend_t'];
+                    $rel['field_species_pop_trend_t'][$node->language][0]['value'] = $v;
+
+                    $v = empty($population['field_species_pop_trend_i']) ? '' : $population['field_species_pop_trend_i'];
+                    $rel['field_species_pop_trend_i'][$node->language][0]['value'] = $v;
+
+                    $v = empty($population['field_species_pop_trend_q']) ? '' : $population['field_species_pop_trend_q'];
+                    $rel['field_species_pop_trend_q'][$node->language][0]['value'] = $v;
+
+                    $v = empty($population['field_species_pop_trend_ref']) ? '' : $population['field_species_pop_trend_ref'];
+                    $rel['field_species_pop_trend_ref'][$node->language][0]['value'] = $v;
+
+                    $v = empty($population['field_species_pop_trend_n']) ? '' : $population['field_species_pop_trend_n'];
+                    $rel['field_species_pop_trend_n'][$node->language][0]['value'] = $v;
+
+                    $entity = entity_create('field_collection_item', $rel);
+                    $entity->setHostEntity('node', $node);
+                }else {
+                    $node->field_species_pop_size[$node->language][$index] = $population;
+                }
+            }
+        }
+    }
+
+    /**
+     * Add range states to a Drupal species node.
+     *
+     * @param object $node The Drupal node
+     * @param array $species Array with all species attributes
+     * @param array $countryName2Iso Mapping with Name & Official name mapping to => code for identification
+     */
+    public static function set_species_range_states(&$node, $species, $save = true) {
+        if(!empty($species['field_species_range_states'])) {
+            foreach ($species['field_species_range_states'] as $index => $country) {
+                $country = (array)$country;
+                $country_ob = Country::get_by_name_or_iso2($country['field_country']);
+                if (!empty($country_ob)) {
+                    if ($save) {
+                        $c = array();
+                        $c['field_name'] = 'field_species_range_states';
+                        $c['field_country'][$node->language][0]['target_id'] = $country_ob->nid;
+                        if (!empty($country['field_species_territories'])) {
+                            $c['field_species_territories'][$node->language][0]['value'] = $country['field_species_territories'];
+                        }
+
+                        if (isset($country['field_species_range_state_status'])){
+                            $field=field_info_field('field_species_range_state_status');
+                            $allowed_val = list_allowed_values($field);
+                            if (is_array($allowed_val) && array_key_exists($country['field_species_range_state_status'], $allowed_val)) {
+                                $c['field_species_range_state_status'][$node->language][0]['value'] = $country['field_species_range_state_status'];
+                            }
+                        }
+                        $entity = entity_create('field_collection_item', $c);
+                        $entity->setHostEntity('node', $node);
+
+                    }else {
+                        $node->field_species_range_states[$node->language][$index]['field_country'] = $country_ob->title;
+                        $node->field_species_range_states[$node->language][$index]['field_species_territories'] = $country['field_species_territories'];
+                    }
+                } else {
+                    echo sprintf("Could not identify range state '%s' for species '%s'\n", $country['field_country'], $species['title']);
+                }
+            }
+        }
+    }
+
+    /**
+     * Add status per country to a Drupal species node.
+     *
+     * @param object $node The Drupal node
+     * @param array $species Array with all species attributes
+     */
+    public static function set_species_aewa_status_per_country(&$node, $species, $save = true) {
+        if(!empty($species['field_species_status_per_country'])) {
+            foreach ($species['field_species_status_per_country'] as $index => $status) {
+                $status = (array)$status;
+                $country_ob = Country::get_by_name_or_iso2($status['field_country']);
+                if (!empty($country_ob)) {
+                    $term = CMSUtils::vocabulary_get_or_create_term($status['field_species_aewa_status'], VOC_SPECIES_AEWA_COUNTRY_STATUS);
+                    $status_name = ($term) ? $term->name : '';
+                    $status_tid = ($term) ? $term->tid : 0;
+
+                    if ($save) {
+                        $c = array();
+                        $c['field_name'] = 'field_species_status_per_country';
+                        $c['field_country'][$node->language][0]['target_id'] = $country_ob->nid;
+                        if ($status_tid) {
+                            $c['field_species_aewa_status'][$node->language][0]['tid'] = $status_tid;
+                        }
+                        $entity = entity_create('field_collection_item', $c);
+                        $entity->setHostEntity('node', $node);
+                    }else {
+                        $node->field_species_status_per_country[$node->language][$index]['field_country'] = $country_ob->title;
+                        if ($status_name) {
+                            $node->field_species_status_per_country[$node->language][$index]['field_species_aewa_status'] = $status_name;
+                        }
+                    }
+                } else {
+                    echo sprintf("Could not identify country '%s' for species '%s'\n", $status['field_country'], $species['title']);
+                }
+            }
+        }
+    }
+
+    public static function set_species_aewa_population_status(&$node, $species, $save = true) {
+        if (!empty($species['field_aewa_population_status'])) {
+            foreach ($species['field_aewa_population_status'] as $index => $status) {
+                $status = (array)$status;
+                if ($save) {
+                    $c = array();
+                    $c['field_name'] = 'field_aewa_population_status';
+                    $population_name = CMSUtils::vocabulary_get_or_create_term($status['field_population_status_name'], VOC_SPECIES_POPUPATION_NAME);
+                    if ($population_name){
+                        $c['field_pop_status_name'][$node->language][0]['tid'] = $population_name->tid;
+                    }
+
+                    $col_a = array();
+                    $col_a['field_name'] = 'field_aewa_pop_status_col_a';
+                    $col_a_status = CMSUtils::vocabulary_get_or_create_term($status['field_aewa_pop_status_col_a']['field_pop_status_col_a_status'], VOC_SPECIES_AEWA_STATUS_A);
+                    if ($col_a_status) {
+                        $col_a['field_pop_status_col_a_status'][$node->language][0]['tid'] = $col_a_status->tid;
+                    }
+                    $entity = entity_create('field_collection_item', $col_a);
+                    $entity->setHostEntity('field_collection_item', $node->field_aewa_pop_status_col_a);
+
+                    $entity = entity_create('field_collection_item', $c);
+                    $entity->setHostEntity('node', $node);
+                }else {
+                    $node->field_aewa_population_status[$node->language][$index] = $status;
+                }
+            }
+        }
+    }
+
+    /**
+     * Add threats to a Drupal species node
+     *
+     * @param   object   $node   The Drupal node
+     * @param   array    $species   Array with all species attributes
+     */
+    public static function set_species_threats(&$node, $species, $save = true) {
+        if(!empty($species['field_species_threats'])) {
+            foreach ($species['field_species_threats'] as $index => $row) {
+                $row = (array)$row;
+                if ($save) {
+                    $rel = array();
+                    $term = CMSUtils::vocabulary_get_or_create_term($row['field_threats'], VOC_THREATS);
+                    $rel['field_threats'][$node->language][0]['tid'] = $term->tid;
+                    $v = empty($row['field_species_threat_notes']) ? '' : $row['field_species_threat_notes'];
+                    $rel['field_species_threat_notes'][$node->language][0]['value'] = $v;
+                    $entity = entity_create('field_collection_item', $rel);
+                    $entity->field_name = 'field_species_threats';
+                    $entity->setHostEntity('node', $node);
+                } else {
+                    $node->field_species_threats[$node->language][$index] = $row;
+                }
+            }
+        }
+    }
+
+    /**
+     * Prepare data for species exposed form dropdowns
+     *
+     * @return   $data
+     */
+    public static function exposed_form_data() {
+        $classes = CMSSpecies::get_classes();
+        $data = array();
+        foreach ($classes as $class) {
+            $orders = CMSSpecies::get_orders_by_class($class);
+            $data[$class] = $orders;
+            foreach ($orders as $order) {
+                $families = CMSSpecies::get_families_by_order($order);
+                $data[$class][$order] = $families;
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Get all species classes
+     *
+     * @return   array   $classes
+     */
+    public static function get_classes() {
+        $select = db_select('field_data_field_species_class', 'c');
+        $select->distinct();
+        $select->fields('c', array('field_species_class_tid'));
+        $select->orderBy('c.field_species_class_tid');
+
+        $values = $select->execute()->fetchCol();
+        $terms = taxonomy_term_load_multiple($values);
+        $classes = array();
+        foreach ($terms as $term) {
+            $classes[$term->tid] = $term->name;
+        }
+
+        asort($classes);
+        return $classes;
+    }
+
+    /**
+     * Get species orders by class
+     *
+     * If a class is specified the function will return all orders for that class,
+     * otherwise all orders will be returned.
+     *
+     * @param   string   $class_selected
+     * @return  array   $orders
+     */
+    public static function get_orders_by_class($class_selected = '') {
+        $classes = CMSSpecies::get_classes();
+        $order_values = array();
+        foreach ($classes as $key => $class) {
+            $select = db_select('field_data_field_species_order', 'o');
+            $select->distinct();
+            $select->fields('o', array('field_species_order_tid'));
+            if (!empty($class)) {
+                $select->innerJoin('field_data_field_species_class', 'c', 'o.entity_id = c.entity_id');
+                $select->condition('c.field_species_class_tid', $key);
+            }
+            $select->orderBy('o.field_species_order_tid');
+
+            $values = $select->execute()->fetchCol();
+            $terms = taxonomy_term_load_multiple($values);
+            $orders = array();
+            foreach ($terms as $term) {
+                $orders[$term->tid] = $term->name;
+            }
+
+            $order_values[$key] = $orders;
+        }
+
+        if (isset($order_values[$class_selected])) {
+            asort($order_values[$class_selected]);
+            return $order_values[$class_selected];
+        }else {
+            $orders = array();
+            foreach ($order_values as $class => $order) {
+                foreach ($order as $key => $value) {
+                    $orders[$key] = $value;
+                }
+            }
+
+            asort($orders);
+            return $orders;
+        }
+    }
+
+    /**
+     * Get species nids by order
+     * @param   string   $order
+     */
+    public static function get_species_by_order($order){
+        $species_nids = array();
+        $order_term = CMSUtils::vocabulary_get_or_create_term($order, VOC_SPECIES_ORDER);
+        $order_tid = $order_term->tid;
+
+        $select = db_select('field_data_field_species_order', 'o');
+        $select->distinct();
+        $select->fields('o', array('entity_id'));
+        $select->condition('o.field_species_order_tid',$order_tid,'=');
+        $select->orderBy('o.entity_id');
+
+        $species_nids = $select->execute()->fetchCol();
+
+        return $species_nids;
+    }
+    /**
+     * Get species families by order
+     *
+     * If an order is specified the function will return all families for that order,
+     * otherwise all familes will be returned.
+     *
+     * @param   string   $order_selected
+     * @return  array    $families
+     */
+    public static function get_families_by_order($order_selected) {
+        $orders = CMSSpecies::get_orders_by_class();
+        $family_values = array();
+        foreach ($orders as $key => $order) {
+            $select = db_select('field_data_field_species_family', 'f');
+            $select->distinct();
+            $select->fields('f', array('field_species_family_tid'));
+            if (!empty($order)) {
+                $select->innerJoin('field_data_field_species_order', 'o', 'o.entity_id = f.entity_id');
+                $select->condition('o.field_species_order_tid', $key);
+            }
+            $select->orderBy('f.field_species_family_tid');
+            $values = $select->execute()->fetchCol();
+            $terms = taxonomy_term_load_multiple($values);
+            $families = array();
+            foreach ($terms as $term) {
+                $families[$term->tid] = $term->name;
+            }
+
+            $family_values[$key] = $families;
+        }
+
+        if (isset($family_values[$order_selected])) {
+            asort($family_values[$order_selected]);
+            return $family_values[$order_selected];
+        }else {
+            $families = array();
+            foreach ($family_values as $order => $family) {
+                foreach ($family as $key => $value) {
+                    $families[$key] = $value;
+                }
+            }
+
+            asort($families);
+            return $families;
+        }
+    }
+
+    public static function map_remote_species($content_type, $profile){
+        $ret = array();
+        $nodes = node_load_multiple(array(), array('type' => $content_type));
+        foreach($nodes as $node) {
+            if (property_exists($node, 'field_species_experts') && array_key_exists($node->language, $node->field_species_experts) && !empty($node->field_species_experts[$node->language])) {
+                $node_cache = array(
+                    'title' => $node->title,
+                    'title_with_website' => $node->title . ' (' . strtoupper($profile) . ')',
+                    'experts_dns' => array(),
+                );
+
+                foreach ($node->field_species_experts[$node->language] as $index => $expert) {
+                    $node_cache['experts_dns'][] = $expert['value'];
+                }
+
+                $ret[$profile . ':' . $node->uuid] = $node_cache;
+            }
+        }
+
+        return $ret;
+    }
+
+
+    /**
+     * Retrieve the species which matches a specified range state.
+     *
+     * @param $id_country integer Country to filter by
+     * @return mixed Array of species objects
+     */
+    public static function get_species_for_range_state($id_country) {
+        $ret = array();
+        if(!is_numeric($id_country)) {
+            watchdog('species', 'get_species_for_range_state - parameter is not an integer, returning empty result');
+            return $ret;
+        }
+        $inner = new EntityFieldQuery();
+        $inner_r = $inner->entityCondition('entity_type', 'field_collection_item')
+            ->fieldCondition('field_country', 'target_id', $id_country, '=')
+            ->execute();
+        if(!empty($inner_r['field_collection_item'])) {
+            $keys = array_keys($inner_r['field_collection_item']);
+            $query = new EntityFieldQuery();
+            $species_r = $query->entityCondition('entity_type', 'node')
+                ->entityCondition('bundle', self::$bundle)
+                ->propertyCondition('status', NODE_PUBLISHED)
+                ->fieldCondition('field_species_range_states', 'value', $keys)
+                ->execute();
+            if(!empty($species_r['node'])) {
+                $ret = node_load_multiple(array_keys($species_r['node']));
+            }
+        }
+        return $ret;
+    }
+
+    public static function get_species_for_content_type($nid, $field_name, $field_collection_name) {
+        $ret = array();
+        if(!is_numeric($nid)) {
+            watchdog('species', 'get_species_content_type() - $nid is not an integer, returning empty result');
+            return $ret;
+        }
+        $inner = new EntityFieldQuery();
+        $inner_r = $inner->entityCondition('entity_type', 'field_collection_item')
+            ->fieldCondition($field_name, 'target_id', $nid, '=')
+            ->execute();
+        if(!empty($inner_r['field_collection_item'])) {
+            $keys = array_keys($inner_r['field_collection_item']);
+            $query = new EntityFieldQuery();
+            $species_r = $query->entityCondition('entity_type', 'node')
+                ->entityCondition('bundle', self::$bundle)
+                ->propertyCondition('status', NODE_PUBLISHED)
+                ->fieldCondition($field_collection_name, 'value', $keys)
+                ->execute();
+            if(!empty($species_r['node'])) {
+                $ret = node_load_multiple(array_keys($species_r['node']));
+            }
+        }
+        return $ret;
+    }
+
+    /**
+     * Function used in template to get data for front-end species profile page
+     * @param $node
+     *
+     * @return array - $data returned should be used in template file by drupal_ammap_render_map() to render the map
+     * @author Dragos Dumitrescu
+     */
+    public static function get_range_states_for_ammap($node) {
+        $countries_fc_ids = array();
+        $langcode = field_language('node', $node, 'field_species_range_states');
+        foreach ($node->field_species_range_states[$langcode] as $country) {
+            $countries_fc_ids []= $country['value'];
+        }
+
+        $result = entity_load('field_collection_item', $countries_fc_ids);
+        foreach ($result as  $field_col) {
+            $country_ids []= $field_col->field_country[$langcode][0]['target_id'];
+            $countries_field_col[$field_col->field_country[$langcode][0]['target_id']]= $field_col;
+        }
+        $query = new EntityFieldQuery();
+        $query->entityCondition('entity_type', 'node')
+            ->entityCondition('bundle', 'country')
+            ->propertyCondition('status', 1)
+            ->propertyCondition('nid', $country_ids );
+        $result = $query->execute();
+        $countries = $result['node'];
+
+        // Get all fields attached to a given node type
+        $fields = field_info_instances('node', 'country');
+
+        // Put all field names you want to load
+        $field_names = array('field_country_official_name');
+
+        foreach ($field_names AS $field_name) {
+            // Get id of body field
+            $field_id = $fields[$field_name]['field_id'];
+
+            // Attach a field of selected id only to get value for it
+            field_attach_load('node', $countries, FIELD_LOAD_CURRENT, array('field_id' => $field_id));
+        }
+
+        //get country statuses
+        $countries_statuses = array();
+        foreach($countries_field_col as $country_id => $field_col) {
+            $countries_statuses[$country_id] = '-';
+            if (!empty($field_col->field_species_range_state_status[$langcode][0]['value'])) {
+                $countries_statuses[$country_id] = $field_col->field_species_range_state_status[$langcode][0]['value'];
+            }
+        }
+
+        foreach ($countries as $nid => $country) {
+            $data []= array(
+                //'title' => $country->field_country_official_name[$node->language][0]['value'],
+                'iso2'  => $country->field_country_iso2[$langcode][0]['value'],
+                'customData'  => '',
+                'legend' => ucfirst($countries_statuses[$nid]),
+                'url' => drupal_lookup_path('alias',"node/" . $country->nid),
+                'color' => ''
+            );
+        }
+        return $data;
+    }
+
+    /**
+     * Function used in template to get data for front-end species profile page
+     * @param $node
+     *
+     * @return array - $data returned should be used in template file by drupal_ammap_render_map() to render the map
+     * @author Dragos Dumitrescu
+     */
+    public static function get_aewa_countries_status_for_ammap($node) {
+        $langcode = field_language('node', $node, 'field_species_status_per_country');
+        $countries_fc_ids = array();
+        foreach ($node->field_species_status_per_country[$langcode] as $country) {
+            $countries_fc_ids []= $country['value'];
+        }
+        $result = entity_load('field_collection_item', $countries_fc_ids);
+        foreach ($result as  $field_col) {
+            $country_ids []= $field_col->field_country[$langcode][0]['target_id'];
+            $countries_field_col[$field_col->field_country[$langcode][0]['target_id']]= $field_col;
+        }
+
+        $query = new EntityFieldQuery();
+        $query->entityCondition('entity_type', 'node')
+            ->entityCondition('bundle', 'country')
+            ->propertyCondition('status', 1)
+            ->propertyCondition('nid', $country_ids );
+        $result = $query->execute();
+        $countries = $result['node'];
+
+        // Get all fields attached to a given node type
+        $fields = field_info_instances('node', 'country');
+
+        // Put all field names you want to load
+        $field_names = array('field_country_official_name');
+
+        foreach ($field_names AS $field_name) {
+            // Get id of body field
+            $field_id = $fields[$field_name]['field_id'];
+
+            // Attach a field of selected id only to get value for it
+            field_attach_load('node', $countries, FIELD_LOAD_CURRENT, array('field_id' => $field_id));
+        }
+
+        //get country statuses
+        $countries_statuses = array();
+        foreach($countries_field_col as $country_id => $field_col) {
+            $countries_statuses[$country_id] = '-';
+            if (!empty($field_col->field_species_aewa_status[$langcode][0]['tid'])) {
+                $tid = $field_col->field_species_aewa_status[$langcode][0]['tid'];
+                $term = taxonomy_term_load($tid);
+                $countries_statuses[$country_id]= (!empty($term->name)) ? $term->name : '';
+            }
+        }
+
+        foreach ($countries as $nid => $country) {
+            $data []= array(
+                'name' => $country->field_country_official_name[$node->language][0]['value'],
+                'iso2'  => $country->field_country_iso2[$langcode][0]['value'],
+                'customData'  => '',
+                'legend' => $countries_statuses[$nid],
+                'url' => drupal_lookup_path('alias',"node/" . $country->nid),
+                'color' => ''
+            );
+        }
+        return $data;
+    }
+}

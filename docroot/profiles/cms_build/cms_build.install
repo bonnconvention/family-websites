@@ -1,0 +1,412 @@
+<?php
+
+if (!function_exists('profiler_v2')) {
+    require_once('libraries/profiler/profiler.inc');
+}else {
+    return FALSE;
+}
+
+/**
+ * Install Drupal with CMS install profile
+*/
+profiler_v2('cms_build');
+
+/**
+ * Avoid pathauto default node alias
+*/
+if (!defined("PATHAUTO_NODE_DEFAULT")) {
+    define("PATHAUTO_NODE_DEFAULT", "");
+}
+
+/**
+ * Path alias to CMS Databases
+*/
+if (!defined("ADMINISTRATION_PATH")) {
+    define("ADMINISTRATION_PATH", "manage/");
+}
+
+/**
+ * Temporarily set front page to species listing for CMS Databases
+ *
+ * @TODO Update the frontpage path to CMS Family Websites homepage
+*/
+define("FRONTPAGE_URL", "manage/species/listing");
+
+/**
+ * Define themes to be activated
+*/
+define("FRONTEND_THEME", "cms_frontend");
+define("DATABASES_ADMINISTRATION_THEME", "cms_theme");
+define("ADMIN_THEME", "seven");
+
+/**
+ * Implements hook_install().
+ * Perform actions to set up the site for this profile.
+ */
+function cms_build_install() {
+    _cms_build_configure_themes();
+
+    // Add text formats.
+    $filtered_html_format = array(
+        'format' => 'filtered_html',
+        'name' => 'Filtered HTML',
+        'weight' => 0,
+        'filters' => array(
+            // URL filter.
+            'filter_url' => array('weight' => 0, 'status' => 1,),
+            // HTML filter.
+            'filter_html' => array('weight' => 1,'status' => 1,),
+            // Line break filter.
+            'filter_autop' => array('weight' => 2,'status' => 1,),
+            // HTML corrector filter.
+            'filter_htmlcorrector' => array('weight' => 10,'status' => 1,),
+        ),
+    );
+    $filtered_html_format = (object) $filtered_html_format;
+    filter_format_save($filtered_html_format);
+
+    $full_html_format = array(
+        'format' => 'full_html', 'name' => 'Full HTML',
+        'weight' => 1, 'filters' => array(
+            // URL filter.
+            'filter_url' => array('weight' => 0, 'status' => 1),
+            // Line break filter.
+            'filter_autop' => array('weight' => 1, 'status' => 1),
+            // HTML corrector filter.
+            'filter_htmlcorrector' => array('weight' => 10, 'status' => 1),
+        ),
+    );
+    $full_html_format = (object) $full_html_format;
+    filter_format_save($full_html_format);
+
+    // Insert default pre-defined RDF mapping into the database.
+    $rdf_mappings = array(
+        array('type' => 'node', 'bundle' => 'page', 'mapping' => array(
+                'rdftype' => array('foaf:Document'),
+            ),
+        ),
+    );
+
+    foreach ($rdf_mappings as $rdf_mapping) {
+        rdf_mapping_save($rdf_mapping);
+    }
+
+    variable_set('site_frontpage', FRONTPAGE_URL);
+
+    /**
+     * Overwrite pathauto node default alias
+    */
+    variable_set('pathauto_node_pattern', PATHAUTO_NODE_DEFAULT);
+
+    // Default "Basic page" to not be promoted and have comments disabled.
+    variable_set('node_options_page', array('status'));
+    variable_set('comment_page', COMMENT_NODE_HIDDEN);
+
+    // Hide date and author information for "Basic page" nodes by default.
+    variable_set('node_submitted_page', FALSE);
+
+    // Enable user picture support and set default to a square thumbnail option.
+    variable_set('user_pictures', '1');
+    variable_set('user_picture_dimensions', '1024x1024');
+    variable_set('user_picture_file_size', '800');
+    variable_set('user_picture_style', 'thumbnail');
+
+    // Allow visitor account creation with adminitrative approval.
+    variable_set('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);
+
+    // Set User Login form on 403 (Access Denied) pages
+    variable_set('site_403', 'toboggan/denied');
+
+   // Enable default permissions for system roles.
+    $filtered_html_permission = filter_permission_name($filtered_html_format);
+    user_role_grant_permissions(DRUPAL_ANONYMOUS_RID,
+        array('access content', 'access comments', $filtered_html_permission));
+
+    user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID,
+        array('access content', 'access comments', 'post comments',
+            'skip comment approval', $filtered_html_permission));
+
+    // Create a default role for site administrators, with all permissions
+    $admin_role = new stdClass();
+    $admin_role->name = 'administrator';
+    $admin_role->weight = 2;
+    user_role_save($admin_role);
+    user_role_grant_permissions($admin_role->rid,
+        array_keys(module_invoke_all('permission')));
+    // Set this as the administrator role.
+    variable_set('user_admin_role', $admin_role->rid);
+
+    // Assign user 1 the "administrator" role.
+    db_insert('users_roles')
+        ->fields(array('uid' => 1, 'rid' => $admin_role->rid))
+        ->execute();
+
+    // Execute the CMS customizations
+    _cms_build_customizations_install();
+
+    // Rebuild access permissions
+    node_access_rebuild();
+
+    if (module_exists('wysiwyg')) {
+        _cms_build_set_wysiwyg_settings();
+    }
+
+    _cms_build_create_context();
+}
+
+/**
+ * Activate and enable necessary themes
+*/
+function _cms_build_configure_themes() {
+    /**
+     * Disable all available themes
+    */
+    db_update('system')->fields(array('status' => 0))->condition('type', 'theme')->execute();
+
+    /**
+     * Enable themes for Frontend, Databases administration and Drupal Administration
+    */
+    theme_enable(array(DATABASES_ADMINISTRATION_THEME, ADMIN_THEME, FRONTEND_THEME));
+
+    /**
+     * Set defaul theme
+    */
+    variable_set('theme_default', FRONTEND_THEME);
+
+    /**
+     * Set default Drupal administration theme
+    */
+    variable_set('admin_theme', ADMIN_THEME);
+
+    /**
+     * Activate Databases administration theme when creating/editing a node
+    */
+    variable_set('node_admin_theme', '0');
+}
+
+/**
+ *  Initial customizations for CMS Databases and Family Websites
+ *
+ * - set environment variables
+ * - disable unnecessary modules
+ * - enable CMS custom modules
+*/
+function _cms_build_customizations_install() {
+    module_disable(array('overlay', 'toolbar'));
+
+    // Set default country, first day of the month and date format
+    variable_set('date_first_day', '1');
+    variable_set('site_default_country', 'DE');
+    variable_set('date_default_timezone', 'Europe/Berlin');
+    variable_set('configurable_timezones', '0');
+    variable_set('user_default_timezone', '0');
+
+    // Internationalization
+    variable_set('i18n_node_default_language_none', '1');
+    variable_set('i18n_string_allowed_formats', array(
+        'filtered_html'   => 'filtered_html',
+        'full_html'       => 'full_html',
+        'plain_text'      => 'plain_text',
+        'unfiltered_html' => 'unfiltered_html'
+    ));
+
+    // Disable cron running
+    // @NOTE This is a temporary fix.
+    // @TODO Fix search index cron
+    variable_set('cron_safe_threshold', 0);
+
+    // Configure jQuery Chosen
+    variable_set('chosen_jquery_selector', 'select[name^="field_"]:not(form[id^="views-exposed-form"] select), #contacts-instrument-filter select, #contacts-form select, #organization-form select');
+    variable_set('chosen_minimum', 0);
+
+    // Set jQuery version
+    variable_set('jquery_update_jquery_version', '1.7');
+
+    // Set CMS Databases websites URLs as environment variables
+    // Need for APIs such as Species Family Display
+    _set_webservices_urls();
+
+    // Enable CMS custom modules
+    $modules = array(
+        'cms',
+    );
+    if (!module_enable($modules)) {
+        drupal_set_message('Failed to enable third party custom modules', 'error');
+    }
+
+    $modules = array(
+        'cms_initial_data',
+    );
+    if (!module_enable($modules)) {
+        drupal_set_message('Failed to enable CMS Initial Data module', 'error');
+    }
+
+    $modules = array(
+        'cms_contacts',
+        'cms_instrument',
+        'cms_country',
+    );
+
+    if (!module_enable($modules)) {
+        drupal_set_message('Failed to enable Contacts, CMS Instruments and Country modules', 'error');
+    }
+
+    $modules = array(
+        'cms_document',
+        'cms_meeting',
+        'cms_project',
+        'cms_publication',
+        'cms_species',
+    );
+
+    if(!module_enable($modules)) {
+        drupal_set_message('Failed to enable custom modules', 'error');
+    }
+
+    $modules = array(
+        'cms_menu',
+    );
+    if (!module_enable($modules)) {
+        drupal_set_message('Failed to enable CMS Menu module', 'error');
+    }
+
+    _set_content_types_pathauto_patterns(array(
+        'legal_instrument',
+        'country',
+        'document',
+        'meeting',
+        'project',
+        'publication',
+        'species',
+    ));
+}
+
+/**
+ * Set pathauto patterns for a specified list of content types
+ *
+ * @param    array    $content_types
+*/
+function _set_content_types_pathauto_patterns($content_types = array()) {
+    foreach ($content_types as $content_type) {
+        variable_set('pathauto_node_' . $content_type . '_pattern', ADMINISTRATION_PATH . 'node/[node:nid]');
+    }
+}
+
+/**
+ * Sets default WYSIWYG settings for CMS
+ */
+function _cms_build_set_wysiwyg_settings() {
+    $settings = array(
+        'default' => 1,
+        'user_choose' => 1,
+        'show_toggle' => 1,
+        'theme' => 'advanced',
+        'language' => 'en',
+        'buttons' => array(
+            'default' => array(
+                'Bold' => 1,
+                'Italic' => 1,
+                'Underline' => 1,
+                'Strike' => 1,
+                'JustifyLeft' => 1,
+                'JustifyCenter' => 1,
+                'JustifyRight' => 1,
+                'BulletedList' => 1,
+                'NumberedList' => 1,
+                'Undo' => 1,
+                'Redo' => 1,
+                'Link' => 1,
+                'Unlink' => 1,
+                'Anchor' => 1,
+                'Image' => 1,
+                'Superscript' => 1,
+                'Subscript' => 1,
+                'Blockquote' => 1,
+                'HorizontalRule' => 1,
+                'Cut' => 1,
+                'Copy' => 1,
+                'Paste' => 1,
+                'PasteFromWord' => 1,
+                'RemoveFormat' => 1,
+                'SpecialChar' => 1,
+                'Format' => 1,
+                'Table' => 1,
+                'Maximize' => 1,
+            ),
+            'imce' => array(
+                'imce' => 1,
+            ),
+        ),
+        'toolbar_loc' => 'top',
+        'toolbar_align' => 'left',
+        'path_loc' => 'bottom',
+        'resizing' => 1,
+        'verify_html' => 1,
+        'preformatted' => 0,
+        'convert_fonts_to_spans' => 1,
+        'remove_linebreaks' => 1,
+        'apply_source_formatting' => 0,
+        'paste_auto_cleanup_on_paste' => 1,
+        'block_formats' => 'p,address,pre,h2,h3,h4,h5,h6,div',
+        'css_setting' => 'self',
+        'css_path' => '%t/css/editor.css',
+        'css_classes' => '',
+    );
+
+    $fields = array(
+        'format' => 'full_html',
+        'editor' => 'ckeditor',
+        'settings' => serialize($settings),
+    );
+
+    db_insert('wysiwyg')->fields($fields)->execute();
+
+    db_update('filter_format')
+    ->condition('format', 'filtered_html')
+    ->fields(array('weight' => 1))
+    ->execute();
+
+    db_update('filter_format')
+    ->condition('format', 'full_html')
+    ->fields(array('weight' => 0))
+    ->execute();
+}
+
+/**
+ * Set environment variable with all websites URLs and title
+ *
+ * @return   boolean
+*/
+function _set_webservices_urls() {
+    $profile_path = drupal_realpath(drupal_get_path('profile', 'cms_build'));
+    $file = file_get_contents($profile_path . DIRECTORY_SEPARATOR . 'urls.config.json');
+    $websites = json_decode($file, true);
+
+    return variable_set('websites', $websites['servers']);
+}
+
+/**
+ * Create a Drupal Context in order to be able to switch between themes
+ *
+ * @return   boolean
+*/
+function _cms_build_create_context() {
+    $reaction = array('active_theme' => array('theme' => DATABASES_ADMINISTRATION_THEME));
+    $conditions = array(
+        'path' => array(
+            'values' => array(
+                'manage/*',
+                'node/add/*',
+                'node/*/edit*',
+            )
+        )
+    );
+
+    ctools_include('export');
+    $context = ctools_export_new_object('context');
+    $context->name = 'Activate Databases administration theme';
+    $context->conditions = $conditions;
+    $context->reactions = $reaction;
+
+    return context_save($context);
+}

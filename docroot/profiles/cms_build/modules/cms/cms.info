@@ -1,0 +1,42 @@
+name = CMS Contrib Modules
+description = Introduces custom modules for CMS along with custom functionalities
+core = 7.x
+package = CMS
+php = 5.2.4
+version = 7.x-7.17
+
+dependencies[] = block
+dependencies[] = color
+dependencies[] = comment
+dependencies[] = contextual
+dependencies[] = ctools
+dependencies[] = dashboard
+dependencies[] = datatables
+dependencies[] = date
+dependencies[] = date_popup_authored
+dependencies[] = dblog
+dependencies[] = entity
+dependencies[] = entityreference
+dependencies[] = field_ui
+dependencies[] = file
+dependencies[] = help
+dependencies[] = image
+dependencies[] = list
+dependencies[] = module_filter
+dependencies[] = number
+dependencies[] = options
+dependencies[] = path
+dependencies[] = search
+dependencies[] = simplenews
+dependencies[] = strongarm
+dependencies[] = taxonomy
+files[] = cms.test
+files[] = utils.php
+files[] = cms.migrate.inc
+
+; Information added by fserver
+core = "7.x"
+datestamp = "1420734842"
+project = "cms"
+project status url = "http://fserver.eaudeweb.ro/fserver"
+version = "7.x-7.34"

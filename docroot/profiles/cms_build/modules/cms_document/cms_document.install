@@ -1,0 +1,77 @@
+<?php
+
+include_once drupal_get_path('module', 'cms') . '/utils.php';
+
+
+/**
+ * Implements hook_uninstall()
+ */
+function cms_document_uninstall() {
+    user_role_delete(ROLE_MANAGE_DOCUMENT);
+
+    CMSUtils::vocabulary_delete(VOC_DOCUMENT_STATUS);
+    CMSUtils::vocabulary_delete(VOC_DOCUMENT_STATUS);
+    CMSUtils::vocabulary_delete(VOC_DOCUMENT_SUBMITTER);
+
+    CMSUtils::remove_menu_and_submenu('main-menu', 'Documents', '<front>');
+}
+
+function cms_document_install () {
+    $role = CMSUtils::get_or_create_role(ROLE_MANAGE_DOCUMENT);
+
+    CMSUtils::vocabulary_create('Document type vocabulary', VOC_DOCUMENT_TYPE);
+    CMSUtils::vocabulary_create('Document status vocabulary', VOC_DOCUMENT_STATUS);
+    CMSUtils::vocabulary_create('Document submitter vocabulary', VOC_DOCUMENT_SUBMITTER);
+
+    menu_rebuild();
+
+    if(!empty($role)) {
+        $rid = $role->rid;
+        $permissions = array(
+            'create document content' => TRUE,
+            'edit own document content' => TRUE,
+            'edit any document content' => TRUE,
+            'delete own document content' => TRUE,
+            'delete any document content' => TRUE,
+
+            'search content' => TRUE,
+            'use advanced search' => TRUE,
+        );
+
+        CMSUtils::set_vocabulary_permissions($permissions, VOC_DOCUMENT_TYPE, 'document', ROLE_MANAGE_DOCUMENT);
+        CMSUtils::set_vocabulary_permissions($permissions, VOC_DOCUMENT_STATUS, 'document', ROLE_MANAGE_DOCUMENT);
+        CMSUtils::set_vocabulary_permissions($permissions, VOC_DOCUMENT_SUBMITTER, 'document', ROLE_MANAGE_DOCUMENT);
+
+        user_role_change_permissions($rid, $permissions);
+
+        CMSUtils::role_add_permissions('administrator', $permissions);
+    } else {
+        watchdog('document', "Unable to load role name '@role'", array("@role" => ROLE_MANAGE_DOCUMENT), WATCHDOG_WARNING);
+    }
+}
+
+function cms_document_update_7001() {
+    $role = CMSUtils::get_or_create_role(ROLE_MANAGE_DOCUMENT);
+
+    $rid = $role->rid;
+    $permissions = array(
+        'create document content' => TRUE,
+        'edit own document content' => TRUE,
+        'edit any document content' => TRUE,
+        'delete own document content' => TRUE,
+        'delete any document content' => TRUE,
+
+        'search content' => TRUE,
+        'use advanced search' => TRUE,
+    );
+
+    CMSUtils::set_vocabulary_permissions($permissions, VOC_DOCUMENT_TYPE, 'document', ROLE_MANAGE_DOCUMENT);
+    CMSUtils::set_vocabulary_permissions($permissions, VOC_DOCUMENT_STATUS, 'document', ROLE_MANAGE_DOCUMENT);
+    CMSUtils::set_vocabulary_permissions($permissions, VOC_DOCUMENT_SUBMITTER, 'document', ROLE_MANAGE_DOCUMENT);
+
+    user_role_change_permissions($rid, $permissions);
+
+    CMSUtils::role_add_permissions('administrator', $permissions);
+
+    return t('Document permissions updated');
+}

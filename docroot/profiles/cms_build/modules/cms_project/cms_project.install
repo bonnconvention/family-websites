@@ -1,0 +1,119 @@
+<?php
+
+
+/**
+ * Implements hook_uninstall()
+ * @todo Test this code
+ */
+function cms_project_uninstall() {
+    user_role_delete(ROLE_MANAGE_PROJECT);
+    CMSUtils::vocabulary_delete(VOC_PROJECT_TAXONOMIC_GROUP);
+    CMSUtils::vocabulary_delete(VOC_PROJECT_TYPE);
+
+    # Remove the 'Projects' menu
+    $mlid = db_select('menu_links' , 'ml')
+            ->condition('ml.link_path' , '<front>')
+            ->condition('ml.link_title' , 'Projects')
+            ->condition('ml.has_children' , '1')
+            ->condition('ml.expanded' , '1')
+            ->fields('ml' , array('mlid'))
+            ->execute()
+            ->fetchField();
+    if(!empty($mlid)) {
+        menu_link_delete($mlid);
+    }
+}
+
+
+/**
+ * Implements hook_install()
+ */
+function cms_project_install() {
+    CMSBase::vocabulary_create('Project taxonomic group', VOC_PROJECT_TAXONOMIC_GROUP);
+    CMSBase::vocabulary_create('Project type', VOC_PROJECT_TYPE);
+    CMSBase::role_create(ROLE_MANAGE_PROJECT);
+    // We clear the cache, otherwise we get PDOException that module is null (module seems is not fully initialized).
+    // @todo: Hopefully this can be be removed in the future
+    menu_rebuild();
+
+    $role = user_role_load_by_name(ROLE_MANAGE_PROJECT);
+    if(!empty($role->rid)) {
+        $rid = $role->rid;
+        $permissions = array(
+            'create project content' => TRUE,
+            'edit own project content' => TRUE,
+            'edit any project content' => TRUE,
+            'delete own project content' => TRUE,
+            'delete any project content' => TRUE,
+
+            'search content' => TRUE,
+            'use advanced search' => TRUE,
+        );
+        CMSUtils::set_vocabulary_permissions($permissions, VOC_PROJECT_TAXONOMIC_GROUP, 'project', ROLE_MANAGE_PROJECT);
+        CMSUtils::set_vocabulary_permissions($permissions, VOC_PROJECT_TYPE, 'project', ROLE_MANAGE_PROJECT);
+        CMSUtils::set_vocabulary_permissions($permissions, VOC_REGION, 'project', ROLE_MANAGE_PROJECT);
+        CMSUtils::set_vocabulary_permissions($permissions, VOC_CURRENCY, 'project', ROLE_MANAGE_PROJECT);
+        user_role_change_permissions($rid, $permissions);
+        CMSUtils::role_add_permissions('administrator', $permissions);
+    } else {
+        watchdog('project', "Unable to load role name '@role'", array("@role" => ROLE_MANAGE_PROJECT), WATCHDOG_WARNING);
+    }
+}
+
+function cms_project_update_7001() {
+    $JSON_file = drupal_get_path('module', 'cms_initial_data') . '/' . CMSUtils::get_current_profile() . '/projects/projects.json';
+
+    /**
+     * Get JSON data with correct appedix dates
+    */
+    $f = fopen($JSON_file, 'r');
+    $JSON_data = fread($f, filesize($JSON_file));
+    fclose($f);
+    $projects_JSON = json_decode($JSON_data);
+
+    /**
+     * Load all existing Species from database
+    */
+    $projects = node_load_multiple(array(), array('type' => 'project'));
+    foreach($projects as $node) {
+        $existing_data = _get_project_by_title($projects_JSON, $node->title);
+        if (!empty($existing_data) && (property_exists($existing_data, 'body'))) {
+            $node->body[$node->language][0]['value'] = $existing_data->body;
+            node_save($node);
+        }
+    }
+}
+function cms_project_update_7003() {
+    $JSON_file = drupal_get_path('module', 'cms_initial_data') . '/' . CMSUtils::get_current_profile() . '/projects/projects.json';
+    /**
+     * Get JSON data
+    */
+    $f = fopen($JSON_file, 'r');
+    $JSON_data = fread($f, filesize($JSON_file));
+    fclose($f);
+    $projects_JSON = json_decode($JSON_data);
+
+    /**
+     * Load all existing projects from database
+    */
+    $projects = node_load_multiple(array(), array('type' => 'project'));
+    foreach($projects as $node) {
+        $existing_data = _get_project_by_title($projects_JSON, $node->title);
+        if (!empty($existing_data) && (property_exists($existing_data, 'uuid'))) {
+            $node->uuid = $existing_data->uuid;
+            node_save($node);
+        }
+    }
+}
+
+function _get_project_by_title($projects, $title) {
+    if (!empty($projects)) {
+        foreach ($projects as $index => $item) {
+            if ($item->title == $title) {
+                return $item;
+            }
+        }
+    }
+    
+    return array();
+}

@@ -1,0 +1,35 @@
+<?php
+/**
+ * Author: Cristian Romanescu <cristi _at_ eaudeweb dot ro>
+ * Created: 201405281448
+ */
+
+class CMSContactsExportWebTest extends DrupalWebTestCase {
+
+    static function getInfo() {
+        return array(
+            'name' => 'CMSContactsExportWebTest',
+            'description' => 'Test export functionality',
+            'group' => 'CMS Tests',
+        );
+    }
+
+    function setUp() {
+        parent::setUp();
+        CMSContactsTestHelper::init_test_environment();
+    }
+
+
+    function test_contacts_export() {
+        $startm = memory_get_usage(TRUE);
+        $request = new CMSContactsRequestHelper(array());
+        $export = new CMSContactsExport($request);
+
+        $rows = $export->prepare_data();
+        $this->assertEqual(7780, count($rows));
+
+        $this->assertEqual(count(CMSContactsExport::$headers), count($rows[0]));
+
+        CMSPerformanceHelper::print_memory_usage($startm);
+    }
+}
