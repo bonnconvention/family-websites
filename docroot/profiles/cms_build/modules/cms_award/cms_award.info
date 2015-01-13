@@ -2,7 +2,7 @@ name = CMS Award
 description = CMS Award content type
 core = 7.x
 package = CMS
-version = 7.x-3.3
+version = 7.x-3.4
 project = cms_award
 dependencies[] = cms_campaign
 dependencies[] = cms_publication
@@ -50,11 +50,4 @@ features[variable][] = node_options_award
 features[variable][] = node_preview_award
 features[variable][] = node_submitted_award
 features_exclude[taxonomy][sponsors] = sponsors
-project status url = http://fserver.eaudeweb.ro/fserver
 
-; Information added by fserver
-core = "7.x"
-datestamp = "1395002853"
-project = "cms_award"
-project status url = "http://fserver.eaudeweb.ro/fserver"
-version = "7.x-3.4"
