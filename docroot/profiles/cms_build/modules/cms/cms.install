@@ -168,3 +168,8 @@ function cms_configure_text_format($arr_configuration) {
     drupal_form_submit('filter_admin_overview', $form_state);
     check_form_errors();
 }
+
+// Disable uuid features example
+function cms_update_7004() {
+    module_disable(array('uuid_default_entities_example'));
+}
