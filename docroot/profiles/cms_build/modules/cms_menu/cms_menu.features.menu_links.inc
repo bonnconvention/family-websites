@@ -321,27 +321,6 @@ function cms_menu_menu_default_menu_links() {
     'weight' => -47,
     'customized' => 1,
   );
-  // Exported menu link: main-menu_manage-mailing-lists:admin/structure/taxonomy/contacts_mailing
-  $menu_links['main-menu_manage-mailing-lists:admin/structure/taxonomy/contacts_mailing'] = array(
-    'menu_name' => 'main-menu',
-    'link_path' => 'admin/structure/taxonomy/contacts_mailing',
-    'router_path' => 'admin/structure/taxonomy/%',
-    'link_title' => 'Manage mailing lists',
-    'options' => array(
-      'attributes' => array(
-        'title' => '',
-      ),
-      'identifier' => 'main-menu_manage-mailing-lists:admin/structure/taxonomy/contacts_mailing',
-    ),
-    'module' => 'menu',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => -49,
-    'customized' => 1,
-    'parent_identifier' => 'main-menu_contacts:<front>',
-  );
   // Exported menu link: main-menu_manage-official-languages:admin/structure/taxonomy/un_languages
   $menu_links['main-menu_manage-official-languages:admin/structure/taxonomy/un_languages'] = array(
     'menu_name' => 'main-menu',
@@ -383,48 +362,6 @@ function cms_menu_menu_default_menu_links() {
     'weight' => -49,
     'customized' => 1,
     'parent_identifier' => 'main-menu_countries:<nolink>',
-  );
-  // Exported menu link: main-menu_manage-status-organization:admin/structure/taxonomy/contacts_status_organization
-  $menu_links['main-menu_manage-status-organization:admin/structure/taxonomy/contacts_status_organization'] = array(
-    'menu_name' => 'main-menu',
-    'link_path' => 'admin/structure/taxonomy/contacts_status_organization',
-    'router_path' => 'admin/structure/taxonomy/%',
-    'link_title' => 'Manage status organization',
-    'options' => array(
-      'attributes' => array(
-        'title' => '',
-      ),
-      'identifier' => 'main-menu_manage-status-organization:admin/structure/taxonomy/contacts_status_organization',
-    ),
-    'module' => 'menu',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => -48,
-    'customized' => 1,
-    'parent_identifier' => 'main-menu_contacts:<front>',
-  );
-  // Exported menu link: main-menu_manage-status-person:admin/structure/taxonomy/contacts_status_person
-  $menu_links['main-menu_manage-status-person:admin/structure/taxonomy/contacts_status_person'] = array(
-    'menu_name' => 'main-menu',
-    'link_path' => 'admin/structure/taxonomy/contacts_status_person',
-    'router_path' => 'admin/structure/taxonomy/%',
-    'link_title' => 'Manage status person',
-    'options' => array(
-      'attributes' => array(
-        'title' => '',
-      ),
-      'identifier' => 'main-menu_manage-status-person:admin/structure/taxonomy/contacts_status_person',
-    ),
-    'module' => 'menu',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => -47,
-    'customized' => 1,
-    'parent_identifier' => 'main-menu_contacts:<front>',
   );
   // Exported menu link: main-menu_meeting-kinds-vocabulary:admin/structure/taxonomy/meeting_kind
   $menu_links['main-menu_meeting-kinds-vocabulary:admin/structure/taxonomy/meeting_kind'] = array(
@@ -979,11 +916,8 @@ function cms_menu_menu_default_menu_links() {
   t('Manage instrument statuses');
   t('Manage instrument types');
   t('Manage instruments');
-  t('Manage mailing lists');
   t('Manage official languages');
   t('Manage regions');
-  t('Manage status organization');
-  t('Manage status person');
   t('Meeting kinds vocabulary');
   t('Meeting statuses vocabulary');
   t('Meeting types vocabulary');
