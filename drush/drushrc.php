@@ -277,8 +277,7 @@ $options['init-modules'] = array(
   'views_ui',
   'views_bulk_operations',
 
-
-  'migrate',
+//  'migrate',
   'features',
   'entityreference',
   'link',
@@ -287,17 +286,19 @@ $options['init-modules'] = array(
   'pathauto',
   'uuid',
 
+  'fe_block',
+
   'search_api',
   'facetapi',
   'search_api_facetapi',
-//  'apachesolr',
-//  'apachesolr_search',
   'search_api_solr',
 
+  'search_api_et',
+  'search_api_attachments',
+  'search_api_et_solr',
+  'search_api_attachments_field_collections',
+
   'imce_wysiwyg',
-
-//  'edw_utils',
-
 
 );
 switch ($cfg->variables->cms_instance) {
