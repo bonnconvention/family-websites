@@ -119,6 +119,12 @@ function cms_meeting_strongarm() {
         'language' => array(
           'weight' => '26',
         ),
+        'metatags' => array(
+          'weight' => '40',
+        ),
+        'redirect' => array(
+          'weight' => '30',
+        ),
       ),
       'display' => array(
         'domain' => array(

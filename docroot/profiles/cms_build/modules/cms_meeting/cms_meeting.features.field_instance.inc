@@ -1350,6 +1350,53 @@ function cms_meeting_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-meeting-field_tags'
+  $field_instances['node-meeting-field_tags'] = array(
+    'bundle' => 'meeting',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'i18n_taxonomy',
+        'settings' => array(),
+        'type' => 'i18n_taxonomy_term_reference_link',
+        'weight' => 31,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_tags',
+    'label' => 'Tags',
+    'required' => 0,
+    'settings' => array(
+      'entity_translation_sync' => FALSE,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'taxonomy',
+      'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 41,
+    ),
+  );
+
   // Exported field_instance: 'node-meeting-field_threats'
   $field_instances['node-meeting-field_threats'] = array(
     'bundle' => 'meeting',
@@ -1472,6 +1519,7 @@ function cms_meeting_field_default_field_instances() {
   t('Start Time');
   t('Start date');
   t('Status');
+  t('Tags');
   t('Threats');
   t('Title');
   t('Type');
