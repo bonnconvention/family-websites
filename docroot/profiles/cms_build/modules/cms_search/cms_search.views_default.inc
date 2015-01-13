@@ -138,6 +138,14 @@ function cms_search_views_default_views() {
     'title' => 'title',
     'title_field' => 'title_field',
   );
+  /* Filter criterion: Indexed Multilingual Node: Is Private */
+  $handler->display->display_options['filters']['field_is_private']['id'] = 'field_is_private';
+  $handler->display->display_options['filters']['field_is_private']['table'] = 'search_api_index_default_multilingual_node_index';
+  $handler->display->display_options['filters']['field_is_private']['field'] = 'field_is_private';
+  $handler->display->display_options['filters']['field_is_private']['operator'] = '<>';
+  $handler->display->display_options['filters']['field_is_private']['value'] = array(
+    1 => '1',
+  );
 
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page');
