@@ -37,6 +37,7 @@
     },
     "variables": {
         "cms_instance": "cms",
+        "environment": "development",
         "site_name": "My Drupal Site",
         "site_mail": "account@example.com",
         "file_temporary_path": "/tmp",

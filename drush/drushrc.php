@@ -321,9 +321,7 @@ switch ($cfg->variables->cms_instance) {
 $command_specific['devify'] = array(
   'enable-modules' => array(
     'reroute_email',
-    'simpletest',
     'devel',
-    'devel_node_access',
     'stage_file_proxy',
   ),
 //  'disable-modules' => array('varnish', 'memcache_admin'),
