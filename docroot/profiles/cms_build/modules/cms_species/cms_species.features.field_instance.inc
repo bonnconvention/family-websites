@@ -1300,6 +1300,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'text_default',
         'weight' => 53,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -1343,6 +1349,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'cms_aewa_population_status_formatter',
         'weight' => 34,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -1381,6 +1393,12 @@ function cms_species_field_default_field_instances() {
         ),
         'type' => 'cms_date_formatter',
         'weight' => 16,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'hidden',
@@ -1433,6 +1451,12 @@ function cms_species_field_default_field_instances() {
         ),
         'type' => 'cms_date_formatter',
         'weight' => 17,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'hidden',
@@ -1488,6 +1512,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 7,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -1531,6 +1561,12 @@ function cms_species_field_default_field_instances() {
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 1,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1579,6 +1615,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'cms_boolean_formatter',
         'weight' => 20,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'hidden',
         'settings' => array(),
@@ -1626,6 +1668,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'cms_boolean_formatter',
         'weight' => 21,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'hidden',
         'settings' => array(),
@@ -1669,6 +1717,12 @@ function cms_species_field_default_field_instances() {
         ),
         'type' => 'cms_field_table_row_formatter',
         'weight' => 23,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'hidden',
@@ -1714,6 +1768,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'entityreference_label',
         'weight' => 50,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -1753,6 +1813,12 @@ function cms_species_field_default_field_instances() {
         'settings' => array(),
         'type' => 'text_default',
         'weight' => 41,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1798,6 +1864,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 3,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -1841,6 +1913,12 @@ function cms_species_field_default_field_instances() {
         ),
         'type' => 'cms_field_table_row_formatter',
         'weight' => 12,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'hidden',
@@ -1887,6 +1965,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 4,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -1926,6 +2010,12 @@ function cms_species_field_default_field_instances() {
         'settings' => array(),
         'type' => 'cms_gallery_formatter',
         'weight' => 30,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1978,6 +2068,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'cms_legal_instruments_formatter',
         'weight' => 32,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -2015,6 +2111,12 @@ function cms_species_field_default_field_instances() {
         'settings' => array(),
         'type' => 'cms_iucn_status_formatter',
         'weight' => 14,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'hidden',
@@ -2060,6 +2162,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'cms_field_table_row_formatter',
         'weight' => 15,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'hidden',
         'settings' => array(),
@@ -2104,6 +2212,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'entityreference_label',
         'weight' => 43,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -2146,6 +2260,12 @@ function cms_species_field_default_field_instances() {
         ),
         'type' => 'cms_field_table_row_formatter',
         'weight' => 11,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'hidden',
@@ -2192,6 +2312,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'cms_field_table_row_formatter',
         'weight' => 8,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'hidden',
         'settings' => array(),
@@ -2236,6 +2362,12 @@ function cms_species_field_default_field_instances() {
         ),
         'type' => 'cms_field_table_row_formatter',
         'weight' => 10,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'hidden',
@@ -2282,6 +2414,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'cms_field_table_row_formatter',
         'weight' => 9,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'hidden',
         'settings' => array(),
@@ -2326,6 +2464,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'entityreference_label',
         'weight' => 49,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -2368,6 +2512,12 @@ function cms_species_field_default_field_instances() {
         ),
         'type' => 'cms_field_table_row_formatter',
         'weight' => 24,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'hidden',
@@ -2414,6 +2564,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 2,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -2457,6 +2613,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'entityreference_label',
         'weight' => 51,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -2497,6 +2659,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'cms_species_population_instrument_formatter',
         'weight' => 26,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -2535,6 +2703,12 @@ function cms_species_field_default_field_instances() {
         'settings' => array(),
         'type' => 'text_plain',
         'weight' => 18,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'hidden',
@@ -2582,6 +2756,12 @@ function cms_species_field_default_field_instances() {
         ),
         'type' => 'date_default',
         'weight' => 19,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'hidden',
@@ -2634,6 +2814,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'cms_species_population_size_formatter',
         'weight' => 27,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -2674,6 +2860,12 @@ function cms_species_field_default_field_instances() {
         ),
         'type' => 'entityreference_label',
         'weight' => 45,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -2717,6 +2909,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'entityreference_label',
         'weight' => 44,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -2756,6 +2954,12 @@ function cms_species_field_default_field_instances() {
         'settings' => array(),
         'type' => 'cms_range_state_formatter',
         'weight' => 25,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'hidden',
@@ -2798,6 +3002,12 @@ function cms_species_field_default_field_instances() {
         ),
         'type' => 'cms_field_table_row_formatter',
         'weight' => 29,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -2842,6 +3052,12 @@ function cms_species_field_default_field_instances() {
           'render_tr' => 1,
         ),
         'type' => 'cms_field_table_row_formatter',
+        'weight' => 0,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
         'weight' => 0,
       ),
       'teaser' => array(
@@ -2889,6 +3105,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 5,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -2933,6 +3155,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'cms_field_table_row_formatter',
         'weight' => 13,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -2974,6 +3202,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'cms_country_status_formatter',
         'weight' => 33,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -3014,6 +3248,12 @@ function cms_species_field_default_field_instances() {
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 6,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -3059,6 +3299,12 @@ function cms_species_field_default_field_instances() {
         'type' => 'cms_field_table_row_formatter',
         'weight' => 42,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -3099,6 +3345,12 @@ function cms_species_field_default_field_instances() {
         'settings' => array(),
         'type' => 'cms_threats_formmater',
         'weight' => 31,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',

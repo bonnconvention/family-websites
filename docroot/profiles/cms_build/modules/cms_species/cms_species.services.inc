@@ -79,6 +79,13 @@ function cms_species_default_services_endpoint() {
         ),
       ),
     ),
+    'documents_types' => array(
+      'operations' => array(
+        'index' => array(
+          'enabled' => '1',
+        ),
+      ),
+    ),
     'eurobats-news' => array(
       'operations' => array(
         'index' => array(
@@ -101,6 +108,13 @@ function cms_species_default_services_endpoint() {
       ),
     ),
     'news' => array(
+      'operations' => array(
+        'index' => array(
+          'enabled' => '1',
+        ),
+      ),
+    ),
+    'news-cop11' => array(
       'operations' => array(
         'index' => array(
           'enabled' => '1',
