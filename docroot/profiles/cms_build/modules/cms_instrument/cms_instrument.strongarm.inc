@@ -98,6 +98,9 @@ function cms_instrument_strongarm() {
       'revision' => array(
         'custom_settings' => FALSE,
       ),
+      'scs' => array(
+        'custom_settings' => TRUE,
+      ),
     ),
     'extra_fields' => array(
       'form' => array(

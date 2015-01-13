@@ -18,7 +18,7 @@ function cms_instrument_field_default_field_instances() {
     'description' => '',
     'display' => array(
       'default' => array(
-        'label' => 'inline',
+        'label' => 'hidden',
         'module' => 'jquery_expander',
         'settings' => array(
           'collapseTimer' => '',
@@ -30,6 +30,12 @@ function cms_instrument_field_default_field_instances() {
         ),
         'type' => 'jquery_expander',
         'weight' => 2,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -74,6 +80,12 @@ function cms_instrument_field_default_field_instances() {
         'type' => 'text_default',
         'weight' => 31,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -115,6 +127,12 @@ function cms_instrument_field_default_field_instances() {
         'type' => 'cms_country_table_row_formatter',
         'weight' => 5,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -155,6 +173,12 @@ function cms_instrument_field_default_field_instances() {
         ),
         'type' => 'cms_date_formatter',
         'weight' => 17,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -205,6 +229,12 @@ function cms_instrument_field_default_field_instances() {
         ),
         'type' => 'cms_date_formatter',
         'weight' => 16,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -258,6 +288,12 @@ function cms_instrument_field_default_field_instances() {
         'type' => 'cms_field_table_row_formatter',
         'weight' => 27,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -301,6 +337,12 @@ function cms_instrument_field_default_field_instances() {
         ),
         'type' => 'cms_field_table_row_formatter',
         'weight' => 4,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -347,6 +389,12 @@ function cms_instrument_field_default_field_instances() {
         'type' => 'cms_field_table_row_formatter',
         'weight' => 11,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -390,6 +438,12 @@ function cms_instrument_field_default_field_instances() {
         ),
         'type' => 'cms_field_table_row_formatter',
         'weight' => 12,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -435,6 +489,12 @@ function cms_instrument_field_default_field_instances() {
         'type' => 'cms_field_table_row_formatter',
         'weight' => 20,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -478,6 +538,12 @@ function cms_instrument_field_default_field_instances() {
         ),
         'type' => 'cms_field_table_row_formatter',
         'weight' => 15,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -523,6 +589,12 @@ function cms_instrument_field_default_field_instances() {
         'type' => 'cms_field_table_row_formatter',
         'weight' => 14,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -565,6 +637,12 @@ function cms_instrument_field_default_field_instances() {
           'render_tr' => TRUE,
         ),
         'type' => 'cms_field_table_row_formatter',
+        'weight' => 0,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
         'weight' => 0,
       ),
       'teaser' => array(
@@ -612,6 +690,12 @@ function cms_instrument_field_default_field_instances() {
         'type' => 'cms_field_table_row_formatter',
         'weight' => 23,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -655,6 +739,12 @@ function cms_instrument_field_default_field_instances() {
         ),
         'type' => 'cms_field_table_row_formatter',
         'weight' => 21,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -700,6 +790,12 @@ function cms_instrument_field_default_field_instances() {
         'type' => 'cms_field_table_row_formatter',
         'weight' => 19,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -743,6 +839,12 @@ function cms_instrument_field_default_field_instances() {
         ),
         'type' => 'cms_field_table_row_formatter',
         'weight' => 13,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -788,6 +890,12 @@ function cms_instrument_field_default_field_instances() {
         'type' => 'cms_field_table_row_formatter',
         'weight' => 22,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -832,6 +940,12 @@ function cms_instrument_field_default_field_instances() {
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 9,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -870,6 +984,12 @@ function cms_instrument_field_default_field_instances() {
         'settings' => array(),
         'type' => 'file_table',
         'weight' => 8,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -919,6 +1039,12 @@ function cms_instrument_field_default_field_instances() {
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 10,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -958,6 +1084,12 @@ function cms_instrument_field_default_field_instances() {
         'settings' => array(),
         'type' => 'cms_link_formatter',
         'weight' => 18,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1017,6 +1149,12 @@ function cms_instrument_field_default_field_instances() {
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 6,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -1060,6 +1198,12 @@ function cms_instrument_field_default_field_instances() {
         'type' => 'cms_field_table_row_formatter',
         'weight' => 26,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -1102,6 +1246,12 @@ function cms_instrument_field_default_field_instances() {
         ),
         'type' => 'image',
         'weight' => 29,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1157,6 +1307,12 @@ function cms_instrument_field_default_field_instances() {
         'type' => 'cms_field_table_row_formatter',
         'weight' => 24,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -1197,6 +1353,12 @@ function cms_instrument_field_default_field_instances() {
         'settings' => array(),
         'type' => 'cms_country_table_row_formatter',
         'weight' => 7,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1241,6 +1403,12 @@ function cms_instrument_field_default_field_instances() {
         'type' => 'cms_field_table_row_formatter',
         'weight' => 25,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -1280,6 +1448,12 @@ function cms_instrument_field_default_field_instances() {
         'settings' => array(),
         'type' => 'hidden',
         'weight' => 30,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
