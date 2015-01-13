@@ -531,6 +531,12 @@ function cms_country_field_default_field_instances() {
         'type' => 'text_default',
         'weight' => 16,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -580,6 +586,12 @@ function cms_country_field_default_field_instances() {
         'type' => 'field_collection_view',
         'weight' => 12,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -624,6 +636,12 @@ function cms_country_field_default_field_instances() {
         'type' => 'field_collection_view',
         'weight' => 13,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -666,6 +684,12 @@ function cms_country_field_default_field_instances() {
         ),
         'type' => 'date_default',
         'weight' => 11,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -721,6 +745,12 @@ function cms_country_field_default_field_instances() {
         'type' => 'date_default',
         'weight' => 10,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -770,6 +800,12 @@ function cms_country_field_default_field_instances() {
         ),
         'type' => 'cms_date_formatter',
         'weight' => 6,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -827,6 +863,12 @@ function cms_country_field_default_field_instances() {
         'type' => 'field_collection_table_view',
         'weight' => 8,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -866,6 +908,12 @@ function cms_country_field_default_field_instances() {
           'render_tr' => TRUE,
         ),
         'type' => 'cms_field_table_row_formatter',
+        'weight' => 0,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
         'weight' => 0,
       ),
       'teaser' => array(
@@ -912,6 +960,12 @@ function cms_country_field_default_field_instances() {
         'type' => 'cms_field_table_row_formatter',
         'weight' => 1,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -957,6 +1011,12 @@ function cms_country_field_default_field_instances() {
         'type' => 'list_default',
         'weight' => 9,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -999,6 +1059,12 @@ function cms_country_field_default_field_instances() {
         ),
         'type' => 'cms_field_table_row_formatter',
         'weight' => 7,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1043,6 +1109,12 @@ function cms_country_field_default_field_instances() {
         ),
         'type' => 'cms_field_table_row_formatter',
         'weight' => 3,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1091,6 +1163,12 @@ function cms_country_field_default_field_instances() {
         'type' => 'field_collection_view',
         'weight' => 14,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -1132,6 +1210,12 @@ function cms_country_field_default_field_instances() {
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 4,
       ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -1170,6 +1254,12 @@ function cms_country_field_default_field_instances() {
         'settings' => array(),
         'type' => 'hidden',
         'weight' => 17,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
