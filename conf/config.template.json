@@ -36,6 +36,7 @@
         "apachesolr_soft_commit": 1
     },
     "variables": {
+        "cms_instance": "cms",
         "site_name": "My Drupal Site",
         "site_mail": "account@example.com"
     }

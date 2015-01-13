@@ -300,6 +300,19 @@ $options['init-modules'] = array(
 
 
 );
+switch ($cfg->variables->cms_instance) {
+  case 'cms':
+    $options['init-modules'][] = 'cms_views';
+    break;
+
+  case 'aewa':
+    $options['init-modules'][] = 'aewa_views';
+    break;
+
+  case 'ascobans':
+    $options['init-modules'][] = 'ascobans_views';
+    break;
+}
 
 // Add specific settings for development or demo.
 $command_specific['devify'] = array(
