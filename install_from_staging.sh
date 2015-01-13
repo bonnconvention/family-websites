@@ -18,7 +18,7 @@ while getopts b:a: opt; do
 done
 
 # Sync from staging
-drush downsync_sql @cms.staging.sync @cms.local -y -v
+drush downsync_sql @cms.staging.sync @cms.local -y
 
 if [ ! -z "$pre_update" ]; then
 echo "Run pre update"
@@ -27,7 +27,7 @@ fi
 
 # Build the site
 echo "Runing custom_build..."
-drush custom_build -y -v
+drush custom_build -y
 
 # Devify - development settings
 drush devify --yes
