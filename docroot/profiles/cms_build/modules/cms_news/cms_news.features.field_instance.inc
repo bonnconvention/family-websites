@@ -234,7 +234,7 @@ function cms_news_field_default_field_instances() {
     'bundle' => 'news',
     'default_value' => NULL,
     'deleted' => 0,
-    'description' => '',
+    'description' => 'Use this when you want the news to be imported in other instances. Don\'t use it if this news will be manually added on the other instance - this will result in duplicates!',
     'display' => array(
       'default' => array(
         'label' => 'above',
@@ -1028,6 +1028,7 @@ function cms_news_field_default_field_instances() {
   t('Threats');
   t('Title');
   t('Type');
+  t('Use this when you want the news to be imported in other instances. Don\'t use it if this news will be manually added on the other instance - this will result in duplicates!');
 
   return $field_instances;
 }

@@ -1,7 +1,7 @@
 name = CMS News
 core = 7.x
 package = CMS
-version = 7.x-3.8
+version = 7.x-3.9
 project = cms_news
 dependencies[] = cms_award
 dependencies[] = cms_publication
@@ -21,7 +21,6 @@ dependencies[] = options
 dependencies[] = strongarm
 dependencies[] = taxonomy
 dependencies[] = text
-datestamp = 1402861790
 features[ctools][] = strongarm:strongarm:1
 features[features_api][] = api:2
 features[field_base][] = field_country
@@ -81,11 +80,3 @@ features[variable][] = node_submitted_news
 features_exclude[taxonomy][project_taxonomic_group] = project_taxonomic_group
 features_exclude[taxonomy][region] = region
 features_exclude[taxonomy][threats] = threats
-project status url = http://fserver.eaudeweb.ro/fserver
-
-; Information added by fserver
-core = "7.x"
-datestamp = "1409743992"
-project = "cms_news"
-project status url = "http://fserver.eaudeweb.ro/fserver"
-version = "7.x-3.9"
