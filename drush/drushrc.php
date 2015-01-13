@@ -322,6 +322,8 @@ $command_specific['devify'] = array(
       'reroute_email_address' => $cfg->variables->site_mail,
       'smtp_from' => $cfg->variables->site_mail,
       'smtp_fromname' => $cfg->variables->site_name,
+      'preprocess_css' => 0,
+      'preprocess_js' => 0,
     )
     , (array) $cfg->variables),
 );
