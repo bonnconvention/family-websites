@@ -724,7 +724,7 @@ final class CMSUtils {
         */
         $POST = array(
             'name' => 'AP1US3R',
-            'pass' => variable_get('AP1US3R_PWD)',
+            'pass' => variable_get('AP1US3R_PWD'),
             'form_id' => 'user_login',
             'op' => 'Log in',
         );
