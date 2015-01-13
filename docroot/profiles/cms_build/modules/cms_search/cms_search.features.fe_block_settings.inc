@@ -12,10 +12,44 @@ function cms_search_default_fe_block_settings() {
 
   $export['version'] = '2.0';
 
-  $export['facetapi-1IZbRPsIvkqVaprT80mO3slJ0d5EcT0x'] = array(
+  $export['facetapi-GiIy4zr9Gu0ZSa0bumw1Y9qIIpIDf1wu'] = array(
     'cache' => -1,
     'custom' => 0,
-    'delta' => '1IZbRPsIvkqVaprT80mO3slJ0d5EcT0x',
+    'delta' => 'GiIy4zr9Gu0ZSa0bumw1Y9qIIpIDf1wu',
+    'i18n_block_language' => array(),
+    'i18n_mode' => 0,
+    'module' => 'facetapi',
+    'node_types' => array(),
+    'pages' => 'search',
+    'roles' => array(),
+    'themes' => array(
+      'cms_frontend' => array(
+        'region' => 'sidebar_second',
+        'status' => 1,
+        'theme' => 'cms_frontend',
+        'weight' => -59,
+      ),
+      'cms_manage' => array(
+        'region' => '',
+        'status' => 0,
+        'theme' => 'cms_manage',
+        'weight' => -57,
+      ),
+      'seven' => array(
+        'region' => '',
+        'status' => 0,
+        'theme' => 'seven',
+        'weight' => 0,
+      ),
+    ),
+    'title' => 'Filter by type of content',
+    'visibility' => 1,
+  );
+
+  $export['facetapi-IDwUpKCI2MmouJ0VQc7V0ZY3gbjUv0JI'] = array(
+    'cache' => -1,
+    'custom' => 0,
+    'delta' => 'IDwUpKCI2MmouJ0VQc7V0ZY3gbjUv0JI',
     'i18n_block_language' => array(),
     'i18n_mode' => 0,
     'module' => 'facetapi',
@@ -33,42 +67,8 @@ function cms_search_default_fe_block_settings() {
         'region' => '',
         'status' => 0,
         'theme' => 'cms_manage',
-        'weight' => 0,
-      ),
-      'seven' => array(
-        'region' => '',
-        'status' => 0,
-        'theme' => 'seven',
-        'weight' => 0,
-      ),
-    ),
-    'title' => '',
-    'visibility' => 1,
-  );
-
-  $export['facetapi-CMdKaPNpQUELSbMFeop7CrP1w6I0EvuU'] = array(
-    'cache' => -1,
-    'custom' => 0,
-    'delta' => 'CMdKaPNpQUELSbMFeop7CrP1w6I0EvuU',
-    'i18n_block_language' => array(),
-    'i18n_mode' => 0,
-    'module' => 'facetapi',
-    'node_types' => array(),
-    'pages' => 'search',
-    'roles' => array(),
-    'themes' => array(
-      'cms_frontend' => array(
-        'region' => 'sidebar_second',
-        'status' => 1,
-        'theme' => 'cms_frontend',
         'weight' => -55,
       ),
-      'cms_manage' => array(
-        'region' => '',
-        'status' => 0,
-        'theme' => 'cms_manage',
-        'weight' => 0,
-      ),
       'seven' => array(
         'region' => '',
         'status' => 0,
@@ -76,14 +76,14 @@ function cms_search_default_fe_block_settings() {
         'weight' => 0,
       ),
     ),
-    'title' => '',
+    'title' => 'Filter by country',
     'visibility' => 1,
   );
 
-  $export['facetapi-bhmRHTzU2n0ejKZP9wDI0S1oi2DgbSDm'] = array(
+  $export['facetapi-Xk1lvI4dnxk8onsFOHOMPAiPFcGgHF6z'] = array(
     'cache' => -1,
     'custom' => 0,
-    'delta' => 'bhmRHTzU2n0ejKZP9wDI0S1oi2DgbSDm',
+    'delta' => 'Xk1lvI4dnxk8onsFOHOMPAiPFcGgHF6z',
     'i18n_block_language' => array(),
     'i18n_mode' => 0,
     'module' => 'facetapi',
@@ -101,7 +101,7 @@ function cms_search_default_fe_block_settings() {
         'region' => '',
         'status' => 0,
         'theme' => 'cms_manage',
-        'weight' => 0,
+        'weight' => -56,
       ),
       'seven' => array(
         'region' => '',
@@ -110,19 +110,19 @@ function cms_search_default_fe_block_settings() {
         'weight' => 0,
       ),
     ),
-    'title' => '',
+    'title' => 'Filter by instrument',
     'visibility' => 1,
   );
 
-  $export['facetapi-vYpTUFJS3dzXqIEUea70igewJv0oCT62'] = array(
+  $export['facetapi-sRWK0VvA8eMD1RfsCYLZBGNP6Trx5iys'] = array(
     'cache' => -1,
     'custom' => 0,
-    'delta' => 'vYpTUFJS3dzXqIEUea70igewJv0oCT62',
+    'delta' => 'sRWK0VvA8eMD1RfsCYLZBGNP6Trx5iys',
     'i18n_block_language' => array(),
     'i18n_mode' => 0,
     'module' => 'facetapi',
     'node_types' => array(),
-    'pages' => 'search',
+    'pages' => '',
     'roles' => array(),
     'themes' => array(
       'cms_frontend' => array(
@@ -135,7 +135,7 @@ function cms_search_default_fe_block_settings() {
         'region' => '',
         'status' => 0,
         'theme' => 'cms_manage',
-        'weight' => 0,
+        'weight' => -54,
       ),
       'seven' => array(
         'region' => '',
@@ -144,8 +144,8 @@ function cms_search_default_fe_block_settings() {
         'weight' => 0,
       ),
     ),
-    'title' => '',
-    'visibility' => 1,
+    'title' => 'Filter by geographical region',
+    'visibility' => 0,
   );
 
   return $export;
