@@ -174,7 +174,15 @@
  * a structure-tables-key is provided. You may add new tables to the existing
  * array or add a new element.
  */
-# $options['structure-tables']['common'] = array('cache', 'cache_filter', 'cache_menu', 'cache_page', 'history', 'sessions', 'watchdog');
+$options['structure-tables']['common'] = array(
+  'cache',
+  'cache_filter',
+  'cache_menu',
+  'cache_page',
+  'history',
+  'sessions',
+  'watchdog',
+);
 
 /**
  * Customize this associative array with your own tables. This is the list of
@@ -282,15 +290,45 @@ $options['init-modules'] = array(
   'search_api',
   'facetapi',
   'search_api_facetapi',
-  'apachesolr',
-  'apachesolr_search',
+//  'apachesolr',
+//  'apachesolr_search',
   'search_api_solr',
 
   'imce_wysiwyg',
 
-  'edw_utils',
+//  'edw_utils',
+
+
 );
 
+// Add specific settings for development or demo.
+$command_specific['devify'] = array(
+  'enable-modules' => array(
+    'reroute_email',
+    'simpletest',
+    'devel',
+    'devel_node_access',
+    'stage_file_proxy',
+  ),
+//  'disable-modules' => array('varnish', 'memcache_admin'),
+  'delete-variables' => array('googleanalytics_account'),
+  'reset-variables' => array_merge(
+    array(
+      'reroute_email_enable_message' => TRUE,
+      'reroute_email_enable' => TRUE,
+      'stage_file_proxy_origin' => 'http://cms.int',
+      'stage_file_proxy_use_imagecache_root' => TRUE,
+      'stage_file_proxy_hotlink' => TRUE,
+      'reroute_email_address' => $cfg->variables->site_mail,
+      'smtp_from' => $cfg->variables->site_mail,
+      'smtp_fromname' => $cfg->variables->site_name,
+    )
+    , (array) $cfg->variables),
+);
+
+$command_specific['devify_solr'] = array(
+  'solr_server' => (array) $cfg->solr_server,
+);
 
 /**
  * Load local development override configuration, if available.

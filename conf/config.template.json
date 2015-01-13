@@ -15,6 +15,7 @@
     },
     "uri": "http://cms.localhost",
     "solr_server": {
+        "solr_id": "cms_solr",
         "name": "Apache Solr server",
         "enabled": 1,
         "description": "",
