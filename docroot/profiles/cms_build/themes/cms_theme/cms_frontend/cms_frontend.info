@@ -62,10 +62,3 @@ settings[bootstrap_breadcrumb_home] = 1
 ; ;settings[toggle_search] = 1
 ; ;settings[cdn_bootstrap] = 1
 ; ;settings[bootstrap_cdn] = 3.0.0
-
-; Information added by fserver
-core = "7.x"
-datestamp = "1420652404"
-project = "cms_theme"
-project status url = "http://fserver.eaudeweb.ro/fserver"
-version = "7.x-7.46"
