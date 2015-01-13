@@ -277,8 +277,7 @@ $options['init-modules'] = array(
   'views_ui',
   'views_bulk_operations',
 
-
-  'migrate',
+//  'migrate',
   'features',
   'entityreference',
   'link',
@@ -287,19 +286,36 @@ $options['init-modules'] = array(
   'pathauto',
   'uuid',
 
+  'fe_block',
+
   'search_api',
   'facetapi',
   'search_api_facetapi',
-//  'apachesolr',
-//  'apachesolr_search',
   'search_api_solr',
+
+  'search_api_et',
+  'search_api_attachments',
+  'search_api_et_solr',
+  'search_api_attachments_field_collections',
+
+  'cms_search',
 
   'imce_wysiwyg',
 
-//  'edw_utils',
-
-
 );
+switch ($cfg->variables->cms_instance) {
+  case 'cms':
+    $options['init-modules'][] = 'cms_views';
+    break;
+
+  case 'aewa':
+    $options['init-modules'][] = 'aewa_views';
+    break;
+
+  case 'ascobans':
+    $options['init-modules'][] = 'ascobans_views';
+    break;
+}
 
 // Add specific settings for development or demo.
 $command_specific['devify'] = array(

@@ -1,0 +1,27 @@
+<?php
+/**
+ * @file
+ * Code for the CMS Search feature.
+ */
+
+include_once 'cms_search.features.inc';
+
+/**
+ * Implements hook_form_alter().
+ */
+function cms_search_form_alter(&$form, &$form_state, $form_id) {
+  switch ($form_id) {
+    case 'search_block_form':
+      // Overwrite the search block to use the Search API view
+      $form['#submit'] = array('cms_search_api_block_form_submit');
+      break;
+  }
+}
+
+/**
+ * Callback for search block module to redirect to search page
+ * with view filter argument.
+ */
+function cms_search_api_block_form_submit($form, $form_state) {
+  drupal_goto('search', array('query' => array('search' => $form_state['values']['search_block_form'])));
+}

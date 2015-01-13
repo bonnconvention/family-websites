@@ -283,23 +283,6 @@ function cms_meeting_views_default_views_alter(&$views) {
 }
 
 /**
- * Implements hook_views_pre_view().
- */
-function cms_views_pre_view(&$view, &$display_id, &$args) {
-    if ($view->name == 'meeting_documents_list_reorder'
-        && $display_id == 'm_d_list_fe') {
-        // Unset the filter is_private_value for auth users.
-        // see #2820
-        $view_filters = $view->display_handler->get_option('filters');
-        if (isset($view_filters['field_is_private_value'])
-            && !user_is_anonymous()) {
-            unset($view_filters['field_is_private_value']);
-            $view->display_handler->override_option('filters', $view_filters);
-        }
-    }
-}
-
-/**
  * Implements hook_node_view();
  */
 function cms_meeting_node_view($node, $view_mode, $langcode) {

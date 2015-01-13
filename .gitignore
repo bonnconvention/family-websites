@@ -51,6 +51,7 @@ docroot/sites/*/private
 ehthumbs.db
 Icon\?
 IThumbs.db
+Thumbs.db
 
 #Editors files
 .idea/

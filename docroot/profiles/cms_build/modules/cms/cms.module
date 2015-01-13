@@ -198,6 +198,20 @@ function cms_apachesolr_node_exclude($entity_id, $row, $env_id) {
 }
 
 /**
+ * Implements hook_views_pre_view().
+ */
+function cms_views_pre_view(&$view, &$display_id, &$args) {
+    // Unset the filter is_private_value for auth users.
+    // see #2820
+    $view_filters = $view->display_handler->get_option('filters');
+    if (isset($view_filters['field_is_private_value'])
+      && !user_is_anonymous()) {
+        unset($view_filters['field_is_private_value']);
+        $view->display_handler->override_option('filters', $view_filters);
+    }
+}
+
+/**
  * Function to give view permissions of nodes on all domains
  * Temporary fix for Drupal ticket https://drupal.org/node/2202171
  *    - Issue: on nodes with checked "send to all affiliates" checkbox, users can't access them on any domains as it should
@@ -564,7 +578,7 @@ function cms_get_node_title($nid) {
  * This class contains various utility functions that can be reused in
  * other parts of the project.
  *
- * Cannot be inherited by other modules to prevent dependency issues
+ * Cannot be inherited by other modules to revent dependency issues
  */
 class CMSBase {
 

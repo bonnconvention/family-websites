@@ -2110,14 +2110,34 @@ list-style-type: none;
 margin-bottom: 0;
 }
 
+.view-site-search .views-field-title-field a {
+font-size: 18px;
+font-weight: bold;
+}
+
 .search-results h3 a {
 font-size: 18px;
 font-weight: bold;
 }
 
+.view-site-search .views-row {
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+
+.view-site-search .views-field-type {
+  font-size: .9em;
+  color: #999;
+}
+
 .search-snippet {
 color: #555;
 margin-bottom: 3px;
+}
+
+.view-site-search .views-field-search-api-excerpt {
+  color: #555;
+  margin-bottom: 3px;
 }
 
 .search-info {

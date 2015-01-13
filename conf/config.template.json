@@ -36,7 +36,14 @@
         "apachesolr_soft_commit": 1
     },
     "variables": {
+        "cms_instance": "cms",
         "site_name": "My Drupal Site",
-        "site_mail": "account@example.com"
+        "site_mail": "account@example.com",
+        "file_temporary_path": "/tmp",
+        "file_private_path" : "/var/local/cms/private_files",
+        "search_api_attachments_extract_using": "solr",
+        "search_api_attachments_extracting_servlet_path": "update/extract",
+        "search_api_attachments_tika_path": "",
+        "search_api_attachments_tika_jar": ""
     }
 }
