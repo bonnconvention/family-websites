@@ -58,7 +58,7 @@ function cms_publication_field_default_field_instances() {
         'summary_rows' => 5,
       ),
       'type' => 'text_textarea_with_summary',
-      'weight' => 4,
+      'weight' => 3,
     ),
   );
 
@@ -104,7 +104,7 @@ function cms_publication_field_default_field_instances() {
         'apply_chosen' => 1,
       ),
       'type' => 'options_select',
-      'weight' => 15,
+      'weight' => 12,
     ),
   );
 
@@ -153,7 +153,7 @@ function cms_publication_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'options_select',
-      'weight' => 17,
+      'weight' => 15,
     ),
   );
 
@@ -203,7 +203,7 @@ function cms_publication_field_default_field_instances() {
         'progress_indicator' => 'throbber',
       ),
       'type' => 'file_generic',
-      'weight' => 8,
+      'weight' => 9,
     ),
   );
 
@@ -254,7 +254,7 @@ function cms_publication_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'taxonomy_autocomplete',
-      'weight' => 12,
+      'weight' => 4,
     ),
   );
 
@@ -305,7 +305,7 @@ function cms_publication_field_default_field_instances() {
         'size' => 30,
       ),
       'type' => 'text_textfield',
-      'weight' => 14,
+      'weight' => 11,
     ),
   );
 
@@ -356,7 +356,7 @@ function cms_publication_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'taxonomy_autocomplete',
-      'weight' => 18,
+      'weight' => 5,
     ),
   );
 
@@ -408,7 +408,7 @@ function cms_publication_field_default_field_instances() {
       'module' => 'number',
       'settings' => array(),
       'type' => 'number',
-      'weight' => 11,
+      'weight' => 6,
     ),
   );
 
@@ -468,7 +468,7 @@ function cms_publication_field_default_field_instances() {
         'progress_indicator' => 'throbber',
       ),
       'type' => 'image_image',
-      'weight' => 6,
+      'weight' => 8,
     ),
   );
 
@@ -505,7 +505,7 @@ function cms_publication_field_default_field_instances() {
     'enterprise_edit_form_display' => '',
     'entity_type' => 'node',
     'field_name' => 'field_publication_language',
-    'label' => 'Language',
+    'label' => 'Publication Language',
     'required' => 0,
     'settings' => array(
       'entity_translation_sync' => FALSE,
@@ -518,7 +518,7 @@ function cms_publication_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 5,
+      'weight' => 2,
     ),
   );
 
@@ -566,7 +566,7 @@ function cms_publication_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 23,
+      'weight' => 19,
     ),
   );
 
@@ -614,7 +614,7 @@ function cms_publication_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 25,
+      'weight' => 23,
     ),
   );
 
@@ -665,7 +665,7 @@ function cms_publication_field_default_field_instances() {
         'size' => 30,
       ),
       'type' => 'text_textfield',
-      'weight' => 10,
+      'weight' => 16,
     ),
   );
 
@@ -713,7 +713,7 @@ function cms_publication_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 24,
+      'weight' => 22,
     ),
   );
 
@@ -761,7 +761,7 @@ function cms_publication_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 26,
+      'weight' => 20,
     ),
   );
 
@@ -852,7 +852,7 @@ function cms_publication_field_default_field_instances() {
         'tz_handling' => 'none',
       ),
       'type' => 'partial_date',
-      'weight' => 7,
+      'weight' => 10,
     ),
   );
 
@@ -903,7 +903,7 @@ function cms_publication_field_default_field_instances() {
         'size' => 30,
       ),
       'type' => 'text_textfield',
-      'weight' => 13,
+      'weight' => 7,
     ),
   );
 
@@ -964,7 +964,7 @@ function cms_publication_field_default_field_instances() {
       'module' => 'link',
       'settings' => array(),
       'type' => 'link_field',
-      'weight' => 9,
+      'weight' => 13,
     ),
   );
 
@@ -1012,7 +1012,7 @@ function cms_publication_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 22,
+      'weight' => 18,
     ),
   );
 
@@ -1062,7 +1062,7 @@ function cms_publication_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 16,
+      'weight' => 14,
     ),
   );
 
@@ -1154,7 +1154,56 @@ function cms_publication_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 19,
+      'weight' => 17,
+    ),
+  );
+
+  // Exported field_instance: 'node-publication-title_field'
+  $field_instances['node-publication-title_field'] = array(
+    'bundle' => 'publication',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 24,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'title_field',
+    'label' => 'Title',
+    'required' => TRUE,
+    'settings' => array(
+      'entity_translation_sync' => FALSE,
+      'hide_label' => array(
+        'entity' => FALSE,
+        'page' => FALSE,
+      ),
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 0,
     ),
   );
 
@@ -1169,18 +1218,19 @@ function cms_publication_field_default_field_instances() {
   t('Description');
   t('Edition');
   t('Image');
-  t('Language');
   t('Meetings');
   t('National Reports');
   t('Order code');
   t('Plans');
   t('Projects');
+  t('Publication Language');
   t('Published Date');
   t('Publisher');
   t('Region');
   t('Source');
   t('Species');
   t('Threats');
+  t('Title');
   t('Type');
 
   return $field_instances;

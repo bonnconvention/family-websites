@@ -108,12 +108,15 @@ function cms_publication_strongarm() {
           'weight' => '0',
         ),
         'path' => array(
-          'weight' => '3',
+          'weight' => '26',
         ),
         'domain' => array(
-          'weight' => '2',
+          'weight' => '25',
         ),
         'domain_path' => array(
+          'weight' => '24',
+        ),
+        'language' => array(
           'weight' => '1',
         ),
       ),
@@ -147,8 +150,24 @@ function cms_publication_strongarm() {
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
   $strongarm->name = 'language_content_type_publication';
-  $strongarm->value = '0';
+  $strongarm->value = '4';
   $export['language_content_type_publication'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'menu_options_publication';
+  $strongarm->value = array(
+    0 => 'main-menu',
+  );
+  $export['menu_options_publication'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'menu_parent_publication';
+  $strongarm->value = 'main-menu:0';
+  $export['menu_parent_publication'] = $strongarm;
 
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
