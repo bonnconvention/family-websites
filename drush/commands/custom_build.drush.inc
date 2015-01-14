@@ -28,6 +28,9 @@ function _drush_custom_build() {
   _drush_custom_enable_modules($modules);
 
   drush_invoke('updatedb');
+
+  drush_invoke('cc', array('type' => 'all'));
+
   drush_invoke_process('@self', 'features-revert-all', array(), array(
     'force' => TRUE,
     'yes' => TRUE,
