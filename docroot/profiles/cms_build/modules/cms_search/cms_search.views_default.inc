@@ -127,7 +127,7 @@ function cms_search_views_default_views() {
     12 => 0,
   );
   $handler->display->display_options['filters']['search_api_views_fulltext']['fields'] = array(
-    'attachments_field_basic_page_attachment' => 'attachments_field_basic_page_attachment',
+    'attachments_field_basic_page_attachment' => 'attachments_field_basic_page_attachments',
     'attachments_field_document_file' => 'attachments_field_document_file',
     'attachments_field_instrument_treaty_text' => 'attachments_field_instrument_treaty_text',
     'attachments_field_news_attachments' => 'attachments_field_news_attachments',
