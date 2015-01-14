@@ -319,6 +319,11 @@ switch ($cfg->variables->cms_instance) {
     break;
 }
 
+$command_specific['sql-sync'] = array(
+  'structure-tables-list' => 'cache*,history,sessions,watchdog,ctools_css_cache,ctools_object_cache'
+);
+
+
 // Exclude domains symlinks from archive-dump
 $command_specific['archive-dump'] = array(
   'tar-options' => '--exclude=manage --exclude=aquatic-mammals --exclude=aquatic-warbler'
