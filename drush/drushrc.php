@@ -246,7 +246,7 @@ $options['structure-tables']['common'] = array(
 # $command_specific['casperjs']['test-root'] = str_replace('drush', 'tests/casperjs', dirname(__FILE__));
 
 // Read JSON configuration file from conf/ and pre-configure drush commands
-$json_path = getcwd() . '/../conf/config.json';
+$json_path = __DIR__ . '/../conf/config.json';
 if (file_exists($json_path)) {
   $cfg = json_decode(file_get_contents($json_path));
   $db_url = sprintf('mysql://%s:%s@%s:%s/%s', $cfg->db->username, $cfg->db->password, $cfg->db->host, $cfg->db->port, $cfg->db->database);

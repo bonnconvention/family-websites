@@ -3,7 +3,14 @@
 # Go to docroot/
 cd docroot/
 
-drush site-install -y
+if [ ! -f ./sites/default/settings.php ]; then
+  chmod u+w sites/default
+  drush site-install -y
+  chmod u+w sites/default/settings.php
+  echo "include DRUPAL_ROOT . '/profiles/cms_build/modules/contrib/domain/settings.inc';" >> sites/default/settings.php
+  chmod u-w sites/default/settings.php
+  chmod u-w sites/default
+fi
 
 pre_update=  post_update=
 while getopts b:a: opt; do
@@ -18,7 +25,9 @@ while getopts b:a: opt; do
 done
 
 # Sync from staging
-drush downsync_sql @cms.staging.sync @cms.local -y
+# Not using full aliases
+# because are built in downsync_sql - preppend @{instance}. to the aliases below.
+drush downsync_sql staging.sync local -y
 
 if [ ! -z "$pre_update" ]; then
 echo "Run pre update"

@@ -33,9 +33,17 @@ function downsync_sql_drush_command() {
  */
 function drush_downsync_sql($source = NULL, $destination = NULL) {
   include __DIR__ . '/../aliases/aliases.drushrc.php';
+  // Read JSON configuration file from conf/ and pre-configure drush commands
+  // Set the aliases accordingly with the current instance.
+  $json_path = __DIR__ . '/../../conf/config.json';
+  if (file_exists($json_path)) {
+    $cfg = json_decode(file_get_contents($json_path));
+  }
+  $source = '@' . $cfg->variables->cms_instance .'.' . $source;
+  $destination = '@' . $cfg->variables->cms_instance . '.' . $destination;
   // Make sure we have the source-dump and target-dump options.
   $destination_name = substr($destination, 1);
-  $source_name = substr($destination, 1);
+  $source_name = substr($source, 1);
   $source_dump = drush_get_option('source-dump');
   if (!isset($source_dump)) {
     if (isset($aliases[$source_name]['command-specific']['sql-sync']['source-dump'])) {
