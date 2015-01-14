@@ -12,6 +12,7 @@ conf/apache.conf
 docroot/files
 docroot/sites/*/files
 docroot/sites/*/private
+private_files
 
 # Vagrant Files #
 #################
