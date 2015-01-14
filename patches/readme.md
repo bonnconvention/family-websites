@@ -7,6 +7,12 @@ Patch documentation should be in the following format:
   * issue link (if exists)
   * patch file location
 
+
+* i18n_string
+  * Fix i18n_string error undifined method string_remove when using build function.
+  * /patches/i18n_string_fix_install_error_string_remove.patch
+
+
 Example:
 
 * views
