@@ -260,6 +260,8 @@ if (file_exists($json_path)) {
   );
 }
 
+$options['variables'] = (array) $cfg->variables;
+
 $options['init-modules'] = array(
   'ctools',
 
@@ -316,6 +318,17 @@ switch ($cfg->variables->cms_instance) {
     $options['init-modules'][] = 'ascobans_views';
     break;
 }
+
+// Exclude domains symlinks from archive-dump
+$command_specific['archive-dump'] = array(
+  'tar-options' => '--exclude=manage --exclude=aquatic-mammals --exclude=aquatic-warbler'
+    . ' --exclude=atlantic-turtles --exclude=bukhara-deer --exclude=dugong'
+    . ' --exclude=flamingos --exclude=gorilla --exclude=grassland-birds'
+    . ' --exclude=great-bustard --exclude=huemul --exclude=monk-seal'
+    . ' --exclude=pacific-cetaceans --exclude=raptors --exclude=ruddy-headed-goose'
+    . ' --exclude=saiga --exclude=sharks --exclude=siberian-crane --exclude=slender-billed-curlew'
+    . ' --exclude=west-african-elephants'
+);
 
 // Add specific settings for development or demo.
 $command_specific['devify'] = array(
