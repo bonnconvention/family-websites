@@ -20,7 +20,7 @@ function cms_search_default_search_api_index() {
     "name" : "Default multilingual node index",
     "machine_name" : "default_multilingual_node_index",
     "description" : "An automatically created search index for indexing multilingual node data. Might be configured to specific needs.",
-    "server" : "cms_solr",
+    "server" : "",
     "item_type" : "search_api_et_node",
     "options" : {
       "index_directly" : 1,
@@ -158,7 +158,7 @@ function cms_search_default_search_api_index() {
         "attachments_field_document_file" : { "type" : "text" },
         "attachments_field_project_file" : { "type" : "text" },
         "attachments_field_publication_attachment" : { "type" : "text" },
-        "attachments_field_basic_page_attachment" : { "type" : "text" },
+        "attachments_field_basic_page_attachments" : { "type" : "text" },
         "attachments_field_news_attachments" : { "type" : "text" },
         "body:value" : { "type" : "text", "boost" : "2.0" },
         "body:summary" : { "type" : "text", "boost" : "2.0" },
@@ -167,39 +167,6 @@ function cms_search_default_search_api_index() {
     },
     "enabled" : "1",
     "read_only" : "0",
-    "rdf_mapping" : []
-  }');
-  return $items;
-}
-
-/**
- * Implements hook_default_search_api_server().
- */
-function cms_search_default_search_api_server() {
-  $items = array();
-  $items['cms_solr'] = entity_import('search_api_server', '{
-    "name" : "CMS Solr",
-    "machine_name" : "cms_solr",
-    "description" : "",
-    "class" : "search_api_solr_service",
-    "options" : {
-      "clean_ids" : true,
-      "site_hash_form" : [],
-      "site_hash" : false,
-      "scheme" : "http",
-      "host" : "127.0.0.1",
-      "port" : "8983",
-      "path" : "\\/solr\\/cms",
-      "http_user" : "admin",
-      "http_pass" : "MGKGZ4rUgl6clO8zidhl",
-      "excerpt" : 1,
-      "retrieve_data" : 1,
-      "highlight_data" : 1,
-      "skip_schema_check" : 0,
-      "solr_version" : "",
-      "http_method" : "AUTO"
-    },
-    "enabled" : "1",
     "rdf_mapping" : []
   }');
   return $items;

@@ -4,5 +4,5 @@
  *  Disable apachesolr modules.
  */
 function cms_search_update_7001() {
-  module_disable(array('apachesolr_access', 'apachesolr_search', 'apachesolr_attachments', 'apachesolr'));
+  module_disable(array('apachesolr_access', 'apachesolr_attachments', 'apachesolr_search', 'apachesolr'));
 }

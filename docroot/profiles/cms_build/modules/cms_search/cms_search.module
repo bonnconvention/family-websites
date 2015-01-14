@@ -25,3 +25,20 @@ function cms_search_form_alter(&$form, &$form_state, $form_id) {
 function cms_search_api_block_form_submit($form, $form_state) {
   drupal_goto('search', array('query' => array('search' => $form_state['values']['search_block_form'])));
 }
+
+/**
+ * Implements hook_post_features_revert().
+ */
+function cms_search_post_features_revert($component) {
+  // Set the solr server for current instance index.
+  if ($component == 'search_api_index') {
+    $index = search_api_index_load('default_multilingual_node_index');
+    $instance = variable_get('cms_instance');
+    if (!empty($instance)) {
+      $index->server = $instance . '_solr';
+      $index->enabled = 1;
+      $index->save();
+
+    }
+  }
+}
