@@ -50,3 +50,8 @@ echo "Run post update"
 fi
 
 drush cc all
+
+chmod u+w robots.txt
+  echo "User-agent: *" >> robots.txt
+  echo "Disallow: /" >> robots.txt
+chmod u-w robots.txt
