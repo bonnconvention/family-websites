@@ -288,7 +288,7 @@ $options['init-modules'] = array(
   'pathauto',
   'uuid',
 
-  'fe_block',
+//  'fe_block',
 
   'search_api',
   'facetapi',
