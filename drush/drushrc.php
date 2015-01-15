@@ -323,6 +323,12 @@ $command_specific['sql-sync'] = array(
   'structure-tables-list' => 'cache*,history,sessions,watchdog,ctools_css_cache,ctools_object_cache'
 );
 
+$command_specific['core-rsync'] = array(
+  'exclude-paths' => 'manage:aquatic-mammals:aquatic-warbler:atlantic-turtles:atlantic-turtles
+    :dugong:flamingos:gorilla:grassland-birds:great-bustard:huemul:monk-seal:raptors:ruddy-headed-goose
+    :saiga:sharks:siberian-crane:slender-billed-curlew:west-african-elephants'
+);
+
 
 // Exclude domains symlinks from archive-dump
 $command_specific['archive-dump'] = array(
