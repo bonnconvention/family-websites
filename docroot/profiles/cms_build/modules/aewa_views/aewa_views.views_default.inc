@@ -4771,6 +4771,7 @@ return "";';
   $handler->display->display_options['fields']['field_country_ratification_date']['table'] = 'field_data_field_country_ratification_date';
   $handler->display->display_options['fields']['field_country_ratification_date']['field'] = 'field_country_ratification_date';
   $handler->display->display_options['fields']['field_country_ratification_date']['relationship'] = 'field_country_instrument_status_value';
+  $handler->display->display_options['fields']['field_country_ratification_date']['label'] = 'Year of accession';
   $handler->display->display_options['fields']['field_country_ratification_date']['settings'] = array(
     'format_type' => 'year_date_type',
     'fromto' => 'both',
@@ -4866,6 +4867,22 @@ return "";';
   $handler->display->display_options['filters']['field_instrument_target_id']['field'] = 'field_instrument_target_id';
   $handler->display->display_options['filters']['field_instrument_target_id']['relationship'] = 'field_country_instrument_status_value';
   $handler->display->display_options['filters']['field_instrument_target_id']['value']['value'] = '2';
+  /* Filter criterion: Content: Nid */
+  $handler->display->display_options['filters']['nid']['id'] = 'nid';
+  $handler->display->display_options['filters']['nid']['table'] = 'node';
+  $handler->display->display_options['filters']['nid']['field'] = 'nid';
+  $handler->display->display_options['filters']['nid']['operator'] = '!=';
+  $handler->display->display_options['filters']['nid']['value']['value'] = '264';
+  $handler->display->display_options['filters']['nid']['expose']['operator_id'] = 'nid_op';
+  $handler->display->display_options['filters']['nid']['expose']['label'] = 'Nid';
+  $handler->display->display_options['filters']['nid']['expose']['operator'] = 'nid_op';
+  $handler->display->display_options['filters']['nid']['expose']['identifier'] = 'nid';
+  /* Filter criterion: Content: Nid */
+  $handler->display->display_options['filters']['nid_1']['id'] = 'nid_1';
+  $handler->display->display_options['filters']['nid_1']['table'] = 'node';
+  $handler->display->display_options['filters']['nid_1']['field'] = 'nid';
+  $handler->display->display_options['filters']['nid_1']['operator'] = '!=';
+  $handler->display->display_options['filters']['nid_1']['value']['value'] = '240';
   $handler->display->display_options['path'] = 'parties_range_states_list';
 
   /* Display: Instrument List */
@@ -4893,6 +4910,7 @@ return "";';
   $handler->display->display_options['fields']['field_country_ratification_date']['table'] = 'field_data_field_country_ratification_date';
   $handler->display->display_options['fields']['field_country_ratification_date']['field'] = 'field_country_ratification_date';
   $handler->display->display_options['fields']['field_country_ratification_date']['relationship'] = 'field_country_instrument_status_value';
+  $handler->display->display_options['fields']['field_country_ratification_date']['label'] = 'Year of accession';
   $handler->display->display_options['fields']['field_country_ratification_date']['settings'] = array(
     'format_type' => 'year_date_type',
     'fromto' => 'both',
@@ -4906,6 +4924,10 @@ return "";';
   $handler->display->display_options['fields']['field_region']['field'] = 'field_region';
   $handler->display->display_options['fields']['field_region']['type'] = 'i18n_taxonomy_term_reference_plain';
   $handler->display->display_options['fields']['field_region']['delta_offset'] = '0';
+  /* Field: Content: Nid */
+  $handler->display->display_options['fields']['nid']['id'] = 'nid';
+  $handler->display->display_options['fields']['nid']['table'] = 'node';
+  $handler->display->display_options['fields']['nid']['field'] = 'nid';
   $handler->display->display_options['defaults']['sorts'] = FALSE;
   /* Sort criterion: Content: Title */
   $handler->display->display_options['sorts']['title']['id'] = 'title';
@@ -4995,6 +5017,18 @@ return "";';
   $handler->display->display_options['filters']['field_instrument_target_id']['field'] = 'field_instrument_target_id';
   $handler->display->display_options['filters']['field_instrument_target_id']['relationship'] = 'field_country_instrument_status_value';
   $handler->display->display_options['filters']['field_instrument_target_id']['value']['value'] = '2';
+  /* Filter criterion: Content: Nid */
+  $handler->display->display_options['filters']['nid']['id'] = 'nid';
+  $handler->display->display_options['filters']['nid']['table'] = 'node';
+  $handler->display->display_options['filters']['nid']['field'] = 'nid';
+  $handler->display->display_options['filters']['nid']['operator'] = '!=';
+  $handler->display->display_options['filters']['nid']['value']['value'] = '264';
+  /* Filter criterion: Content: Nid */
+  $handler->display->display_options['filters']['nid_1']['id'] = 'nid_1';
+  $handler->display->display_options['filters']['nid_1']['table'] = 'node';
+  $handler->display->display_options['filters']['nid_1']['field'] = 'nid';
+  $handler->display->display_options['filters']['nid_1']['operator'] = '!=';
+  $handler->display->display_options['filters']['nid_1']['value']['value'] = '240';
   $handler->display->display_options['path'] = 'instrument-country-list/%';
 
   /* Display: Instrument Map */
@@ -5051,7 +5085,9 @@ return "";';
     t('List'),
     t('term from field_country_status'),
     t('Country'),
+    t('Year of accession'),
     t('Region'),
+    t('Nid'),
     t('Instrument List'),
     t('Instrument Map'),
   );
