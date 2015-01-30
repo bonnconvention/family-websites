@@ -34,13 +34,15 @@ echo "Run pre update"
 ../$pre_update
 fi
 
-# Build the site
-echo "Runing custom_build..."
-drush custom_build -y
-
 # Devify - development settings
 drush devify --yes
 drush devify_solr
+
+drush cc all
+
+# Build the site
+echo "Runing custom_build..."
+drush custom_build -y
 
 drush cc all
 
