@@ -6,6 +6,28 @@ docroot/sites/*/settings*.php
 #drush/aliases/aliases.drushrc.php
 conf/config.json
 conf/apache.conf
+docroot/robots.txt
+
+#Subdomains symlinks.
+docroot/aquatic-mammals
+docroot/aquatic-warbler
+docroot/atlantic-turtles
+docroot/bukhara-deer
+docroot/bukhara-deer
+docroot/flamingos
+docroot/gorilla
+docroot/grassland-birds
+docroot/great-bustard
+docroot/huemul
+docroot/manage
+docroot/monk-seal
+docroot/pacific-cetaceans
+docroot/raptors
+docroot/ruddy-headed-goose
+docroot/saiga
+docroot/sharks
+docroot/siberian-crane
+docroot/slender-billed-curlew
 
 # User Generated Content #
 ##########################
@@ -13,6 +35,7 @@ docroot/files
 docroot/sites/*/files
 docroot/sites/*/private
 private_files
+files_private
 
 # Vagrant Files #
 #################
