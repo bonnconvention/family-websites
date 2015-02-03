@@ -128,7 +128,7 @@ function cms_news_field_default_field_instances() {
         'label' => 'hidden',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 10,
+        'weight' => 19,
       ),
       'scs' => array(
         'label' => 'above',
@@ -241,7 +241,7 @@ function cms_news_field_default_field_instances() {
         'module' => 'list',
         'settings' => array(),
         'type' => 'list_default',
-        'weight' => 18,
+        'weight' => 15,
       ),
       'scs' => array(
         'label' => 'above',
@@ -295,7 +295,7 @@ function cms_news_field_default_field_instances() {
           'colorbox_node_style_first' => 'medium_thumbnail',
         ),
         'type' => 'colorbox',
-        'weight' => 19,
+        'weight' => 16,
       ),
       'scs' => array(
         'label' => 'above',
@@ -340,6 +340,55 @@ function cms_news_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-news-field_imported'
+  $field_instances['node-news-field_imported'] = array(
+    'bundle' => 'news',
+    'default_value' => array(
+      0 => array(
+        'value' => 0,
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 18,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_imported',
+    'label' => 'Imported',
+    'required' => 0,
+    'settings' => array(
+      'entity_translation_sync' => FALSE,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(
+        'display_label' => 0,
+      ),
+      'type' => 'options_onoff',
+      'weight' => 41,
+    ),
+  );
+
   // Exported field_instance: 'node-news-field_in_slideshow'
   $field_instances['node-news-field_in_slideshow'] = array(
     'bundle' => 'news',
@@ -356,7 +405,7 @@ function cms_news_field_default_field_instances() {
         'module' => 'list',
         'settings' => array(),
         'type' => 'list_default',
-        'weight' => 20,
+        'weight' => 17,
       ),
       'scs' => array(
         'label' => 'above',
@@ -499,7 +548,7 @@ function cms_news_field_default_field_instances() {
         'module' => 'file',
         'settings' => array(),
         'type' => 'file_default',
-        'weight' => 15,
+        'weight' => 14,
       ),
       'scs' => array(
         'label' => 'above',
@@ -554,7 +603,7 @@ function cms_news_field_default_field_instances() {
           'multiple_to' => '',
         ),
         'type' => 'date_default',
-        'weight' => 13,
+        'weight' => 12,
       ),
       'scs' => array(
         'label' => 'above',
@@ -609,7 +658,7 @@ function cms_news_field_default_field_instances() {
         'module' => 'link',
         'settings' => array(),
         'type' => 'link_default',
-        'weight' => 12,
+        'weight' => 11,
       ),
       'scs' => array(
         'label' => 'above',
@@ -674,7 +723,7 @@ function cms_news_field_default_field_instances() {
         'module' => 'taxonomy',
         'settings' => array(),
         'type' => 'taxonomy_term_reference_plain',
-        'weight' => 14,
+        'weight' => 13,
       ),
       'scs' => array(
         'label' => 'above',
@@ -720,7 +769,7 @@ function cms_news_field_default_field_instances() {
         'module' => 'taxonomy',
         'settings' => array(),
         'type' => 'taxonomy_term_reference_plain',
-        'weight' => 11,
+        'weight' => 10,
       ),
       'scs' => array(
         'label' => 'above',
@@ -969,7 +1018,7 @@ function cms_news_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 16,
+        'weight' => 20,
       ),
       'scs' => array(
         'label' => 'above',
@@ -1018,6 +1067,7 @@ function cms_news_field_default_field_instances() {
   t('Featured image');
   t('Featured in');
   t('Further Resources');
+  t('Imported');
   t('Keywords');
   t('Photo gallery');
   t('Region');
