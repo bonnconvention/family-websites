@@ -7,6 +7,7 @@ docroot/sites/*/settings*.php
 conf/config.json
 conf/apache.conf
 docroot/robots.txt
+tmp
 
 #Subdomains symlinks.
 docroot/aquatic-mammals
