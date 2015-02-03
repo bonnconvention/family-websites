@@ -12177,6 +12177,13 @@ return "";';
   $handler->display->display_options['fields']['php_16']['php_value'] = 'return cms_api_get_field($row->nid, \'news\', \'field_featured_in_instances\');';
   $handler->display->display_options['fields']['php_16']['use_php_click_sortable'] = '0';
   $handler->display->display_options['fields']['php_16']['php_click_sortable'] = '';
+  /* Field: Content: Post date */
+  $handler->display->display_options['fields']['created']['id'] = 'created';
+  $handler->display->display_options['fields']['created']['table'] = 'node';
+  $handler->display->display_options['fields']['created']['field'] = 'created';
+  $handler->display->display_options['fields']['created']['label'] = 'created';
+  $handler->display->display_options['fields']['created']['date_format'] = 'long';
+  $handler->display->display_options['fields']['created']['second_date_format'] = 'cms_date';
   /* Sort criterion: Content: Post date */
   $handler->display->display_options['sorts']['created']['id'] = 'created';
   $handler->display->display_options['sorts']['created']['table'] = 'node';
@@ -12257,7 +12264,7 @@ return "";';
     'CMS' => 'CMS',
   );
   $handler->display->display_options['filters']['field_featured_in_instances_value']['reduce_duplicates'] = TRUE;
-  $handler->display->display_options['path'] = 'ascobans-news';
+  $handler->display->display_options['path'] = 'cms-news';
 
   /* Display: News Eurobats */
   $handler = $view->new_display('services', 'News Eurobats', 'services_3');

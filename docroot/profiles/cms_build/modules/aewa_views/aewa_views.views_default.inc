@@ -12256,6 +12256,13 @@ return "";';
   $handler->display->display_options['fields']['php_16']['php_value'] = 'return cms_api_get_field($row->nid, \'news\', \'field_featured_in_instances\');';
   $handler->display->display_options['fields']['php_16']['use_php_click_sortable'] = '0';
   $handler->display->display_options['fields']['php_16']['php_click_sortable'] = '';
+  /* Field: Content: Post date */
+  $handler->display->display_options['fields']['created']['id'] = 'created';
+  $handler->display->display_options['fields']['created']['table'] = 'node';
+  $handler->display->display_options['fields']['created']['field'] = 'created';
+  $handler->display->display_options['fields']['created']['label'] = 'created';
+  $handler->display->display_options['fields']['created']['date_format'] = 'long';
+  $handler->display->display_options['fields']['created']['second_date_format'] = 'cms_date';
   /* Sort criterion: Content: Post date */
   $handler->display->display_options['sorts']['created']['id'] = 'created';
   $handler->display->display_options['sorts']['created']['table'] = 'node';
@@ -12441,6 +12448,7 @@ return "";';
     t('field_news_further_resources'),
     t('field_in_slideshow'),
     t('field_featured_in_instances'),
+    t('created'),
     t('News CMS'),
     t('News Ascobans'),
     t('News Eurobats'),
