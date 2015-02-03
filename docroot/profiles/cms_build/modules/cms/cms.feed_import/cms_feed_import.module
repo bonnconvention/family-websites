@@ -278,6 +278,9 @@ function cms_feed_import_execute($url, $bundle) {
           }
           $node->uid = 1;
           $node->field_imported[LANGUAGE_NONE][0]['value'] = 1;
+          if (isset($node->created)) {
+            $node->date = date('Y-m-d H:i', $node->created);
+          }
           $node = node_submit($node);
 
           //Get properties from existing node
