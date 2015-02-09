@@ -139,6 +139,12 @@ function cms_news_strongarm() {
         'domain_path' => array(
           'weight' => '1',
         ),
+        'metatags' => array(
+          'weight' => '40',
+        ),
+        'redirect' => array(
+          'weight' => '30',
+        ),
       ),
       'display' => array(
         'domain' => array(

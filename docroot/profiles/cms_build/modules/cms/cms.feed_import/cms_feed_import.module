@@ -7,7 +7,7 @@
  *
  */
 
-
+module_load_include('inc', 'cms_feed_import', 'cms_feed_import.admin');
 
 /**
  * Implements hook_menu().
@@ -22,65 +22,118 @@ function cms_feed_import_menu() {
         'access arguments' => array('access administration pages'),
         'type' => MENU_NORMAL_ITEM,
     );
-    $items['admin/config/content/cms_feed_import/process'] = array(
-        'page callback' => 'cms_feed_import_node_import',
+    $items['cms_feed_import/process'] = array(
+        'page callback' => 'cms_feed_import_node_import_callback',
         'type' => MENU_CALLBACK,
         'access arguments' => array('access content'),
     );
-
     return $items;
 }
 
 /**
- * Page callback: CMS AmMap settings
- *
- * @see current_posts_menu()
+ * Implements hook_form_alter().
  */
-function cms_feed_import_form($form, &$form_state) {
-    $bundles = field_info_bundles();
-    $node_bundles = array();
-    foreach ($bundles['node'] as $machine_name => $bundle) {
-        $node_bundles[$machine_name] = $bundle['label'];
+function cms_feed_import_form_alter(&$form, &$form_state, $form_id) {
+  if (!empty($form['#node_edit_form']) && isset($form['field_featured_in_instances'])) {
+    $form['actions']['submit']['#submit'][] = 'cms_feed_import_node_save_submit';
+    if (isset($form['field_imported'])) {
+      $form['field_imported']['#attributes']['class'][] = 'hide';
     }
-    $exiting_bundle = variable_get('cms_feed_import_bundle', "");
-    $existing_url = variable_get('cms_feed_import_url', "");
-    $form['cms_feed_import_bundle'] = array(
-        '#type' => 'select',
-        '#title' => t('Bundle'),
-        '#options' => $node_bundles,
-        '#default_value' => variable_get('cms_feed_import_bundle', ""),
-        '#description' => t('Bundle'),
-        '#required' => TRUE,
-    );
-    $form['cms_feed_import_url'] = array(
-        '#type' => 'textfield',
-        '#title' => t('URL'),
-        '#default_value' => variable_get('cms_feed_import_url', ""),
-        '#description' => t('URL'),
-        '#required' => TRUE,
-    );
-    if (!empty($exiting_bundle) && !empty($existing_url)) {
-        $form['cms_import_link'] = array(
-            '#markup' => '<a href="/admin/config/content/cms_feed_import/process">Import now</a>'
-        );
-    }
-    return system_settings_form($form);
+  }
+}
+
+/**
+ * Callback for node edit form submit.
+ */
+function cms_feed_import_node_save_submit($form, &$form_state) {
+    cms_feed_import_form_trigger_source($form_state['node']);
 }
 
 /**
  * Implements hook_cron
  */
 function cms_feed_import_cron(){
-    $interval = 60 * 60;
     if (time() >= variable_get('cms_feed_import_next_execution', 0)) {
         cms_feed_import_node_import(TRUE);
-        variable_set('cms_feed_import_next_execution', time() + $interval);
+        cms_feed_import_set_interval();
     }
 }
 
-function cms_feed_import_node_import($cron = FALSE){
-    $bundle = variable_get('cms_feed_import_bundle', "news");
-    $url = variable_get('cms_feed_import_url', "http://www.cms.int/ws/aewa-news");
+/**
+ * Callback for menu hook to trigger import.
+ */
+function cms_feed_import_node_import_callback() {
+  $common_key = variable_get('common_key');
+  $param = drupal_get_query_parameters();
+  watchdog('cms_feed_import', 'Import remotely triggered');
+  if (isset($param['key']) && $param['key'] == $common_key) {
+    cms_feed_import_node_import(TRUE);
+  }
+}
+
+/**
+ * Triggers the import on a remote source.
+ */
+function cms_feed_import_form_trigger_source($node) {
+  $bundle = variable_get('cms_feed_import_bundle', "news");
+  $urls = variable_get('cms_feed_import_url', array());
+  $common_key = variable_get('common_key');
+  if (!empty($urls) && $bundle == $node->type
+      && empty($node->field_imported[LANGUAGE_NONE][0]['value'])
+      && !empty($node->field_featured_in_instances[LANGUAGE_NONE][0])) {
+    foreach ($urls as $url) {
+      if (valid_url($url, TRUE)) {
+        $path = parse_url($url);
+        $target_url = $path['scheme'] . '://' . $path['host'] . '/cms_feed_import/process';
+        $options = array(
+          'query' => array(
+            'key' => $common_key,
+          )
+        );
+        entity_get_controller('node')->resetCache(array($node->nid));
+        drupal_http_request(url($target_url, $options), array('timeout', 90));
+      }
+    }
+  }
+}
+
+/**
+ * Executes Import for all URLs.
+ */
+function cms_feed_import_node_import($cron = FALSE, $urls = array(), $bundle = ''){
+    if (empty($urls)) {
+        $bundle = variable_get('cms_feed_import_bundle', "news");
+        $urls = variable_get('cms_feed_import_url', array());
+    }
+    $saves = 0;
+    if (!empty($urls)) {
+        foreach ($urls as $url) {
+            if (!empty($url)) {
+                $saves += cms_feed_import_execute($url, $bundle);
+            }
+        }
+    }
+    if (!$cron) {
+        drupal_set_message($saves .' nodes saved');
+        drupal_goto('admin/config/content/cms_feed_import');
+    }
+    cms_feed_import_set_interval();
+}
+
+/**
+ * Sets the next interval for import.
+ */
+function cms_feed_import_set_interval() {
+    $interval = variable_get('cms_feed_import_cron_interval', 360);
+    variable_set('cms_feed_import_next_execution', time() + $interval);
+}
+
+/**
+ * Executes import from an url.
+ */
+function cms_feed_import_execute($url, $bundle) {
+    $path = parse_url($url);
+    $base_path = $path['scheme'] . '://' . $path['host'];
     $import = new CMSFeedImport($url, $bundle);
     $import->call_feed();
     $result = $import->get_result();
@@ -93,6 +146,7 @@ function cms_feed_import_node_import($cron = FALSE){
     $fields_entity_ref = array();
     $fields_term_ref = array();
     $fields_generic_info = array();
+    $standard_fields = array();
 
     //Get bundle field infos
     foreach ($fields_info as $field_name => $field) {
@@ -110,154 +164,166 @@ function cms_feed_import_node_import($cron = FALSE){
             case 'taxonomy_term_reference':
                 $fields_term_ref[$field_name] = $field_name;
                 break;
+            default:
+                $standard_fields[$field_name] = $field_name;
         }
     }
 
     //Check trough received data
     foreach ($result as $node_data) {
-        $query = new EntityFieldQuery();
-        $nodes = $query->entityCondition('entity_type', 'node')
-            ->entityCondition('bundle', $bundle)
-            ->propertyCondition('uuid', $node_data['uuid'])
-            ->execute();
+      $query = new EntityFieldQuery();
+      $nodes = $query->entityCondition('entity_type', 'node')
+        ->entityCondition('bundle', $bundle)
+        ->propertyCondition('uuid', $node_data['uuid'])
+        ->execute();
 
-        //get languages that has data
-        $languages = language_list();
-        $node_languages = array();
-        foreach ($node_data as $field) {
-            if(is_array($field)) {
-                foreach($field as $key => $value){
-                    if(array_key_exists($key, $languages)) {
-                        $node_languages[$key] = $key;
-                    }
+      //get languages that has data
+      $languages = language_list();
+      $node_languages = array();
+      foreach ($node_data as $field) {
+          if(is_array($field)) {
+              foreach($field as $key => $value){
+                  if(array_key_exists($key, $languages)) {
+                      $node_languages[$key] = $key;
+                  }
+              }
+          }
+      }
+
+      $current_node = array();
+      //if new
+      if (empty($nodes)) {
+          unset($node_data['nid']);
+      } else {
+          $current_node = node_load(current($nodes['node'])->nid);
+          $node_data['nid'] = $current_node->nid;
+      }
+
+      //if new or modified, we have to save it
+      if (empty($nodes) ||
+        (!empty($current_node) && $current_node->changed < $node_data['changed'])) {
+          $node_data['type'] = $bundle;
+
+          $node = (object) $node_data;
+
+          //Parse image fields
+          foreach ($fields_image as $field_image) {
+              if (!empty($node->{$field_image})) {
+                  foreach ($node->{$field_image} as $lang => $images) {
+                      foreach ($images as $idx => $image) {
+                          $f_img = (array) CMSFeedImport::saveFile(
+                            $image['url'],
+                            'public://' . $fields_info[$field_image]['settings']['file_directory']
+                          );
+                          $f_img['image_field_caption'] = $image['image_field_caption'];
+                          $node->{$field_image}[$lang][$idx] = $f_img;
+                      }
+                  }
+              }
+          }
+
+          //Parse File fields
+          foreach ($fields_file as $field_file) {
+              if (!empty($node->{$field_file})) {
+                  foreach ($node->{$field_file} as $lang => $files) {
+                      foreach ($files as $idx => $file) {
+                          $f_file = (array) CMSFeedImport::saveFile(
+                            $file['url'],
+                            'public://' . $fields_info[$field_file]['settings']['file_directory']
+                          );
+                          $f_file['description'] = $file['description'];
+                          $f_file['display'] = $file['display'];
+                          $node->{$field_file}[$lang][$idx] = $f_file;
+                      }
+                  }
+              }
+          }
+
+          //Parse Term ref fields
+          foreach ($fields_term_ref as $field_term_ref) {
+              if (!empty($node->{$field_term_ref})) {
+                  $voc = $fields_generic_info[$field_term_ref]['settings']['allowed_values'][0]['vocabulary'];
+                  $field_values = array();
+                  foreach ($node->{$field_term_ref} as $lang => $terms) {
+                      foreach ($terms as $term) {
+                          $current_term = taxonomy_get_term_by_name($term, $voc);
+                          if (!empty($current_term)) {
+                              $field_values[$lang] []= array('tid' => current($current_term)->tid);
+                          }
+                      }
+                  }
+                  $node->{$field_term_ref} = $field_values;
+              }
+          }
+
+          //Parse Entity ref fields
+          foreach ($fields_entity_ref as $field_entity_ref) {
+            if(!empty($node->{$field_entity_ref})) {
+              $field_values = array();
+              foreach ($node->{$field_entity_ref} as $lang => $ent_ref) {
+                foreach($ent_ref as $target_title) {
+                  $query = new EntityFieldQuery();
+                  $target_nodes = $query->entityCondition('entity_type', 'node')
+                    ->entityCondition('bundle', $fields_generic_info[$field_entity_ref]['settings']['handler_settings']['target_bundles'])
+                    ->propertyCondition('title', $target_title)
+                    ->range(0,1)
+                    ->execute();
+                  if (!empty($target_nodes['node'])) {
+                      $field_values[$lang] []= array('target_id' => current($target_nodes['node'])->nid);
+                  }
                 }
+              }
+              $node->{$field_entity_ref} = $field_values;
             }
+          }
+          $node->uid = 1;
+          $node->field_imported[LANGUAGE_NONE][0]['value'] = 1;
+          if (isset($node->created)) {
+            $node->date = date('Y-m-d H:i', $node->created);
+          }
+          $node = node_submit($node);
+
+          //Get properties from existing node
+          if (!empty($current_node)) {
+            $node_array = (array) $node;
+            $diff = CMSFeedImport::arrayRecursiveDiff((array) $current_node, $node_array);
+            $node = (object) array_merge($diff, $node_array);
+          }
+
+        //set Translations
+        foreach($node_languages as $language) {
+          if ($language == $node->language) {
+              continue;
+          }
+
+          $handler = entity_translation_get_handler('node', $node, TRUE);
+          $handler->initTranslations();
+
+          $translation = array(
+            'language'  => $language,
+            'source'    => $node->language,
+            'status'    => 1,
+            'translate' => 0
+          );
+
+          $handler->setTranslation($translation, $node);
         }
 
-        $current_node = array();
-        //if new
-        if (empty($nodes)) {
-            unset($node_data['nid']);
-        } else {
-            $current_node = node_load(current($nodes['node'])->nid);
-            $node_data['nid'] = $current_node->nid;
+        // Replace images src and a href with absolute url from source.
+        foreach ($node->body as $lang => $body) {
+          $html = $node->body[$lang][0]['value'];
+          $html = preg_replace('/src="\/(.*?)"/', 'src="'. $base_path .'/\1"', $html);
+          $html = preg_replace('/href="\/(.*?)"/', 'href="'. $base_path .'/\1"', $html);
+          $node->body[$lang][0]['value'] = $html;
         }
 
-        //if new or modified, we have to save it
-        if (empty($nodes) ||
-            (!empty($current_node) && $current_node->changed < $node_data['changed'])) {
-            $node_data['type'] = $bundle;
-
-            $node = (object) $node_data;
-
-            //Parse image fields
-            foreach ($fields_image as $field_image) {
-                if (!empty($node->{$field_image})) {
-                    foreach ($node->{$field_image} as $lang => $images) {
-                        foreach ($images as $idx => $image) {
-                            $f_img = (array) CMSFeedImport::saveFile(
-                                $image['url'],
-                                'public://' . $fields_info[$field_image]['settings']['file_directory']
-                            );
-                            $f_img['image_field_caption'] = $image['image_field_caption'];
-                            $node->{$field_image}[$lang][$idx] = $f_img;
-                        }
-                    }
-                }
-            }
-
-            //Parse File fields
-            foreach ($fields_file as $field_file) {
-                if (!empty($node->{$field_file})) {
-                    foreach ($node->{$field_file} as $lang => $files) {
-                        foreach ($files as $idx => $file) {
-                            $f_file = (array) CMSFeedImport::saveFile(
-                                $file['url'],
-                                'public://' . $fields_info[$field_file]['settings']['file_directory']
-                            );
-                            $f_file['description'] = $file['description'];
-                            $f_file['display'] = $file['display'];
-                            $node->{$field_file}[$lang][$idx] = $f_file;
-                        }
-                    }
-                }
-            }
-
-            //Parse Term ref fields
-            foreach ($fields_term_ref as $field_term_ref) {
-                if (!empty($node->{$field_term_ref})) {
-                    $voc = $fields_generic_info[$field_term_ref]['settings']['allowed_values'][0]['vocabulary'];
-                    $field_values = array();
-                    foreach ($node->{$field_term_ref} as $lang => $terms) {
-                        foreach ($terms as $term) {
-                            $current_term = taxonomy_get_term_by_name($term, $voc);
-                            if (!empty($current_term)) {
-                                $field_values[$lang] []= array('tid' => current($current_term)->tid);
-                            }
-                        }
-                    }
-                    $node->{$field_term_ref} = $field_values;
-                }
-            }
-
-            //Parse Entity ref fields
-            foreach ($fields_entity_ref as $field_entity_ref) {
-                if(!empty($node->{$field_entity_ref})) {
-                    $field_values = array();
-                    foreach ($node->{$field_entity_ref} as $lang => $ent_ref) {
-                        foreach($ent_ref as $target_title) {
-                            $query = new EntityFieldQuery();
-                            $target_nodes = $query->entityCondition('entity_type', 'node')
-                                ->entityCondition('bundle', $fields_generic_info[$field_entity_ref]['settings']['handler_settings']['target_bundles'])
-                                ->propertyCondition('title', $target_title)
-                                ->range(0,1)
-                                ->execute();
-                            if (!empty($target_nodes['node'])) {
-                                $field_values[$lang] []= array('target_id' => current($target_nodes['node'])->nid);
-                            }
-                        }
-                    }
-                    $node->{$field_entity_ref} = $field_values;
-                }
-            }
-
-            $node = node_submit($node);
-
-            //Get properties from existing node
-            if (!empty($current_node)) {
-                $node_array = (array) $node;
-                $diff = array_diff_assoc((array) $current_node, $node_array);
-                $node = (object) array_merge($node_array, $diff);
-            }
-
-            //set Translations
-            foreach($node_languages as $language) {
-                if ($language == $node->language) {
-                    continue;
-                }
-
-                $handler = entity_translation_get_handler('node', $node, TRUE);
-                $handler->initTranslations();
-
-                $translation = array(
-                    'language'  => $language,
-                    'source'    => $node->language,
-                    'status'    => 1,
-                    'translate' => 0
-                );
-
-                $handler->setTranslation($translation, $node);
-            }
-
-            node_save($node);
-            $saves ++;
-        }
+        node_save($node);
+        watchdog('cms_feed_import', $node->title . ' saved!');
+        $saves ++;
+      }
     }
     watchdog('cms_feed_import', 'Imported '.$saves .' nodes', NULL, WATCHDOG_DEBUG, $url);
-    if (!$cron) {
-        drupal_set_message($saves .' nodes saved');
-        drupal_goto('admin/config/content/cms_feed_import');
-    }
+    return $saves;
 }
 
 class CMSFeedImport {
@@ -336,4 +402,24 @@ class CMSFeedImport {
         }
         return NULL;
     }
+
+  public static function arrayRecursiveDiff($array1, $array2) {
+    $return = array();
+
+    foreach ($array1 as $key => $value) {
+      if (array_key_exists($key, $array2)) {
+        if (is_array($value)) {
+          $diff = self::arrayRecursiveDiff($value, $array2[$key]);
+          if (count($diff)) { $return[$key] = $diff; }
+        } else {
+          if ($value != $array2[$key]) {
+            $return[$key] = $value;
+          }
+        }
+      } else {
+        $return[$key] = $value;
+      }
+    }
+    return $return;
+  }
 }

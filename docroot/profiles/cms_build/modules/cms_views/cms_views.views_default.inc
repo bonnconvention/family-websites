@@ -15538,6 +15538,31 @@ return "";';
   $handler->display->display_options['fields']['php_13']['php_value'] = 'return cms_api_get_field($row->nid, \'news\', \'field_news_further_resources\');';
   $handler->display->display_options['fields']['php_13']['use_php_click_sortable'] = '0';
   $handler->display->display_options['fields']['php_13']['php_click_sortable'] = '';
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php_15']['id'] = 'php_15';
+  $handler->display->display_options['fields']['php_15']['table'] = 'views';
+  $handler->display->display_options['fields']['php_15']['field'] = 'php';
+  $handler->display->display_options['fields']['php_15']['label'] = 'field_in_slideshow';
+  $handler->display->display_options['fields']['php_15']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php_15']['php_value'] = 'return cms_api_get_field($row->nid, \'news\', \'field_in_slideshow\');';
+  $handler->display->display_options['fields']['php_15']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php_15']['php_click_sortable'] = '';
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php_16']['id'] = 'php_16';
+  $handler->display->display_options['fields']['php_16']['table'] = 'views';
+  $handler->display->display_options['fields']['php_16']['field'] = 'php';
+  $handler->display->display_options['fields']['php_16']['label'] = 'field_featured_in_instances';
+  $handler->display->display_options['fields']['php_16']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php_16']['php_value'] = 'return cms_api_get_field($row->nid, \'news\', \'field_featured_in_instances\');';
+  $handler->display->display_options['fields']['php_16']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php_16']['php_click_sortable'] = '';
+  /* Field: Content: Post date */
+  $handler->display->display_options['fields']['created']['id'] = 'created';
+  $handler->display->display_options['fields']['created']['table'] = 'node';
+  $handler->display->display_options['fields']['created']['field'] = 'created';
+  $handler->display->display_options['fields']['created']['label'] = 'created';
+  $handler->display->display_options['fields']['created']['date_format'] = 'long';
+  $handler->display->display_options['fields']['created']['second_date_format'] = 'cms_date';
   /* Sort criterion: Content: Post date */
   $handler->display->display_options['sorts']['created']['id'] = 'created';
   $handler->display->display_options['sorts']['created']['table'] = 'node';
@@ -15550,6 +15575,14 @@ return "";';
   $handler->display->display_options['filters']['status']['value'] = 1;
   $handler->display->display_options['filters']['status']['group'] = 1;
   $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+  /* Filter criterion: Content: Imported (field_imported) */
+  $handler->display->display_options['filters']['field_imported_value']['id'] = 'field_imported_value';
+  $handler->display->display_options['filters']['field_imported_value']['table'] = 'field_data_field_imported';
+  $handler->display->display_options['filters']['field_imported_value']['field'] = 'field_imported_value';
+  $handler->display->display_options['filters']['field_imported_value']['operator'] = 'not';
+  $handler->display->display_options['filters']['field_imported_value']['value'] = array(
+    1 => '1',
+  );
   /* Filter criterion: Content: Type */
   $handler->display->display_options['filters']['type']['id'] = 'type';
   $handler->display->display_options['filters']['type']['table'] = 'node';
@@ -15682,6 +15715,8 @@ return "";';
     t('field_species_group'),
     t('field_keywords'),
     t('field_news_further_resources'),
+    t('field_in_slideshow'),
+    t('field_featured_in_instances'),
     t('News Aewa'),
     t('News Ascobans'),
     t('News Eurobats'),

@@ -128,6 +128,20 @@ function cms_instrument_form_alter(&$form, &$form_state, $form_id) {
     return $form;
 }
 
+/**
+ * Implements hook__post_features_revert().
+ */
+function cms_instrument_post_features_revert($component) {
+    if ($component == 'field_instance'
+        && in_array(variable_get('cms_instance'), array('aewa', 'ascobans'))) {
+        // On Aewa and Ascobans, remove jquery expander.
+        $field_instance = field_info_instance('node', 'body', 'legal_instrument');
+        $field_instance['display']['default']['module'] = 'text';
+        $field_instance['display']['default']['type'] = 'text_default';
+        field_update_instance($field_instance);
+    }
+}
+
 function _legal_instrument_redirect_after_delete(&$form, &$form_state) {
     $form_state['redirect'] = 'legal_instrument/listing';
 }

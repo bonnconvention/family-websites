@@ -7,13 +7,14 @@ docroot/sites/*/settings*.php
 conf/config.json
 conf/apache.conf
 docroot/robots.txt
+tmp
 
 #Subdomains symlinks.
 docroot/aquatic-mammals
 docroot/aquatic-warbler
 docroot/atlantic-turtles
 docroot/bukhara-deer
-docroot/bukhara-deer
+docroot/dugong
 docroot/flamingos
 docroot/gorilla
 docroot/grassland-birds

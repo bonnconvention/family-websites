@@ -70,7 +70,7 @@ function drush_devify_solr($source = NULL, $destination = NULL) {
     $server->save();
   }
   else {
-    print 'No Solr Server (machine name: solr_server) found in database';
+    print 'No Solr Server (machine name:' . $cfg['solr_id'] .') found in database';
   }
 
 }
