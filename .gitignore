@@ -10,6 +10,7 @@ docroot/robots.txt
 tmp
 
 #Subdomains symlinks.
+docroot/manage
 docroot/aquatic-mammals
 docroot/aquatic-warbler
 docroot/atlantic-turtles
