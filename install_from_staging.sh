@@ -29,14 +29,13 @@ done
 # because are built in downsync_sql - preppend @{instance}. to the aliases below.
 drush downsync_sql staging.sync local -y
 
+# Devify - development settings
+drush devify_solr
+
 if [ ! -z "$pre_update" ]; then
 echo "Run pre update"
 ../$pre_update
 fi
-
-# Devify - development settings
-drush devify --yes
-drush devify_solr
 
 drush cc all
 
