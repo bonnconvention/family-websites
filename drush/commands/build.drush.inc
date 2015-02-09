@@ -17,6 +17,11 @@ function build_drush_command() {
 		'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
 	);
 
+	$items['reset-variables'] = array(
+		'description' => 'Runs database updates, reverts features and clears caches.',
+		'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+	);
+
 	$items['devify'] = array(
 		'description' => 'Configures the current database for development.',
 		'callback' => '_drush_devify',
@@ -110,3 +115,14 @@ function _drush_devify() {
 	drush_log(dt('Devified!'), 'success');
 }
 
+function drush_build_reset_variables() {
+	global $cfg;
+	if (!empty($cfg->variables)) {
+		foreach ((array)$cfg->variables as $k => $v) {
+			if (drush_get_option('verbose', FALSE)) {
+				drush_log(sprintf('Setting %s = %s', $k, $v));
+			}
+			variable_set($k, $v);
+		}
+	}
+}

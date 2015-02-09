@@ -247,6 +247,7 @@ $options['structure-tables']['common'] = array(
 
 // Read JSON configuration file from conf/ and pre-configure drush commands
 $json_path = __DIR__ . '/../conf/config.json';
+global $cfg;
 if (file_exists($json_path)) {
   $cfg = json_decode(file_get_contents($json_path));
   $db_url = sprintf('mysql://%s:%s@%s:%s/%s', $cfg->db->username, $cfg->db->password, $cfg->db->host, $cfg->db->port, $cfg->db->database);
@@ -259,7 +260,6 @@ if (file_exists($json_path)) {
     'db-su-pw' => $cfg->db->root_password
   );
 }
-
 $options['variables'] = (array) $cfg->variables;
 
 $options['init-modules'] = array(
