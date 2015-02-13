@@ -371,9 +371,11 @@ final class CMSUtils {
      * @param mixed args Variable arguments
      */
     static function println($message) {
-        $params = array($message) + func_get_args();
-        call_user_func_array('printf', $params);
-        echo "\n";
+        if (drupal_is_cli()) {
+            $params = array($message) + func_get_args();
+            call_user_func_array('printf', $params);
+            echo "\n";
+        }
     }
 
 
