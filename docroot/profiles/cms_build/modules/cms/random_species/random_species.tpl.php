@@ -9,7 +9,7 @@
                     <?php echo $images[0];
                     unset($images[0]); ?>
                 <?php elseif ('cck' == $image_type): ?>
-                    <img src="<?php echo file_create_url($images[0]['raw']['uri']); ?>" alt="" title="" class="species-custom-image" />
+                    <img src="<?php echo image_style_url('species_block', $images[0]['raw']['uri']); ?>" alt="" title="" class="species-custom-image" />
                     <?php unset($images[0]); ?>
                 <?php endif; ?>                
             </div>
@@ -19,7 +19,7 @@
                         <?php if ('arkive' == $image_type): ?>
                             <?php echo $image; ?>
                         <?php elseif ('cck' == $image_type): ?>
-                            <img src="<?php echo file_create_url($image['raw']['uri']); ?>" alt="" title="" class="species-custom-image" />
+                            <img src="<?php echo image_style_url('species_block', $image['raw']['uri']); ?>" alt="" title="" class="species-custom-image" />
                         <?php endif; ?>
                     </div>
                 <?php endforeach; ?>                

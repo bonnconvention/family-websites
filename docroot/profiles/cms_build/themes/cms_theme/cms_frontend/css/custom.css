@@ -450,6 +450,10 @@ height: auto;
 padding-left: 73px;
 display: block;
 }
+.species-carousel .item img {
+  max-width: 170px !important;
+  height: auto !important;
+}
 
 @media (max-width: 1200px) and (min-width: 1025px) {
   .calendar-calendar .month-view table {
