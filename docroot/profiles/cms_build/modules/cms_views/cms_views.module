@@ -74,6 +74,17 @@ function cms_views_views_pre_view(&$view, &$display_id, &$args) {
                 $args[0] = (string) $instrument_id;
             }
             break;
+        case 'event_and_meetings_lists':
+            $instrument_id = cms_domain_instrument_id();
+            if ($instrument_id) {
+                if ($display_id == 'page_1') {
+                    $args[1] = (string) $instrument_id;
+                }
+                else {
+                    $args[0] = (string) $instrument_id;
+                }
+            }
+            break;
     }
 }
 
