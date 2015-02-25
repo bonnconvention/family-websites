@@ -4578,6 +4578,14 @@ return "";';
   $handler->display->display_options['sorts']['event_calendar_date_value']['id'] = 'event_calendar_date_value';
   $handler->display->display_options['sorts']['event_calendar_date_value']['table'] = 'field_data_event_calendar_date';
   $handler->display->display_options['sorts']['event_calendar_date_value']['field'] = 'event_calendar_date_value';
+  /* Contextual filter: Field: CMS Instrument (field_instrument) */
+  $handler->display->display_options['arguments']['field_instrument_target_id']['id'] = 'field_instrument_target_id';
+  $handler->display->display_options['arguments']['field_instrument_target_id']['table'] = 'field_data_field_instrument';
+  $handler->display->display_options['arguments']['field_instrument_target_id']['field'] = 'field_instrument_target_id';
+  $handler->display->display_options['arguments']['field_instrument_target_id']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['field_instrument_target_id']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['field_instrument_target_id']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['field_instrument_target_id']['summary_options']['items_per_page'] = '25';
   /* Filter criterion: Content: Published */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'node';
@@ -4796,7 +4804,6 @@ return "";';
   $handler->display->display_options['fields']['title']['alter']['word_boundary'] = FALSE;
   $handler->display->display_options['fields']['title']['alter']['ellipsis'] = FALSE;
   $handler->display->display_options['fields']['title']['element_label_colon'] = FALSE;
-  $handler->display->display_options['defaults']['arguments'] = FALSE;
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Content: Published */
@@ -4996,6 +5003,14 @@ return "";';
   $handler->display->display_options['arguments']['event_calendar_date_value']['year_range'] = '-30:+5';
   $handler->display->display_options['arguments']['event_calendar_date_value']['granularity'] = 'year';
   $handler->display->display_options['arguments']['event_calendar_date_value']['use_fromto'] = 'no';
+  /* Contextual filter: Field: CMS Instrument (field_instrument) */
+  $handler->display->display_options['arguments']['field_instrument_target_id']['id'] = 'field_instrument_target_id';
+  $handler->display->display_options['arguments']['field_instrument_target_id']['table'] = 'field_data_field_instrument';
+  $handler->display->display_options['arguments']['field_instrument_target_id']['field'] = 'field_instrument_target_id';
+  $handler->display->display_options['arguments']['field_instrument_target_id']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['field_instrument_target_id']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['field_instrument_target_id']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['field_instrument_target_id']['summary_options']['items_per_page'] = '25';
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Content: Published */
@@ -5006,6 +5021,7 @@ return "";';
   $handler->display->display_options['filters']['status']['group'] = 1;
   $handler->display->display_options['filters']['status']['exposed'] = TRUE;
   $handler->display->display_options['filters']['status']['expose']['operator_id'] = '';
+  $handler->display->display_options['filters']['status']['expose']['label'] = 'Published';
   $handler->display->display_options['filters']['status']['expose']['operator'] = 'status_op';
   $handler->display->display_options['filters']['status']['expose']['identifier'] = 'status';
   $handler->display->display_options['filters']['status']['expose']['required'] = TRUE;
@@ -5077,14 +5093,15 @@ return "";';
     t('[field_event_organizer][field_meeting_organizer]'),
     t('[field_meeting_location][field_event_place]'),
     t('[field_event_url][field_meeting_url]'),
+    t('All'),
     t('Type'),
     t('Upcoming Page'),
     t('Upcoming Events'),
     t('Upcoming List'),
     t('Archive'),
     t('Event and Meetings Archive'),
-    t('All'),
     t('Event and Meetings from %1'),
+    t('Published'),
   );
   $export['event_and_meetings_lists'] = $view;
 
@@ -15717,6 +15734,7 @@ return "";';
     t('field_news_further_resources'),
     t('field_in_slideshow'),
     t('field_featured_in_instances'),
+    t('created'),
     t('News Aewa'),
     t('News Ascobans'),
     t('News Eurobats'),
@@ -15849,6 +15867,16 @@ return "";';
 
   /* Display: Block */
   $handler = $view->new_display('block', 'Block', 'block');
+  $handler->display->display_options['defaults']['arguments'] = FALSE;
+  /* Contextual filter: Field: CMS Instrument (field_instrument) */
+  $handler->display->display_options['arguments']['field_instrument_target_id']['id'] = 'field_instrument_target_id';
+  $handler->display->display_options['arguments']['field_instrument_target_id']['table'] = 'field_data_field_instrument';
+  $handler->display->display_options['arguments']['field_instrument_target_id']['field'] = 'field_instrument_target_id';
+  $handler->display->display_options['arguments']['field_instrument_target_id']['default_action'] = 'default';
+  $handler->display->display_options['arguments']['field_instrument_target_id']['default_argument_type'] = 'node';
+  $handler->display->display_options['arguments']['field_instrument_target_id']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['field_instrument_target_id']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['field_instrument_target_id']['summary_options']['items_per_page'] = '25';
   $handler->display->display_options['block_description'] = 'Subdomains News Slideshow';
 
   /* Display: CMS Slideshow */
