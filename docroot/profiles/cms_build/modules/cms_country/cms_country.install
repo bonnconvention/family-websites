@@ -78,3 +78,18 @@ function cms_country_update_7001() {
 
     return t("Countries' statuses successfully updated.");
 }
+
+
+/**
+ * Create new date format
+ */
+function cms_country_update_7002() {
+    db_insert('date_format_type')
+      ->fields(array(
+        'type' => 'full_date_short_month',
+        'title' => 'Full Date (short month)',
+        'locked' => 0,
+      ))
+      ->execute();
+    variable_set('date_format_full_date_short_month', 'd M Y');
+}

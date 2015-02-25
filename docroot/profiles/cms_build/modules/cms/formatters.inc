@@ -1644,3 +1644,82 @@ function cms_date_optional_time_format($value) {
     }
     return $output;
 }
+
+/**
+ * implementation of hook_rest_server_response_formatters_alter()
+ */
+function cms_rest_server_response_formatters_alter(&$formatters) {
+    //This will change the formatter for xml, to use our custom one so it renders correctly
+    $formatters['xml_informea'] = $formatters['xml'];
+    $formatters['xml_informea']['formatter class'] = 'ContractingPartiesServicesXMLFormatter';
+}
+
+/*
+ * A custom formatter class for Contracting parties
+ */
+
+class ContractingPartiesServicesXMLFormatter extends ServicesXMLFormatter {
+    public function render($data) {
+
+        $doc = new DOMDocument('1.0', 'utf-8');
+        $root = $doc->createElement('Document');
+        $treaty = $doc->createElement('Treaty');
+        $root->appendChild($treaty);
+        $participants = $doc->createElement('Participants');
+        $table = $doc->createElement('Table');
+        $thead = $doc->createElement('Thead');
+        $tbody = $doc->createElement('Tbody');
+        $rows = $doc->createElement('Rows');
+        $tbody->appendChild($rows);
+        $table->appendChild($thead);
+        $table->appendChild($tbody);
+        $participants->appendChild($table);
+        $treaty->appendChild($participants);
+        $doc->appendChild($root);
+
+        $this->xml_recursive($doc, $rows, $data);
+
+        return $doc->saveXML();
+    }
+
+    private function xml_recursive(&$doc, &$parent, $data) {
+        if (is_object($data)) {
+            $data = get_object_vars($data);
+        }
+
+        if (is_array($data)) {
+            $assoc = FALSE || empty($data);
+            foreach ($data as $key => $value) {
+                if (is_numeric($key)) {
+                    $key = 'Row';
+                }
+                else {
+                    $assoc = TRUE;
+                    $key = preg_replace('/[^A-Za-z0-9_]/', '_', $key);
+                    $key = preg_replace('/^([0-9]+)/', '_$1', $key);
+                }
+                if($key != 'nid') {
+                    if($key == 'Official_name' || $key == 'Date_of_joining' || $key == 'Entry_into_force' || $key == 'node_title' || $key == 'Type') {
+                        $key = 'Entry';
+                    }
+                    // services adds strange fields.
+                    $clean_keys = array('field_collection_item_field_data_field_country_instrument_st');
+                    if (!in_array($key, $clean_keys)) {
+                        $element = $doc->createElement($key);
+                        $parent->appendChild($element);
+                        $this->xml_recursive($doc, $element, $value);
+                    }
+
+                }
+
+            }
+
+            if (!$assoc) {
+                $parent->setAttribute('is_array', 'true');
+            }
+        }
+        elseif ($data !== NULL) {
+            $parent->appendChild($doc->createTextNode(strip_tags($data)));
+        }
+    }
+}
