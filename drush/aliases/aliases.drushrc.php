@@ -2,12 +2,12 @@
 /**
  * Implement this aliases in your aliases.local.php
  */
-$aliases['cms.production'] = array(
-  'uri' => 'please-fill-in-local-aliases',
+$aliases['staging'] = array(
+  'uri' => 'http://cms.edw.ro',
   'db-allows-remote' => TRUE,
-  'remote-host' => 'please-fill-in-local-aliases',
-  'remote-user' => 'please-fill-in-local-aliases',
-  'root' => 'please-fill-in-local-aliases',
+  'remote-host' => 'php-devel1.edw.lan',
+  'remote-user' => 'php',
+  'root' => '/var/www/html/cms/cms.edw.ro/docroot',
   'path-aliases' => array(
     '%files' => 'sites/default/files',
   ),
@@ -20,12 +20,12 @@ $aliases['cms.production'] = array(
   ),
 );
 
-$aliases['cms.staging'] = array(
-  'uri' => 'please-fill-in-local-aliases',
+$aliases['production'] = array(
+  'uri' => 'http://www.cms.int',
   'db-allows-remote' => TRUE,
-  'remote-host' => 'please-fill-in-local-aliases',
-  'remote-user' => 'please-fill-in-local-aliases',
-  'root' => 'please-fill-in-local-aliases',
+  'remote-host' => 'www.cms.int',
+  'remote-user' => 'please-fill-in-remote-user',
+  'root' => '/path/to/drupal/root',
   'path-aliases' => array(
     '%files' => 'sites/default/files',
   ),
@@ -36,11 +36,6 @@ $aliases['cms.staging'] = array(
       'target-dump' => '/tmp/cms-target-dump-myuser.sql.gz',
     ),
   ),
-);
-
-$aliases['cms.local'] = array(
-  'uri' => 'cms.localhost',
-  'root' => '/home/user/Work/cms/docroot',
 );
 
 // Add your local aliases.

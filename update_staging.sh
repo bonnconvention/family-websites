@@ -9,7 +9,7 @@ git checkout robots.txt
 git pull
 
 # Sync from edw staging
-drush downsync @cms.production @cms.local -y
+drush downsync @production @self -y
 
 drush cc all
 
