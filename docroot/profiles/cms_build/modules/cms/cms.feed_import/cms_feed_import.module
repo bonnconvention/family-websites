@@ -316,7 +316,7 @@ function cms_feed_import_execute($url, $bundle) {
           $html = preg_replace('/href="\/(.*?)"/', 'href="'. $base_path .'/\1"', $html);
           $node->body[$lang][0]['value'] = $html;
         }
-
+        $node->path['pathauto'] = TRUE;
         node_save($node);
         watchdog('cms_feed_import', $node->title . ' saved!');
         $saves ++;
