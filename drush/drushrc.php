@@ -338,7 +338,8 @@ $command_specific['archive-dump'] = array(
     . ' --exclude=great-bustard --exclude=huemul --exclude=monk-seal'
     . ' --exclude=pacific-cetaceans --exclude=raptors --exclude=ruddy-headed-goose'
     . ' --exclude=saiga --exclude=sharks --exclude=siberian-crane --exclude=slender-billed-curlew'
-    . ' --exclude=west-african-elephants --exclude=sites/default/files'
+    . ' --exclude=west-african-elephants'
+    . ' --exclude=sites/default/files'
 );
 
 // Add specific settings for development or demo.
