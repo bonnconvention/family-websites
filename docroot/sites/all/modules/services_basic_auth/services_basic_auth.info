@@ -6,9 +6,9 @@ package = Services - authentication
 
 dependencies[] = services
 
-; Information added by drupal.org packaging script on 2012-12-13
-version = "7.x-1.1"
+; Information added by Drupal.org packaging script on 2015-03-03
+version = "7.x-1.3"
 core = "7.x"
 project = "services_basic_auth"
-datestamp = "1355402932"
+datestamp = "1425373989"
 
