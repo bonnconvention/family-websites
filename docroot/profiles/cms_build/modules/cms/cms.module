@@ -111,8 +111,9 @@ function cms_menu() {
  */
 function cms_menu_alter(&$items) {
   // Redirect Newsletter add link to content selection
-  $items['node/add/simplenews']['page callback'] = 'drupal_goto';
-  $items['node/add/simplenews']['page arguments'] = array('admin/content/newsletter-creation');
+    // This brakes the newsletter creation.
+//  $items['node/add/simplenews']['page callback'] = 'drupal_goto';
+//  $items['node/add/simplenews']['page arguments'] = array('admin/content/newsletter-creation');
 }
 
 
