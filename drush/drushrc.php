@@ -300,7 +300,6 @@ $options['init-modules'] = array(
   'search_api_et_solr',
   'search_api_attachments_field_collections',
 
-  'module_filter',
   'cms_search',
 
   'imce_wysiwyg',
