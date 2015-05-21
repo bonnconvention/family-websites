@@ -4239,6 +4239,8 @@ return "";';
 
   /* Display: Awards */
   $handler = $view->new_display('page', 'Awards', 'page');
+  $handler->display->display_options['defaults']['title'] = FALSE;
+  $handler->display->display_options['title'] = 'AEWA Waterbird Conservation Award';
   $handler->display->display_options['path'] = 'awards';
   $handler->display->display_options['menu']['title'] = 'Awards';
   $handler->display->display_options['menu']['weight'] = '0';
@@ -4261,6 +4263,7 @@ return "";';
     t('‹ previous'),
     t('next ›'),
     t('last »'),
+    t('AEWA Waterbird Conservation Award'),
   );
   $export['front_end_awards'] = $view;
 
@@ -7363,38 +7366,19 @@ return "";';
   $handler->display->display_options['defaults']['title'] = FALSE;
   $handler->display->display_options['title'] = 'Notifications';
   $handler->display->display_options['defaults']['style_plugin'] = FALSE;
-  $handler->display->display_options['style_plugin'] = 'datatables';
+  $handler->display->display_options['style_plugin'] = 'table';
   $handler->display->display_options['style_options']['columns'] = array(
-    'title' => 'title',
+    'title_field' => 'title_field',
   );
   $handler->display->display_options['style_options']['default'] = '-1';
   $handler->display->display_options['style_options']['info'] = array(
-    'title' => array(
-      'sortable' => 1,
+    'title_field' => array(
+      'sortable' => 0,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
     ),
-  );
-  $handler->display->display_options['style_options']['elements'] = array(
-    'search_box' => 1,
-    'table_info' => 1,
-    'save_state' => 0,
-    'enable_tabletools' => 0,
-  );
-  $handler->display->display_options['style_options']['layout'] = array(
-    'autowidth' => 0,
-    'themeroller' => 0,
-    'sdom' => '',
-  );
-  $handler->display->display_options['style_options']['pages'] = array(
-    'pagination_style' => '0',
-    'length_change' => 1,
-    'display_length' => '10',
-    'processing' => 1,
-    'server_side' => 1,
-    'items_per_page_options' => '10, 25, 50, All',
   );
   $handler->display->display_options['defaults']['style_options'] = FALSE;
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
@@ -7431,6 +7415,11 @@ return "";';
   $handler->display->display_options['filters']['field_news_type_tid']['reduce_duplicates'] = TRUE;
   $handler->display->display_options['filters']['field_news_type_tid']['type'] = 'select';
   $handler->display->display_options['filters']['field_news_type_tid']['vocabulary'] = 'news_type';
+  /* Filter criterion: Field: CMS Instrument (field_instrument) */
+  $handler->display->display_options['filters']['field_instrument_target_id']['id'] = 'field_instrument_target_id';
+  $handler->display->display_options['filters']['field_instrument_target_id']['table'] = 'field_data_field_instrument';
+  $handler->display->display_options['filters']['field_instrument_target_id']['field'] = 'field_instrument_target_id';
+  $handler->display->display_options['filters']['field_instrument_target_id']['value']['value'] = '2';
   $handler->display->display_options['path'] = 'news/notifications';
   $handler->display->display_options['menu']['title'] = 'Notifications';
   $handler->display->display_options['menu']['weight'] = '0';
@@ -12374,6 +12363,14 @@ return "";';
     'ASCOBANS' => 'ASCOBANS',
   );
   $handler->display->display_options['filters']['field_featured_in_instances_value']['reduce_duplicates'] = TRUE;
+  /* Filter criterion: Content: Imported (field_imported) */
+  $handler->display->display_options['filters']['field_imported_value']['id'] = 'field_imported_value';
+  $handler->display->display_options['filters']['field_imported_value']['table'] = 'field_data_field_imported';
+  $handler->display->display_options['filters']['field_imported_value']['field'] = 'field_imported_value';
+  $handler->display->display_options['filters']['field_imported_value']['operator'] = 'not';
+  $handler->display->display_options['filters']['field_imported_value']['value'] = array(
+    1 => '1',
+  );
   $handler->display->display_options['path'] = 'ascobans-news';
 
   /* Display: News Eurobats */
@@ -12409,6 +12406,14 @@ return "";';
     'EUROBATS' => 'EUROBATS',
   );
   $handler->display->display_options['filters']['field_featured_in_instances_value']['reduce_duplicates'] = TRUE;
+  /* Filter criterion: Content: Imported (field_imported) */
+  $handler->display->display_options['filters']['field_imported_value']['id'] = 'field_imported_value';
+  $handler->display->display_options['filters']['field_imported_value']['table'] = 'field_data_field_imported';
+  $handler->display->display_options['filters']['field_imported_value']['field'] = 'field_imported_value';
+  $handler->display->display_options['filters']['field_imported_value']['operator'] = 'not';
+  $handler->display->display_options['filters']['field_imported_value']['value'] = array(
+    1 => '1',
+  );
   $handler->display->display_options['path'] = 'eurobats-news';
   $translatables['news_feeds_for_other_instances'] = array(
     t('Master'),
