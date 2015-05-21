@@ -1930,6 +1930,133 @@ return "";';
   $handler->display->display_options['filters']['field_news_expiration_date_value']['granularity'] = 'hour';
   $handler->display->display_options['filters']['field_news_expiration_date_value']['default_date'] = 'now';
   $handler->display->display_options['path'] = 'latest-news';
+
+  /* Display: JSON News */
+  $handler = $view->new_display('services', 'JSON News', 'cop_11_news');
+  $handler->display->display_options['defaults']['title'] = FALSE;
+  $handler->display->display_options['title'] = 'Latest News';
+  $handler->display->display_options['display_description'] = 'Latest news from AEWA';
+  $handler->display->display_options['defaults']['pager'] = FALSE;
+  $handler->display->display_options['pager']['type'] = 'none';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Content: Nid */
+  $handler->display->display_options['fields']['nid']['id'] = 'nid';
+  $handler->display->display_options['fields']['nid']['table'] = 'node';
+  $handler->display->display_options['fields']['nid']['field'] = 'nid';
+  $handler->display->display_options['fields']['nid']['label'] = 'nid';
+  /* Field: Content: Updated date */
+  $handler->display->display_options['fields']['changed']['id'] = 'changed';
+  $handler->display->display_options['fields']['changed']['table'] = 'node';
+  $handler->display->display_options['fields']['changed']['field'] = 'changed';
+  $handler->display->display_options['fields']['changed']['label'] = 'updated';
+  $handler->display->display_options['fields']['changed']['date_format'] = 'convention_date';
+  /* Field: Content: Title */
+  $handler->display->display_options['fields']['title']['id'] = 'title';
+  $handler->display->display_options['fields']['title']['table'] = 'node';
+  $handler->display->display_options['fields']['title']['field'] = 'title';
+  $handler->display->display_options['fields']['title']['label'] = 'title';
+  /* Field: Content: Description */
+  $handler->display->display_options['fields']['body_1']['id'] = 'body_1';
+  $handler->display->display_options['fields']['body_1']['table'] = 'field_data_body';
+  $handler->display->display_options['fields']['body_1']['field'] = 'body';
+  $handler->display->display_options['fields']['body_1']['label'] = 'summary';
+  $handler->display->display_options['fields']['body_1']['type'] = 'text_summary_or_trimmed';
+  $handler->display->display_options['fields']['body_1']['settings'] = array(
+    'trim_length' => '400',
+  );
+  /* Field: Field: CMS Instrument */
+  $handler->display->display_options['fields']['field_instrument']['id'] = 'field_instrument';
+  $handler->display->display_options['fields']['field_instrument']['table'] = 'field_data_field_instrument';
+  $handler->display->display_options['fields']['field_instrument']['field'] = 'field_instrument';
+  $handler->display->display_options['fields']['field_instrument']['label'] = 'instrument';
+  $handler->display->display_options['fields']['field_instrument']['settings'] = array(
+    'link' => 0,
+  );
+  $handler->display->display_options['fields']['field_instrument']['delta_offset'] = '0';
+  /* Field: Content: Post date */
+  $handler->display->display_options['fields']['created']['id'] = 'created';
+  $handler->display->display_options['fields']['created']['table'] = 'node';
+  $handler->display->display_options['fields']['created']['field'] = 'created';
+  $handler->display->display_options['fields']['created']['label'] = 'created';
+  $handler->display->display_options['fields']['created']['date_format'] = 'custom';
+  $handler->display->display_options['fields']['created']['custom_date_format'] = 'U';
+  /* Field: Content: Type */
+  $handler->display->display_options['fields']['field_news_type']['id'] = 'field_news_type';
+  $handler->display->display_options['fields']['field_news_type']['table'] = 'field_data_field_news_type';
+  $handler->display->display_options['fields']['field_news_type']['field'] = 'field_news_type';
+  $handler->display->display_options['fields']['field_news_type']['label'] = 'type';
+  $handler->display->display_options['fields']['field_news_type']['type'] = 'taxonomy_term_reference_plain';
+  /* Field: Content: Language */
+  $handler->display->display_options['fields']['language']['id'] = 'language';
+  $handler->display->display_options['fields']['language']['table'] = 'node';
+  $handler->display->display_options['fields']['language']['field'] = 'language';
+  $handler->display->display_options['fields']['language']['label'] = 'language';
+  /* Field: Content: Featured image */
+  $handler->display->display_options['fields']['field_featured_image']['id'] = 'field_featured_image';
+  $handler->display->display_options['fields']['field_featured_image']['table'] = 'field_data_field_featured_image';
+  $handler->display->display_options['fields']['field_featured_image']['field'] = 'field_featured_image';
+  $handler->display->display_options['fields']['field_featured_image']['label'] = 'featured_image';
+  $handler->display->display_options['fields']['field_featured_image']['click_sort_column'] = 'fid';
+  $handler->display->display_options['fields']['field_featured_image']['type'] = 'services';
+  $handler->display->display_options['fields']['field_featured_image']['settings'] = array(
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php']['id'] = 'php';
+  $handler->display->display_options['fields']['php']['table'] = 'views';
+  $handler->display->display_options['fields']['php']['field'] = 'php';
+  $handler->display->display_options['fields']['php']['label'] = 'url';
+  $handler->display->display_options['fields']['php']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php']['php_value'] = 'return url(\'node/\' . $row->nid);
+';
+  $handler->display->display_options['fields']['php']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php']['php_click_sortable'] = '';
+  $handler->display->display_options['defaults']['sorts'] = FALSE;
+  /* Sort criterion: Content: Post date */
+  $handler->display->display_options['sorts']['created']['id'] = 'created';
+  $handler->display->display_options['sorts']['created']['table'] = 'node';
+  $handler->display->display_options['sorts']['created']['field'] = 'created';
+  $handler->display->display_options['sorts']['created']['order'] = 'DESC';
+  $handler->display->display_options['defaults']['filter_groups'] = FALSE;
+  $handler->display->display_options['defaults']['filters'] = FALSE;
+  /* Filter criterion: Content: Published */
+  $handler->display->display_options['filters']['status']['id'] = 'status';
+  $handler->display->display_options['filters']['status']['table'] = 'node';
+  $handler->display->display_options['filters']['status']['field'] = 'status';
+  $handler->display->display_options['filters']['status']['value'] = 1;
+  $handler->display->display_options['filters']['status']['group'] = 1;
+  $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+  /* Filter criterion: Content: Type */
+  $handler->display->display_options['filters']['type']['id'] = 'type';
+  $handler->display->display_options['filters']['type']['table'] = 'node';
+  $handler->display->display_options['filters']['type']['field'] = 'type';
+  $handler->display->display_options['filters']['type']['value'] = array(
+    'news' => 'news',
+  );
+  /* Filter criterion: Content: Expiration date (field_news_expiration_date) */
+  $handler->display->display_options['filters']['field_news_expiration_date_value']['id'] = 'field_news_expiration_date_value';
+  $handler->display->display_options['filters']['field_news_expiration_date_value']['table'] = 'field_data_field_news_expiration_date';
+  $handler->display->display_options['filters']['field_news_expiration_date_value']['field'] = 'field_news_expiration_date_value';
+  $handler->display->display_options['filters']['field_news_expiration_date_value']['operator'] = '>';
+  $handler->display->display_options['filters']['field_news_expiration_date_value']['granularity'] = 'hour';
+  $handler->display->display_options['filters']['field_news_expiration_date_value']['default_date'] = 'now';
+  /* Filter criterion: Content: Post date */
+  $handler->display->display_options['filters']['created']['id'] = 'created';
+  $handler->display->display_options['filters']['created']['table'] = 'node';
+  $handler->display->display_options['filters']['created']['field'] = 'created';
+  $handler->display->display_options['filters']['created']['operator'] = '>';
+  $handler->display->display_options['filters']['created']['value']['value'] = '-2 months';
+  $handler->display->display_options['filters']['created']['value']['type'] = 'offset';
+  /* Filter criterion: Content: Expiration date (field_news_expiration_date) */
+  $handler->display->display_options['filters']['field_news_expiration_date_value_1']['id'] = 'field_news_expiration_date_value_1';
+  $handler->display->display_options['filters']['field_news_expiration_date_value_1']['table'] = 'field_data_field_news_expiration_date';
+  $handler->display->display_options['filters']['field_news_expiration_date_value_1']['field'] = 'field_news_expiration_date_value';
+  $handler->display->display_options['filters']['field_news_expiration_date_value_1']['operator'] = '>=';
+  $handler->display->display_options['filters']['field_news_expiration_date_value_1']['form_type'] = 'date_text';
+  $handler->display->display_options['filters']['field_news_expiration_date_value_1']['default_date'] = 'now';
+  $handler->display->display_options['path'] = 'news-aewa';
   $translatables['api_species'] = array(
     t('Master'),
     t('API Species'),
@@ -2033,6 +2160,10 @@ return "";';
     t('All news'),
     t('Latest News'),
     t('Latest 2 news'),
+    t('JSON News'),
+    t('Latest news from AEWA'),
+    t('language'),
+    t('featured_image'),
   );
   $export['api_species'] = $view;
 
