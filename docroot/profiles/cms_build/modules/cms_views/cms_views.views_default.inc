@@ -2135,7 +2135,7 @@ return "";';
   $handler->display->display_options['filters']['created']['field'] = 'created';
   $handler->display->display_options['filters']['created']['operator'] = '>';
   $handler->display->display_options['filters']['created']['value']['value'] = '2014-10-01 00:00:00';
-  $handler->display->display_options['path'] = 'news-cop11';
+  $handler->display->display_options['path'] = 'news-cms';
   $translatables['api_species'] = array(
     t('Master'),
     t('API Species'),
@@ -7856,24 +7856,24 @@ return "";';
   $handler->display->display_options['pager']['options']['offset'] = '0';
   $handler->display->display_options['pager']['options']['id'] = '0';
   $handler->display->display_options['pager']['options']['quantity'] = '9';
-  $handler->display->display_options['style_plugin'] = 'datatables';
+  $handler->display->display_options['style_plugin'] = 'table';
   $handler->display->display_options['style_options']['columns'] = array(
     'title_field' => 'title_field',
-    'field_meeting_start' => 'field_meeting_start',
+    'event_calendar_date' => 'event_calendar_date',
     'field_meeting_status' => 'field_meeting_status',
     'field_country' => 'field_country',
     'field_instrument' => 'field_instrument',
   );
-  $handler->display->display_options['style_options']['default'] = 'field_meeting_start';
+  $handler->display->display_options['style_options']['default'] = 'event_calendar_date';
   $handler->display->display_options['style_options']['info'] = array(
     'title_field' => array(
-      'sortable' => 0,
+      'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
     ),
-    'field_meeting_start' => array(
+    'event_calendar_date' => array(
       'sortable' => 1,
       'default_sort_order' => 'desc',
       'align' => '',
@@ -7898,25 +7898,6 @@ return "";';
       'empty_column' => 0,
     ),
   );
-  $handler->display->display_options['style_options']['elements'] = array(
-    'search_box' => 1,
-    'table_info' => 1,
-    'save_state' => 0,
-    'enable_tabletools' => 0,
-  );
-  $handler->display->display_options['style_options']['layout'] = array(
-    'autowidth' => 0,
-    'themeroller' => 0,
-    'sdom' => '',
-  );
-  $handler->display->display_options['style_options']['pages'] = array(
-    'pagination_style' => '0',
-    'length_change' => 1,
-    'display_length' => '10',
-    'processing' => 1,
-    'server_side' => 1,
-    'items_per_page_options' => '10, 25, 50, 100',
-  );
   /* Field: Content: Title */
   $handler->display->display_options['fields']['title_field']['id'] = 'title_field';
   $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
@@ -7928,7 +7909,7 @@ return "";';
   $handler->display->display_options['fields']['event_calendar_date']['field'] = 'event_calendar_date';
   $handler->display->display_options['fields']['event_calendar_date']['label'] = 'Start date';
   $handler->display->display_options['fields']['event_calendar_date']['settings'] = array(
-    'format_type' => 'long_no_time',
+    'format_type' => 'convention_date',
     'fromto' => 'value',
     'multiple_number' => '',
     'multiple_from' => '',
@@ -7953,11 +7934,6 @@ return "";';
   $handler->display->display_options['fields']['field_instrument']['settings'] = array(
     'link' => 0,
   );
-  /* Sort criterion: Content: Dates -  start date (event_calendar_date) */
-  $handler->display->display_options['sorts']['event_calendar_date_value']['id'] = 'event_calendar_date_value';
-  $handler->display->display_options['sorts']['event_calendar_date_value']['table'] = 'field_data_event_calendar_date';
-  $handler->display->display_options['sorts']['event_calendar_date_value']['field'] = 'event_calendar_date_value';
-  $handler->display->display_options['sorts']['event_calendar_date_value']['order'] = 'DESC';
   /* Filter criterion: Content: Published */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'node';
@@ -8044,114 +8020,6 @@ return "";';
   );
   $handler->display->display_options['access']['domain_strict'] = 0;
   $handler->display->display_options['access']['domain_member'] = 0;
-  $handler->display->display_options['defaults']['style_plugin'] = FALSE;
-  $handler->display->display_options['style_plugin'] = 'datatables';
-  $handler->display->display_options['style_options']['columns'] = array(
-    'title_field' => 'title_field',
-    'event_calendar_date' => 'event_calendar_date',
-    'field_meeting_status' => 'field_meeting_status',
-    'field_country' => 'field_country',
-    'field_instrument' => 'field_instrument',
-  );
-  $handler->display->display_options['style_options']['default'] = '-1';
-  $handler->display->display_options['style_options']['info'] = array(
-    'title_field' => array(
-      'sortable' => 0,
-      'default_sort_order' => 'asc',
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    ),
-    'event_calendar_date' => array(
-      'sortable' => 0,
-      'default_sort_order' => 'desc',
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    ),
-    'field_meeting_status' => array(
-      'sortable' => 1,
-      'default_sort_order' => 'asc',
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    ),
-    'field_country' => array(
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    ),
-    'field_instrument' => array(
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    ),
-  );
-  $handler->display->display_options['style_options']['elements'] = array(
-    'search_box' => 1,
-    'table_info' => 1,
-    'save_state' => 0,
-    'enable_tabletools' => 0,
-  );
-  $handler->display->display_options['style_options']['layout'] = array(
-    'autowidth' => 0,
-    'themeroller' => 0,
-    'sdom' => '',
-  );
-  $handler->display->display_options['style_options']['pages'] = array(
-    'pagination_style' => '0',
-    'length_change' => 1,
-    'display_length' => '10',
-    'processing' => 1,
-    'server_side' => 1,
-    'items_per_page_options' => '10, 25, 50, 100',
-  );
-  $handler->display->display_options['defaults']['style_options'] = FALSE;
-  $handler->display->display_options['defaults']['row_plugin'] = FALSE;
-  $handler->display->display_options['defaults']['row_options'] = FALSE;
-  $handler->display->display_options['defaults']['fields'] = FALSE;
-  /* Field: Content: Title */
-  $handler->display->display_options['fields']['title_field']['id'] = 'title_field';
-  $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
-  $handler->display->display_options['fields']['title_field']['field'] = 'title_field';
-  $handler->display->display_options['fields']['title_field']['link_to_entity'] = 1;
-  /* Field: Content: Dates */
-  $handler->display->display_options['fields']['event_calendar_date']['id'] = 'event_calendar_date';
-  $handler->display->display_options['fields']['event_calendar_date']['table'] = 'field_data_event_calendar_date';
-  $handler->display->display_options['fields']['event_calendar_date']['field'] = 'event_calendar_date';
-  $handler->display->display_options['fields']['event_calendar_date']['label'] = 'Start date';
-  $handler->display->display_options['fields']['event_calendar_date']['settings'] = array(
-    'format_type' => 'long_no_time',
-    'fromto' => 'value',
-    'multiple_number' => '',
-    'multiple_from' => '',
-    'multiple_to' => '',
-  );
-  /* Field: Content: Status */
-  $handler->display->display_options['fields']['field_meeting_status']['id'] = 'field_meeting_status';
-  $handler->display->display_options['fields']['field_meeting_status']['table'] = 'field_data_field_meeting_status';
-  $handler->display->display_options['fields']['field_meeting_status']['field'] = 'field_meeting_status';
-  $handler->display->display_options['fields']['field_meeting_status']['type'] = 'taxonomy_term_reference_plain';
-  /* Field: Field: Country */
-  $handler->display->display_options['fields']['field_country']['id'] = 'field_country';
-  $handler->display->display_options['fields']['field_country']['table'] = 'field_data_field_country';
-  $handler->display->display_options['fields']['field_country']['field'] = 'field_country';
-  $handler->display->display_options['fields']['field_country']['settings'] = array(
-    'link' => 0,
-  );
-  /* Field: Field: CMS Instrument */
-  $handler->display->display_options['fields']['field_instrument']['id'] = 'field_instrument';
-  $handler->display->display_options['fields']['field_instrument']['table'] = 'field_data_field_instrument';
-  $handler->display->display_options['fields']['field_instrument']['field'] = 'field_instrument';
-  $handler->display->display_options['fields']['field_instrument']['settings'] = array(
-    'link' => 0,
-  );
-  $handler->display->display_options['defaults']['sorts'] = FALSE;
-  /* Sort criterion: Content: Dates -  start date (event_calendar_date) */
-  $handler->display->display_options['sorts']['event_calendar_date_value']['id'] = 'event_calendar_date_value';
-  $handler->display->display_options['sorts']['event_calendar_date_value']['table'] = 'field_data_event_calendar_date';
-  $handler->display->display_options['sorts']['event_calendar_date_value']['field'] = 'event_calendar_date_value';
-  $handler->display->display_options['sorts']['event_calendar_date_value']['order'] = 'DESC';
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Content: Published */
@@ -8213,49 +8081,6 @@ return "";';
   $handler = $view->new_display('page', 'Standing Committee', 'standing_committee');
   $handler->display->display_options['defaults']['title'] = FALSE;
   $handler->display->display_options['title'] = 'Standing Committee';
-  $handler->display->display_options['defaults']['fields'] = FALSE;
-  /* Field: Content: Title */
-  $handler->display->display_options['fields']['title_field']['id'] = 'title_field';
-  $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
-  $handler->display->display_options['fields']['title_field']['field'] = 'title_field';
-  $handler->display->display_options['fields']['title_field']['link_to_entity'] = 1;
-  /* Field: Content: Dates */
-  $handler->display->display_options['fields']['event_calendar_date']['id'] = 'event_calendar_date';
-  $handler->display->display_options['fields']['event_calendar_date']['table'] = 'field_data_event_calendar_date';
-  $handler->display->display_options['fields']['event_calendar_date']['field'] = 'event_calendar_date';
-  $handler->display->display_options['fields']['event_calendar_date']['label'] = 'Start date';
-  $handler->display->display_options['fields']['event_calendar_date']['settings'] = array(
-    'format_type' => 'long_no_time',
-    'fromto' => 'value',
-    'multiple_number' => '',
-    'multiple_from' => '',
-    'multiple_to' => '',
-  );
-  /* Field: Content: Status */
-  $handler->display->display_options['fields']['field_meeting_status']['id'] = 'field_meeting_status';
-  $handler->display->display_options['fields']['field_meeting_status']['table'] = 'field_data_field_meeting_status';
-  $handler->display->display_options['fields']['field_meeting_status']['field'] = 'field_meeting_status';
-  $handler->display->display_options['fields']['field_meeting_status']['type'] = 'taxonomy_term_reference_plain';
-  /* Field: Field: Country */
-  $handler->display->display_options['fields']['field_country']['id'] = 'field_country';
-  $handler->display->display_options['fields']['field_country']['table'] = 'field_data_field_country';
-  $handler->display->display_options['fields']['field_country']['field'] = 'field_country';
-  $handler->display->display_options['fields']['field_country']['settings'] = array(
-    'link' => 0,
-  );
-  /* Field: Field: CMS Instrument */
-  $handler->display->display_options['fields']['field_instrument']['id'] = 'field_instrument';
-  $handler->display->display_options['fields']['field_instrument']['table'] = 'field_data_field_instrument';
-  $handler->display->display_options['fields']['field_instrument']['field'] = 'field_instrument';
-  $handler->display->display_options['fields']['field_instrument']['settings'] = array(
-    'link' => 0,
-  );
-  $handler->display->display_options['defaults']['sorts'] = FALSE;
-  /* Sort criterion: Content: Dates -  start date (event_calendar_date) */
-  $handler->display->display_options['sorts']['event_calendar_date_value']['id'] = 'event_calendar_date_value';
-  $handler->display->display_options['sorts']['event_calendar_date_value']['table'] = 'field_data_event_calendar_date';
-  $handler->display->display_options['sorts']['event_calendar_date_value']['field'] = 'event_calendar_date_value';
-  $handler->display->display_options['sorts']['event_calendar_date_value']['order'] = 'DESC';
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Content: Published */
@@ -8324,43 +8149,6 @@ return "";';
   );
   $handler->display->display_options['access']['domain_strict'] = 0;
   $handler->display->display_options['access']['domain_member'] = 0;
-  $handler->display->display_options['defaults']['fields'] = FALSE;
-  /* Field: Content: Title */
-  $handler->display->display_options['fields']['title_field']['id'] = 'title_field';
-  $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
-  $handler->display->display_options['fields']['title_field']['field'] = 'title_field';
-  $handler->display->display_options['fields']['title_field']['link_to_entity'] = 1;
-  /* Field: Content: Dates */
-  $handler->display->display_options['fields']['event_calendar_date']['id'] = 'event_calendar_date';
-  $handler->display->display_options['fields']['event_calendar_date']['table'] = 'field_data_event_calendar_date';
-  $handler->display->display_options['fields']['event_calendar_date']['field'] = 'event_calendar_date';
-  $handler->display->display_options['fields']['event_calendar_date']['label'] = 'Start date';
-  $handler->display->display_options['fields']['event_calendar_date']['settings'] = array(
-    'format_type' => 'long_no_time',
-    'fromto' => 'value',
-    'multiple_number' => '',
-    'multiple_from' => '',
-    'multiple_to' => '',
-  );
-  /* Field: Content: Status */
-  $handler->display->display_options['fields']['field_meeting_status']['id'] = 'field_meeting_status';
-  $handler->display->display_options['fields']['field_meeting_status']['table'] = 'field_data_field_meeting_status';
-  $handler->display->display_options['fields']['field_meeting_status']['field'] = 'field_meeting_status';
-  $handler->display->display_options['fields']['field_meeting_status']['type'] = 'taxonomy_term_reference_plain';
-  /* Field: Field: Country */
-  $handler->display->display_options['fields']['field_country']['id'] = 'field_country';
-  $handler->display->display_options['fields']['field_country']['table'] = 'field_data_field_country';
-  $handler->display->display_options['fields']['field_country']['field'] = 'field_country';
-  $handler->display->display_options['fields']['field_country']['settings'] = array(
-    'link' => 0,
-  );
-  /* Field: Field: CMS Instrument */
-  $handler->display->display_options['fields']['field_instrument']['id'] = 'field_instrument';
-  $handler->display->display_options['fields']['field_instrument']['table'] = 'field_data_field_instrument';
-  $handler->display->display_options['fields']['field_instrument']['field'] = 'field_instrument';
-  $handler->display->display_options['fields']['field_instrument']['settings'] = array(
-    'link' => 0,
-  );
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Content: Published */
@@ -8422,43 +8210,6 @@ return "";';
   $handler = $view->new_display('page', 'Working Group', 'working_group');
   $handler->display->display_options['defaults']['title'] = FALSE;
   $handler->display->display_options['title'] = 'Working Group';
-  $handler->display->display_options['defaults']['fields'] = FALSE;
-  /* Field: Content: Title */
-  $handler->display->display_options['fields']['title_field']['id'] = 'title_field';
-  $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
-  $handler->display->display_options['fields']['title_field']['field'] = 'title_field';
-  $handler->display->display_options['fields']['title_field']['link_to_entity'] = 1;
-  /* Field: Content: Dates */
-  $handler->display->display_options['fields']['event_calendar_date']['id'] = 'event_calendar_date';
-  $handler->display->display_options['fields']['event_calendar_date']['table'] = 'field_data_event_calendar_date';
-  $handler->display->display_options['fields']['event_calendar_date']['field'] = 'event_calendar_date';
-  $handler->display->display_options['fields']['event_calendar_date']['label'] = 'Start date';
-  $handler->display->display_options['fields']['event_calendar_date']['settings'] = array(
-    'format_type' => 'long_no_time',
-    'fromto' => 'value',
-    'multiple_number' => '',
-    'multiple_from' => '',
-    'multiple_to' => '',
-  );
-  /* Field: Content: Status */
-  $handler->display->display_options['fields']['field_meeting_status']['id'] = 'field_meeting_status';
-  $handler->display->display_options['fields']['field_meeting_status']['table'] = 'field_data_field_meeting_status';
-  $handler->display->display_options['fields']['field_meeting_status']['field'] = 'field_meeting_status';
-  $handler->display->display_options['fields']['field_meeting_status']['type'] = 'taxonomy_term_reference_plain';
-  /* Field: Field: Country */
-  $handler->display->display_options['fields']['field_country']['id'] = 'field_country';
-  $handler->display->display_options['fields']['field_country']['table'] = 'field_data_field_country';
-  $handler->display->display_options['fields']['field_country']['field'] = 'field_country';
-  $handler->display->display_options['fields']['field_country']['settings'] = array(
-    'link' => 0,
-  );
-  /* Field: Field: CMS Instrument */
-  $handler->display->display_options['fields']['field_instrument']['id'] = 'field_instrument';
-  $handler->display->display_options['fields']['field_instrument']['table'] = 'field_data_field_instrument';
-  $handler->display->display_options['fields']['field_instrument']['field'] = 'field_instrument';
-  $handler->display->display_options['fields']['field_instrument']['settings'] = array(
-    'link' => 0,
-  );
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Content: Published */
@@ -8488,43 +8239,6 @@ return "";';
 
   /* Display: Workshops */
   $handler = $view->new_display('page', 'Workshops', 'workshops');
-  $handler->display->display_options['defaults']['fields'] = FALSE;
-  /* Field: Content: Title */
-  $handler->display->display_options['fields']['title_field']['id'] = 'title_field';
-  $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
-  $handler->display->display_options['fields']['title_field']['field'] = 'title_field';
-  $handler->display->display_options['fields']['title_field']['link_to_entity'] = 1;
-  /* Field: Content: Dates */
-  $handler->display->display_options['fields']['event_calendar_date']['id'] = 'event_calendar_date';
-  $handler->display->display_options['fields']['event_calendar_date']['table'] = 'field_data_event_calendar_date';
-  $handler->display->display_options['fields']['event_calendar_date']['field'] = 'event_calendar_date';
-  $handler->display->display_options['fields']['event_calendar_date']['label'] = 'Start date';
-  $handler->display->display_options['fields']['event_calendar_date']['settings'] = array(
-    'format_type' => 'long_no_time',
-    'fromto' => 'value',
-    'multiple_number' => '',
-    'multiple_from' => '',
-    'multiple_to' => '',
-  );
-  /* Field: Content: Status */
-  $handler->display->display_options['fields']['field_meeting_status']['id'] = 'field_meeting_status';
-  $handler->display->display_options['fields']['field_meeting_status']['table'] = 'field_data_field_meeting_status';
-  $handler->display->display_options['fields']['field_meeting_status']['field'] = 'field_meeting_status';
-  $handler->display->display_options['fields']['field_meeting_status']['type'] = 'taxonomy_term_reference_plain';
-  /* Field: Field: Country */
-  $handler->display->display_options['fields']['field_country']['id'] = 'field_country';
-  $handler->display->display_options['fields']['field_country']['table'] = 'field_data_field_country';
-  $handler->display->display_options['fields']['field_country']['field'] = 'field_country';
-  $handler->display->display_options['fields']['field_country']['settings'] = array(
-    'link' => 0,
-  );
-  /* Field: Field: CMS Instrument */
-  $handler->display->display_options['fields']['field_instrument']['id'] = 'field_instrument';
-  $handler->display->display_options['fields']['field_instrument']['table'] = 'field_data_field_instrument';
-  $handler->display->display_options['fields']['field_instrument']['field'] = 'field_instrument';
-  $handler->display->display_options['fields']['field_instrument']['settings'] = array(
-    'link' => 0,
-  );
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Content: Published */
@@ -9672,6 +9386,76 @@ return "";';
   $handler->display->display_options['menu']['name'] = 'e970efe1a1096ffad70ab2f820aa0845';
   $handler->display->display_options['menu']['context'] = 0;
   $handler->display->display_options['menu']['context_only_inline'] = 0;
+
+  /* Display: MoUs Other Meetings - Raptors */
+  $handler = $view->new_display('page', 'MoUs Other Meetings - Raptors', 'raptors_other_meetings');
+  $handler->display->display_options['defaults']['title'] = FALSE;
+  $handler->display->display_options['title'] = 'Other Meetings';
+  $handler->display->display_options['defaults']['access'] = FALSE;
+  $handler->display->display_options['access']['type'] = 'domain';
+  $handler->display->display_options['access']['domains'] = array(
+    1 => 0,
+    2 => '2',
+    3 => 0,
+    4 => 0,
+    5 => 0,
+    6 => 0,
+    7 => 0,
+    8 => 0,
+    9 => 0,
+    10 => 0,
+    11 => 0,
+    12 => 0,
+    13 => 0,
+    14 => 0,
+    15 => 0,
+    16 => 0,
+    17 => 0,
+    18 => 0,
+    19 => 0,
+    20 => 0,
+    21 => 0,
+  );
+  $handler->display->display_options['access']['domain_strict'] = 0;
+  $handler->display->display_options['access']['domain_member'] = 0;
+  $handler->display->display_options['defaults']['arguments'] = FALSE;
+  $handler->display->display_options['defaults']['filter_groups'] = FALSE;
+  $handler->display->display_options['defaults']['filters'] = FALSE;
+  /* Filter criterion: Content: Published */
+  $handler->display->display_options['filters']['status']['id'] = 'status';
+  $handler->display->display_options['filters']['status']['table'] = 'node';
+  $handler->display->display_options['filters']['status']['field'] = 'status';
+  $handler->display->display_options['filters']['status']['value'] = 1;
+  $handler->display->display_options['filters']['status']['group'] = 1;
+  $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+  /* Filter criterion: Content: Type */
+  $handler->display->display_options['filters']['type']['id'] = 'type';
+  $handler->display->display_options['filters']['type']['table'] = 'node';
+  $handler->display->display_options['filters']['type']['field'] = 'type';
+  $handler->display->display_options['filters']['type']['value'] = array(
+    'event_calendar' => 'event_calendar',
+    'meeting' => 'meeting',
+  );
+  /* Filter criterion: Content: Type (field_meeting_type) */
+  $handler->display->display_options['filters']['field_meeting_type_tid']['id'] = 'field_meeting_type_tid';
+  $handler->display->display_options['filters']['field_meeting_type_tid']['table'] = 'field_data_field_meeting_type';
+  $handler->display->display_options['filters']['field_meeting_type_tid']['field'] = 'field_meeting_type_tid';
+  $handler->display->display_options['filters']['field_meeting_type_tid']['operator'] = 'not';
+  $handler->display->display_options['filters']['field_meeting_type_tid']['value'] = array(
+    0 => '208',
+    1 => '211',
+    2 => '212',
+    3 => '1646',
+    4 => '1648',
+  );
+  $handler->display->display_options['filters']['field_meeting_type_tid']['reduce_duplicates'] = TRUE;
+  $handler->display->display_options['filters']['field_meeting_type_tid']['vocabulary'] = 'meeting_type';
+  /* Filter criterion: Field: CMS Instrument (field_instrument) */
+  $handler->display->display_options['filters']['field_instrument_target_id']['id'] = 'field_instrument_target_id';
+  $handler->display->display_options['filters']['field_instrument_target_id']['table'] = 'field_data_field_instrument';
+  $handler->display->display_options['filters']['field_instrument_target_id']['field'] = 'field_instrument_target_id';
+  $handler->display->display_options['filters']['field_instrument_target_id']['value']['value'] = '24';
+  $handler->display->display_options['path'] = 'meetings/other';
   $translatables['front_end_meetings'] = array(
     t('Master'),
     t('Workshops'),
@@ -9727,6 +9511,8 @@ return "";';
     t('Gorillas Meeting of Parties'),
     t('Gorillas Tech Comm'),
     t('Technical Committee'),
+    t('MoUs Other Meetings - Raptors'),
+    t('Other Meetings'),
   );
   $export['front_end_meetings'] = $view;
 
@@ -15725,6 +15511,16 @@ return "";';
   $handler->display->display_options['fields']['created']['label'] = 'created';
   $handler->display->display_options['fields']['created']['date_format'] = 'long';
   $handler->display->display_options['fields']['created']['second_date_format'] = 'cms_date';
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php_17']['id'] = 'php_17';
+  $handler->display->display_options['fields']['php_17']['table'] = 'views';
+  $handler->display->display_options['fields']['php_17']['field'] = 'php';
+  $handler->display->display_options['fields']['php_17']['label'] = 'field_gallery';
+  $handler->display->display_options['fields']['php_17']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php_17']['php_value'] = 'return cms_api_get_field_image($row->nid, \'news\', \'field_gallery\');
+';
+  $handler->display->display_options['fields']['php_17']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php_17']['php_click_sortable'] = '';
   /* Sort criterion: Content: Post date */
   $handler->display->display_options['sorts']['created']['id'] = 'created';
   $handler->display->display_options['sorts']['created']['table'] = 'node';
@@ -15805,6 +15601,14 @@ return "";';
     'ASCOBANS' => 'ASCOBANS',
   );
   $handler->display->display_options['filters']['field_featured_in_instances_value']['reduce_duplicates'] = TRUE;
+  /* Filter criterion: Content: Imported (field_imported) */
+  $handler->display->display_options['filters']['field_imported_value']['id'] = 'field_imported_value';
+  $handler->display->display_options['filters']['field_imported_value']['table'] = 'field_data_field_imported';
+  $handler->display->display_options['filters']['field_imported_value']['field'] = 'field_imported_value';
+  $handler->display->display_options['filters']['field_imported_value']['operator'] = 'not';
+  $handler->display->display_options['filters']['field_imported_value']['value'] = array(
+    1 => '1',
+  );
   $handler->display->display_options['path'] = 'ascobans-news';
 
   /* Display: News Eurobats */
@@ -15840,6 +15644,14 @@ return "";';
     'EUROBATS' => 'EUROBATS',
   );
   $handler->display->display_options['filters']['field_featured_in_instances_value']['reduce_duplicates'] = TRUE;
+  /* Filter criterion: Content: Imported (field_imported) */
+  $handler->display->display_options['filters']['field_imported_value']['id'] = 'field_imported_value';
+  $handler->display->display_options['filters']['field_imported_value']['table'] = 'field_data_field_imported';
+  $handler->display->display_options['filters']['field_imported_value']['field'] = 'field_imported_value';
+  $handler->display->display_options['filters']['field_imported_value']['operator'] = 'not';
+  $handler->display->display_options['filters']['field_imported_value']['value'] = array(
+    1 => '1',
+  );
   $handler->display->display_options['path'] = 'eurobats-news';
   $translatables['news_feeds_for_other_instances'] = array(
     t('Master'),
@@ -15880,6 +15692,7 @@ return "";';
     t('field_in_slideshow'),
     t('field_featured_in_instances'),
     t('created'),
+    t('field_gallery'),
     t('News Aewa'),
     t('News Ascobans'),
     t('News Eurobats'),
@@ -16017,7 +15830,6 @@ return "";';
   $handler->display->display_options['arguments']['field_instrument_target_id']['id'] = 'field_instrument_target_id';
   $handler->display->display_options['arguments']['field_instrument_target_id']['table'] = 'field_data_field_instrument';
   $handler->display->display_options['arguments']['field_instrument_target_id']['field'] = 'field_instrument_target_id';
-  $handler->display->display_options['arguments']['field_instrument_target_id']['default_action'] = 'default';
   $handler->display->display_options['arguments']['field_instrument_target_id']['default_argument_type'] = 'node';
   $handler->display->display_options['arguments']['field_instrument_target_id']['summary']['number_of_records'] = '0';
   $handler->display->display_options['arguments']['field_instrument_target_id']['summary']['format'] = 'default_summary';
