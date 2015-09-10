@@ -669,6 +669,10 @@ class CMSBase {
             'alias' => 'west-african-elephants',
             'instrument' => 16,
         ),
+        '22' => array(
+            'alias' => 'iosea-turtles',
+            'instrument' => 13,
+        ),
     );
     /**
      * Create a new Drupal node node instance
