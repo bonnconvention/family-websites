@@ -326,7 +326,7 @@ $command_specific['sql-sync'] = array(
 $command_specific['core-rsync'] = array(
   'exclude-paths' => 'manage:aquatic-mammals:aquatic-warbler:atlantic-turtles:atlantic-turtles
     :dugong:flamingos:gorilla:grassland-birds:great-bustard:huemul:monk-seal:raptors:ruddy-headed-goose
-    :saiga:sharks:siberian-crane:slender-billed-curlew:west-african-elephants'
+    :saiga:sharks:siberian-crane:slender-billed-curlew:west-african-elephants:iosea-turtles'
 );
 
 
@@ -339,6 +339,7 @@ $command_specific['archive-dump'] = array(
     . ' --exclude=pacific-cetaceans --exclude=raptors --exclude=ruddy-headed-goose'
     . ' --exclude=saiga --exclude=sharks --exclude=siberian-crane --exclude=slender-billed-curlew'
     . ' --exclude=west-african-elephants'
+    . ' --exclude=iosea-turtles'
     . ' --exclude=sites/default/files'
 );
 
