@@ -1,26 +1,6 @@
 <?php
-/**
- * Implement this aliases in your aliases.local.php
- */
-$aliases['staging'] = array(
-  'uri' => 'http://cms.edw.ro',
-  'db-allows-remote' => TRUE,
-  'remote-host' => 'php-devel1.edw.lan',
-  'remote-user' => 'php',
-  'root' => '/var/www/html/cms/cms.edw.ro/docroot',
-  'path-aliases' => array(
-    '%files' => 'sites/default/files',
-  ),
-  'command-specific' => array(
-    'sql-sync' => array(
-      'simulate' => '1',
-      'source-dump' => '/tmp/cms-source-dump-myuser.sql',
-      'target-dump' => '/tmp/cms-target-dump-myuser.sql.gz',
-    ),
-  ),
-);
 
-$aliases['production'] = array(
+$aliases['prod'] = array(
   'uri' => 'http://www.cms.int',
   'db-allows-remote' => TRUE,
   'remote-host' => 'www.cms.int',
@@ -32,8 +12,6 @@ $aliases['production'] = array(
   'command-specific' => array(
     'sql-sync' => array(
       'simulate' => '1',
-      'source-dump' => '/tmp/cms-source-dump-myuser.sql',
-      'target-dump' => '/tmp/cms-target-dump-myuser.sql.gz',
     ),
   ),
 );
