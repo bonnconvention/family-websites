@@ -141,7 +141,7 @@ function drupal_ammap_get_data(ajax_endpoint, val) {
                     drupal_ammap.dataProvider.areas = drupal_ammap_parse_areas(response.ammapData);
                     var legend = drupal_ammap_parse_legend(response.legend);
 
-                    if (legend.length > 0 && !(legend.length == 1 && legend[0].title == '-')) {
+                    if (legend.data.length > 0 && !(legend.data.length == 1 && legend.data[0].title == '-')) {
                         drupal_ammap.addLegend(legend);
                     }
                     drupal_ammap.validateData();
