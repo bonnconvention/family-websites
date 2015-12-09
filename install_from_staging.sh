@@ -41,17 +41,15 @@ drush cc all
 # Build the site - disabled - we have changes on live website
 # echo "Runing custom_build..."
 # drush custom_build -y
-
-drush cc all
+# drush cc all
 
 if [ ! -z "$post_update" ]; then
 echo "Run post update"
-../$post_update
+  ../$post_update
+  drush cc all
 fi
 
-drush cc all
-
 chmod u+w robots.txt
-  echo "User-agent: *" >> robots.txt
+  echo "User-agent: *" > robots.txt
   echo "Disallow: /" >> robots.txt
 chmod u-w robots.txt
