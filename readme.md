@@ -88,6 +88,12 @@ Edit the new file so the patchs are matching your local paths, then restart apac
 *Note: On some platforms like CentOS, due to security constraints, you need to make _apache_ user member of your group, disable or configure SELinux etc.*
 
 
+Add the virtual host in your aliases file (ie. ``/etc/hosts``) like this:
+
+``
+127.0.0.1    cms.localhost
+``
+
 ### Step 4. Synchronize the database & files with the production instance
 
 1. To synchronise the database: ``drush sql-sync @prod @self``
