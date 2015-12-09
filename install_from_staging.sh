@@ -25,12 +25,11 @@ while getopts b:a: opt; do
 done
 
 # Sync from staging
-# Not using full aliases
-# because are built in downsync_sql - preppend @{instance}. to the aliases below.
-drush downsync_sql staging.sync local -y
+drush sql-sync @prod @self -y
 
 # Devify - development settings
 drush devify_solr
+drush devify -y
 
 if [ ! -z "$pre_update" ]; then
 echo "Run pre update"
@@ -39,9 +38,9 @@ fi
 
 drush cc all
 
-# Build the site
-echo "Runing custom_build..."
-drush custom_build -y
+# Build the site - disabled - we have changes on live website
+# echo "Runing custom_build..."
+# drush custom_build -y
 
 drush cc all
 
