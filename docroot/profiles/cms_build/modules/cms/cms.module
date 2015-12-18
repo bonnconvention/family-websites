@@ -673,6 +673,10 @@ class CMSBase {
             'alias' => 'iosea-turtles',
             'instrument' => 13,
         ),
+        '23' => array(
+          'alias' => 'cami',
+          'instrument' => 28,
+        ),
     );
     /**
      * Create a new Drupal node node instance
