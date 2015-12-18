@@ -340,6 +340,7 @@ $command_specific['archive-dump'] = array(
     . ' --exclude=saiga --exclude=sharks --exclude=siberian-crane --exclude=slender-billed-curlew'
     . ' --exclude=west-african-elephants'
     . ' --exclude=iosea-turtles'
+    . ' --exclude=cami'
     . ' --exclude=sites/default/files'
 );
 
