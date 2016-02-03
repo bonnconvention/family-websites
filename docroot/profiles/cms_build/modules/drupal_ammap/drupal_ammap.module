@@ -83,7 +83,7 @@ function drupal_ammap_form($form, &$form_state) {
  *
  * @return string
  */
-function drupal_ammap_render_map($data, $settings = array(), $legend = null, $steps = null) {
+function drupal_ammap_render_map($data, $settings = array(), $legend = array(), $steps = array()) {
 
     if(!isset($settings['drupal_ammap_no_data_text'])) {
         $settings['drupal_ammap_no_data_text'] = variable_get('drupal_ammap_no_data_text', "No data to display");
@@ -97,14 +97,13 @@ function drupal_ammap_render_map($data, $settings = array(), $legend = null, $st
                 ));
     }
 
-    $data_legend = array();
-    drupal_ammap_parse_data($data, $settings, $data_legend);
+    drupal_ammap_parse_data($data, $settings, $legend);
 
     drupal_add_js(array('drupal_ammap' => array('ammapData' => $data )), 'setting');
     drupal_add_js(array('drupal_ammap' => array('settings' => $settings )), 'setting');
-    drupal_add_js(array('drupal_ammap' => array('legend' => $data_legend )), 'setting');
+    drupal_add_js(array('drupal_ammap' => array('legend' => $legend )), 'setting');
 
-    drupal_add_js(array('drupal_ammap' => array('legend' => $data_legend )), 'setting');
+    drupal_add_js(array('drupal_ammap' => array('legend' => $legend )), 'setting');
 
     global $base_url;
     $ajax_url = $base_url;
@@ -148,32 +147,29 @@ function drupal_ammap_parse_data(&$data, $settings, &$data_legend) {
     }
     $default_colors = explode(',', $settings['color_default']);
 
-    $data_legend = array();
-    if (!empty($legend)) {
+    if (!empty($data_legend)) {
         //sort legend by weight and assign colors
-        uasort($legend, 'drupal_ammap_cmp_weight');
-        $data_legend = $legend;
+        uasort($data_legend, 'drupal_ammap_cmp_weight');
         foreach ($data_legend as &$lg) {
             if(empty($lg['color'])) {
                 $lg['color'] = drupal_ammap_get_color($default_colors);
             }
         }
     }
-
     foreach($data as &$area) {
-        //if legend field exists for area
-        if ( isset($area['legend']) && !empty($area['legend']) ) {
-            if (!isset($data_legend[$area['legend']])) {
-                //construct legend array
-                $legend_entry = array (
-                    'name' => $area['legend'],
-                    'color' => drupal_ammap_get_color($default_colors)
-                );
-                $data_legend[$area['legend']] = $legend_entry;
-            }
-            $area['color'] = $data_legend[$area['legend']]['color'];
+        // if legend field exists for area
+        if (!empty($area['legend'])) {
+          // Add area if not already exists.
+          if (!isset($data_legend[$area['legend']])) {
+              $legend_entry = array (
+                  'name' => $area['legend'],
+                  'color' => drupal_ammap_get_color($default_colors)
+              );
+              $data_legend[$area['legend']] = $legend_entry;
+          }
+          $area['color'] = $data_legend[$area['legend']]['color'];
         } else {
-            //if no legend for area, assign it to default
+            // if no legend for area, assign it to default
             if (empty($data_legend['default'])) {
                 $data_legend['default'] = array(
                     'name'  => t('Other'),

@@ -913,6 +913,7 @@ class Country extends CMSBase {
         }
         $years[date('Y')] = date('Y');
         asort($years);
+        uasort($legend, 'drupal_ammap_cmp_weight');
         $return = array();
         $return['data'] = $data;
         $return['legend'] = $legend;
