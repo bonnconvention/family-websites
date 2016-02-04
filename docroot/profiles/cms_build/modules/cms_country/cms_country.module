@@ -881,7 +881,7 @@ class Country extends CMSBase {
         $years = array();
 
         foreach ($view->result as $row) {
-            if (empty($row->field_field_country_status)){
+            if (isset($data[$row->nid]) || empty($row->field_field_country_status)){
                 continue;
             }
 
@@ -900,7 +900,7 @@ class Country extends CMSBase {
             }
             $customData = (!empty($type)) ? $type : '';
             $customData .= (!empty($year)) ? " since $year" : '';
-            $data []= array(
+            $data[$row->nid]= array(
                 'title' => (!empty($row->field_title_field[0]['raw']['value']))
                         ? $row->field_title_field[0]['raw']['value'] : $row->node_title,
                 'iso2'  => strtoupper($row->field_field_country_iso2[0]['raw']['value']),
