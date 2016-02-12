@@ -108,22 +108,22 @@ function cms_meeting_strongarm() {
           'weight' => '0',
         ),
         'path' => array(
-          'weight' => '30',
+          'weight' => '32',
         ),
         'domain' => array(
-          'weight' => '25',
-        ),
-        'domain_path' => array(
-          'weight' => '31',
-        ),
-        'language' => array(
           'weight' => '26',
         ),
+        'domain_path' => array(
+          'weight' => '33',
+        ),
+        'language' => array(
+          'weight' => '27',
+        ),
         'metatags' => array(
-          'weight' => '40',
+          'weight' => '34',
         ),
         'redirect' => array(
-          'weight' => '30',
+          'weight' => '31',
         ),
       ),
       'display' => array(

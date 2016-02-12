@@ -102,16 +102,22 @@ function cms_country_strongarm() {
           'weight' => '0',
         ),
         'domain' => array(
-          'weight' => '0',
+          'weight' => '17',
         ),
         'domain_path' => array(
-          'weight' => '1',
+          'weight' => '18',
         ),
         'path' => array(
-          'weight' => '2',
+          'weight' => '19',
         ),
         'language' => array(
-          'weight' => '3',
+          'weight' => '0',
+        ),
+        'metatags' => array(
+          'weight' => '21',
+        ),
+        'redirect' => array(
+          'weight' => '20',
         ),
       ),
       'display' => array(

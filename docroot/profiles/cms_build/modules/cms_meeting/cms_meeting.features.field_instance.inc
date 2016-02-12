@@ -410,7 +410,7 @@ function cms_meeting_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'entityreference_autocomplete_tags',
-      'weight' => 22,
+      'weight' => 23,
     ),
   );
 
@@ -466,7 +466,7 @@ function cms_meeting_field_default_field_instances() {
         'year_range' => '1970:+3',
       ),
       'type' => 'date_popup',
-      'weight' => 29,
+      'weight' => 30,
     ),
   );
 
@@ -878,7 +878,7 @@ function cms_meeting_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 23,
+      'weight' => 24,
     ),
   );
 
@@ -926,7 +926,7 @@ function cms_meeting_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 24,
+      'weight' => 25,
     ),
   );
 
@@ -974,7 +974,7 @@ function cms_meeting_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 20,
+      'weight' => 21,
     ),
   );
 
@@ -1078,7 +1078,7 @@ function cms_meeting_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 19,
+      'weight' => 20,
     ),
   );
 
@@ -1135,7 +1135,7 @@ function cms_meeting_field_default_field_instances() {
         'year_range' => '1920:+3',
       ),
       'type' => 'date_popup',
-      'weight' => 27,
+      'weight' => 28,
     ),
   );
 
@@ -1185,7 +1185,7 @@ function cms_meeting_field_default_field_instances() {
         'size' => 10,
       ),
       'type' => 'text_textfield',
-      'weight' => 28,
+      'weight' => 29,
     ),
   );
 
@@ -1346,6 +1346,56 @@ function cms_meeting_field_default_field_instances() {
       'module' => 'link',
       'settings' => array(),
       'type' => 'link_field',
+      'weight' => 19,
+    ),
+  );
+
+  // Exported field_instance: 'node-meeting-field_show_map'
+  $field_instances['node-meeting-field_show_map'] = array(
+    'bundle' => 'meeting',
+    'default_value' => array(
+      0 => array(
+        'value' => 1,
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'list',
+        'settings' => array(),
+        'type' => 'list_default',
+        'weight' => 32,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_show_map',
+    'label' => 'Show map',
+    'required' => 0,
+    'settings' => array(
+      'entity_translation_sync' => FALSE,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(
+        'display_label' => 1,
+      ),
+      'type' => 'options_onoff',
       'weight' => 18,
     ),
   );
@@ -1393,7 +1443,7 @@ function cms_meeting_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'taxonomy_autocomplete',
-      'weight' => 41,
+      'weight' => 35,
     ),
   );
 
@@ -1439,7 +1489,7 @@ function cms_meeting_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 21,
+      'weight' => 22,
     ),
   );
 
@@ -1515,6 +1565,7 @@ function cms_meeting_field_default_field_instances() {
   t('Registration Deadline');
   t('Set 00:00 for not displaying time');
   t('Short description such as COP 11');
+  t('Show map');
   t('Species');
   t('Start Time');
   t('Start date');
