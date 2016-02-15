@@ -74,3 +74,36 @@ function cms_meeting_update_7007() {
 
     return t('Meeting permissions updated');
 }
+
+/**
+ * Set the map visible for previous meetings
+ */
+function cms_meeting_update_7008() {
+  $rows = db_select('node', 'a')->fields('a', array('nid', 'vid'))->condition('a.type', 'meeting')->execute()->fetchAll();
+  foreach($rows as $row) {
+    db_insert('field_data_field_show_map')
+      ->fields(array('entity_type', 'bundle', 'deleted', 'entity_id', 'revision_id', 'language', 'delta', 'field_show_map_value'))
+      ->values(array(
+        'entity_type' => 'node',
+        'bundle' => 'meeting',
+        'deleted' => 0,
+        'entity_id' => $row->nid,
+        'revision_id' => $row->vid,
+        'language' => LANGUAGE_NONE,
+        'delta' => 0,
+        'field_show_map_value' => 1
+      ))->execute();
+    db_insert('field_revision_field_show_map')
+      ->fields(array('entity_type', 'bundle', 'deleted', 'entity_id', 'revision_id', 'language', 'delta', 'field_show_map_value'))
+      ->values(array(
+        'entity_type' => 'node',
+        'bundle' => 'meeting',
+        'deleted' => 0,
+        'entity_id' => $row->nid,
+        'revision_id' => $row->vid,
+        'language' => LANGUAGE_NONE,
+        'delta' => 0,
+        'field_show_map_value' => 1
+      ))->execute();
+  }
+}
