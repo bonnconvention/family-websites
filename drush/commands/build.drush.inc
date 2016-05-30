@@ -108,6 +108,25 @@ function _drush_devify() {
 		variable_set($name, $value);
 	}
 
+	// Change the domains to point to local development
+	foreach (domain_domains() as $id => $domain) {
+		if ($id == 1) {
+			$domain['subdomain'] = 'cms.local.ro';
+			$domain['path'] = 'http://cms.local.ro/';
+		}
+		else {
+			$subdomain = $domain['subdomain'];
+			$parts = explode('/', $subdomain);
+			$domain['subdomain'] = 'cms.local.ro/' . $parts[1];
+			$domain['path'] = 'http://cms.local.ro/' . $parts[1] . '/';
+			if (!empty($parts[1]) && !file_exists(DRUPAL_ROOT . '/' . $parts[1])) {
+				symlink(DRUPAL_ROOT, $parts[1]);
+			}
+		}
+		drush_log('Configuring `www` domain: ' . $domain['subdomain'], 'ok');
+		domain_save($domain);
+	}
+
 	// Sanitize database.
 	// @see sql_drush_sql_sync_sanitize() to add your sanitize queries.
 	drush_sql_sanitize();
