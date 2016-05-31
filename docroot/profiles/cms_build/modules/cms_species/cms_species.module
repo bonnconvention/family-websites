@@ -98,6 +98,17 @@ function cms_species_menu() {
         'file' => 'cms_species.api.inc',
     );
 
+    $items['admin/config/services/iucnredlist'] = array(
+        'title' => t('IUCN Redlist API'),
+        'description' => t('Manage configuration for the IUCN Redlist API access'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('cms_species_service_config_form'),
+        'access arguments' => array('administer site configuration'),
+        'file' => 'cms_species.admin.inc',
+        'type' => MENU_NORMAL_ITEM,
+        'menu_name' => 'management',
+    );
+
     return $items;
 }
 
@@ -426,17 +437,43 @@ function cms_species_alter_experts_submit(&$form, &$form_state) {
  * @param   stdClass    $node
  */
 function cms_species_node_presave($node) {
-    if (($node->type == "species")) {
-
-        $iucn_data = CMSSpecies::get_species_iucn_data($node->title);
+    if (($node->type == 'species')) {
+        $w = entity_metadata_wrapper('node', $node);
+        $current = $w->field_species_iucn_web_srv->value();
+        $iucn_data = array();
+        if (!empty($current)) {
+            // Extract numeric ID (might have been overriden)
+            // http://www.iucnredlist.org/details/22693452 or http://www.iucnredlist.org/details/22693452/0
+            $exploded = explode('/', $current);
+            $numeric_id = FALSE;
+            if (count($exploded)) {
+                if (is_numeric($exploded[count($exploded) - 2])) {
+                    $numeric_id = $exploded[count($exploded) - 2];
+                }
+                else if (is_numeric($exploded[count($exploded) - 1])) {
+                    $numeric_id = $exploded[count($exploded) - 1];
+                }
+            }
+            if ($numeric_id) {
+                // Call the service by numeric ID (in case of manual override)
+                $iucn_data = CMSSpecies::get_species_iucn_data(NULL, $numeric_id);
+            }
+        }
+        // Extra call by scientific name
+        if (empty($iucn_data)) {
+            $iucn_data = CMSSpecies::get_species_iucn_data($node->title);
+        }
         if (!empty($iucn_data)) {
             $langcode = field_language('node', $node, 'field_species_iucn_status');
-            if ((!isset($node->field_species_iucn_status)) || (empty($node->field_species_iucn_status[$langcode]))) {
-                $node->field_species_iucn_status[$langcode][0]['value'] = $iucn_data['field_species_iucn_status'];
+            if (!empty($iucn_data['field_species_iucn_status'])) {
+                $node->field_species_iucn_status[$langcode][0]['value'] = strtolower($iucn_data['field_species_iucn_status']);
             }
-            if ((!isset($node->field_species_iucn_web_srv)) || (empty($node->field_species_iucn_web_srv[$langcode]))) {
+            if (!empty($iucn_data['field_species_iucn_web_srv'])) {
                 $node->field_species_iucn_web_srv[$langcode][0]['value'] = $iucn_data['field_species_iucn_web_srv'];
             }
+        }
+        else {
+            drupal_set_message('Could not find IUCN redlist threat status for this species. You could try to manually set the <b>IUCN web service</b> assessment field', 'error');
         }
     }
 }
@@ -1335,51 +1372,58 @@ class CMSSpecies extends CMSBase {
     /**
      * Get species data from IUCN website
      *
-     * @param String $species_name The name of species
-     * @return Array Species data associative array (field_species_iucn_status and field_species_iucn_web_srv)
+     * @param string $species_name
+     *   The name of species
+     * @param integer $numeric_id
+     *   Check the status base on the ID instead of name
+     * @return array
+     *   Species data associative array (field_species_iucn_status and field_species_iucn_web_srv)
      */
-    public static function get_species_iucn_data($species_name) {
-        $title = trim(strtolower($species_name));
-        if (empty($title)) {
-            return array();
-        }
+    public static function get_species_iucn_data($species_name, $numeric_id = NULL) {
+        $ret = array(
+            'field_species_iucn_web_srv' => NULL,
+            'field_species_iucn_status' => NULL,
+        );
+        // Retrieve by the numeric ID
+        if (!empty($numeric_id)) {
+            $ws_url = url(
+              variable_get('cms_iucnredlist_url', 'http://apiv3.iucnredlist.org/api/v3') . '/species/id/' . $numeric_id,
+              array('absolute' => TRUE, 'query' => array('token' => variable_get('cms_iucnredlist_apikey')))
+            );
+            $ret['field_species_iucn_web_srv'] = variable_get('cms_iucnredlist_url', 'http://apiv3.iucnredlist.org/api/v3') . '/species/id/' . $numeric_id;
+            if ($data = json_decode(file_get_contents($ws_url), TRUE) ) {
+                if (!empty($data['result'][0]['category'])) {
+                    $ret['field_species_iucn_status'] = $data['result'][0]['category'];
 
-        $title_arr = explode(" ", $title);
-        $sub_species = "";
-        // If the name exceed two words, then it is a sub species
-        if (count($title_arr) > 2) {
-            $sub_species = array_pop($title_arr);
-        }
-        // Join by dash (API url)
-        $url_title = CMSUtils::slug($species_name);
-        $species_index_url = "http://api.iucnredlist.org/index/species/" . $url_title . ".json";
-        // Retrieve species data from url
-        $species_index_json = file_get_contents($species_index_url);
-        $species_index_data = json_decode($species_index_json, true);
-
-        $species_data = array();
-        if (is_array($species_index_data) && count($species_index_data) > 0) {
-            foreach ($species_index_data as $index) {
-                if (empty($sub_species)) {
-                    // Update species data for infra_rank is null
-                    if (!is_null($index['infra_rank'])) {
-                        continue;
-                    }
-                } else {
-                    if (!($index['infra_name'] == $sub_species && $index['infra_rank'] == "ssp.")) {
-                        continue;
-                    }
+                    return $ret;
                 }
-
-                // IUCN status
-                $species_data['field_species_iucn_status'] = strtolower($index['category']);
-                // IUCN link
-                $species_data['field_species_iucn_web_srv'] = strtolower("http://www.iucnredlist.org/details/" . $index['species_id']);
-                break;
             }
         }
+        if ($title = trim(strtolower($species_name))) {
+            $exploded = explode(' ', $title);
+            if (count($exploded) > 2) {
+                array_pop($exploded);
+                $title = implode(' ', $exploded);
+            }
+            $ws_url = url(
+              variable_get('cms_iucnredlist_url', 'http://apiv3.iucnredlist.org/api/v3') . '/species/' . $title,
+              array(
+                'absolute' => TRUE,
+                'query' => array('token' => variable_get('cms_iucnredlist_apikey'))
+              )
+            );
+            // Retrieve species data from url
+            if ($data = json_decode(file_get_contents($ws_url), TRUE)) {
+                if (!empty($data['result'][0]['category'])) {
+                    $data = $data['result'][0];
+                    $ret['field_species_iucn_web_srv'] = variable_get('cms_iucnredlist_url', 'http://apiv3.iucnredlist.org/api/v3') . '/species/id/' . $data['taxonid'];
+                    $ret['field_species_iucn_status'] = $data['category'];
 
-        return $species_data;
+                    return $ret;
+                }
+            }
+        }
+        return FALSE;
     }
 
     public static function set_species_population_instrument(&$node, $species, $save = true, $property = 'field_species_pop') {

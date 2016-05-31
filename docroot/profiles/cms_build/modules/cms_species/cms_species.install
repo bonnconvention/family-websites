@@ -74,3 +74,8 @@ function cms_species_install() {
         watchdog('species', "Unable to load role name '@role'", array("@role" => ROLE_MANAGE_SPECIES), WATCHDOG_WARNING);
     }
 }
+
+function cms_species_update_7001() {
+    variable_set('cms_iucnredlist_url', 'http://apiv3.iucnredlist.org/api/v3');
+    variable_set('cms_iucnredlist_apikey', '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee');
+}
