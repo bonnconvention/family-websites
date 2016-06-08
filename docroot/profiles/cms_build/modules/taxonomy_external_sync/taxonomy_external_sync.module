@@ -36,6 +36,19 @@ function taxonomy_external_sync_cronapi($op, $job = NULL) {
   return $ret;
 }
 
+/**
+ * Implements hook_cron().
+ */
+function taxonomy_external_sync_cron() {
+  if (module_exists('elysia_cron')) {
+    return;
+  }
+  $last_run = variable_get('taxonomy_external_sync_migration_last_run', NULL);
+  if (empty($last_run) || (time() - $last_run) > (60 * 30)) {
+    taxonomy_external_sync_migrate_all_vocabularies();
+    variable_set('taxonomy_external_sync_migration_last_run', time());
+  }
+}
 
 /**
  * Run the actual elysia synchronisation task
