@@ -10,6 +10,44 @@
 function cms_thesaurus_field_default_field_instances() {
   $field_instances = array();
 
+  // Exported field_instance: 'taxonomy_term-thesaurus_cms-field_related_informea_terms'
+  $field_instances['taxonomy_term-thesaurus_cms-field_related_informea_terms'] = array(
+    'bundle' => 'thesaurus_cms',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'entityreference',
+        'settings' => array(
+          'link' => FALSE,
+        ),
+        'type' => 'entityreference_label',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'taxonomy_term',
+    'field_name' => 'field_related_informea_terms',
+    'label' => 'Related InforMEA terms',
+    'required' => 0,
+    'settings' => array(
+      'entity_translation_sync' => FALSE,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'entityreference',
+      'settings' => array(
+        'match_operator' => 'CONTAINS',
+        'path' => '',
+        'size' => 60,
+      ),
+      'type' => 'entityreference_autocomplete_tags',
+      'weight' => 2,
+    ),
+  );
+
   // Exported field_instance: 'taxonomy_term-thesaurus_informea-description_field'
   $field_instances['taxonomy_term-thesaurus_informea-description_field'] = array(
     'bundle' => 'thesaurus_informea',
@@ -139,6 +177,7 @@ function cms_thesaurus_field_default_field_instances() {
   // Included for use with string extractors like potx.
   t('Description');
   t('Name');
+  t('Related InforMEA terms');
   t('Taxonomy term URI');
 
   return $field_instances;

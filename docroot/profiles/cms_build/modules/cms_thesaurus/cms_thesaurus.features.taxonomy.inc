@@ -58,6 +58,20 @@ function cms_thesaurus_taxonomy_default_vocabularies() {
           ),
         ),
       ),
+      'tes' => array(
+        'enable' => TRUE,
+        'plugin' => 'Drupal\\taxonomy_external_sync\\plugin\\source\\VocBenchRDFSource',
+        'mappings' => array(
+          'description_field' => 'definition',
+          'field_taxonomy_term_uri' => 'uri',
+          'name_field' => 'prefLabel',
+        ),
+        'plugin_config' => array(
+          'url' => 'http://informea.org/sites/default/files/export/informea.rdf',
+          'id_field' => 'uri',
+          'parent_field' => 'broader',
+        ),
+      ),
     ),
   );
 }
