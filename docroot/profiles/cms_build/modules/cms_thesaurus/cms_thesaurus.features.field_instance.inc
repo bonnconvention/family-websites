@@ -19,8 +19,16 @@ function cms_thesaurus_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
+        'module' => 'jquery_expander',
+        'settings' => array(
+          'collapseTimer' => FALSE,
+          'expandPrefix' => '...',
+          'expandText' => 'Expand »',
+          'slicePoint' => 50,
+          'userCollapsePrefix' => '',
+          'userCollapseText' => 'Collapse',
+        ),
+        'type' => 'jquery_expander',
         'weight' => 1,
       ),
     ),
@@ -60,10 +68,10 @@ function cms_thesaurus_field_default_field_instances() {
         'label' => 'above',
         'module' => 'entityreference',
         'settings' => array(
-          'link' => FALSE,
+          'link' => 1,
         ),
         'type' => 'entityreference_label',
-        'weight' => 0,
+        'weight' => 2,
       ),
     ),
     'entity_type' => 'taxonomy_term',
@@ -96,9 +104,14 @@ function cms_thesaurus_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 2,
+        'module' => 'title',
+        'settings' => array(
+          'title_class' => '',
+          'title_link' => '',
+          'title_style' => '',
+        ),
+        'type' => 'title_linked',
+        'weight' => 0,
       ),
     ),
     'entity_type' => 'taxonomy_term',
@@ -133,8 +146,16 @@ function cms_thesaurus_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
+        'module' => 'jquery_expander',
+        'settings' => array(
+          'collapseTimer' => FALSE,
+          'expandPrefix' => '...',
+          'expandText' => 'Expand »',
+          'slicePoint' => 50,
+          'userCollapsePrefix' => '',
+          'userCollapseText' => 'Collapse',
+        ),
+        'type' => 'jquery_expander',
         'weight' => 1,
       ),
     ),
@@ -221,8 +242,13 @@ function cms_thesaurus_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
+        'module' => 'title',
+        'settings' => array(
+          'title_class' => '',
+          'title_link' => '',
+          'title_style' => '',
+        ),
+        'type' => 'title_linked',
         'weight' => 0,
       ),
     ),
