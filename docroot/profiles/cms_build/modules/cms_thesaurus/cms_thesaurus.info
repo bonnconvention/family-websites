@@ -1,0 +1,7 @@
+name = CMS Thesaurus
+description = CMS tags taxonomy
+core = 7.x
+package = CMS
+version = 7.x-0.1
+project = cms_thesaurus
+features[features_api][] = api:2
