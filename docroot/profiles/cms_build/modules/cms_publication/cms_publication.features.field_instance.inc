@@ -190,10 +190,10 @@ function cms_publication_field_default_field_instances() {
     'required' => 0,
     'settings' => array(
       'description_field' => 1,
-      'entity_translation_sync' => FALSE,
+      'entity_translation_sync' => 0,
       'file_directory' => 'publication',
-      'file_extensions' => 'pdf doc docx odt rtf txt csv xsl ods xslx ppt pptx xml accdb db mdb sql htm html djvu epub',
-      'max_filesize' => '50 MB',
+      'file_extensions' => 'pdf doc docx odt rtf txt csv xls ods xlsx ppt pptx xml accdb db mdb sql htm html djvu epub',
+      'max_filesize' => '',
       'user_register_form' => FALSE,
     ),
     'widget' => array(
