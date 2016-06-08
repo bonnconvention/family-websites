@@ -86,6 +86,21 @@ function cms_species_strongarm() {
       'diff_standard' => array(
         'custom_settings' => FALSE,
       ),
+      'scs' => array(
+        'custom_settings' => TRUE,
+      ),
+      'email_plain' => array(
+        'custom_settings' => FALSE,
+      ),
+      'email_html' => array(
+        'custom_settings' => FALSE,
+      ),
+      'email_textalt' => array(
+        'custom_settings' => FALSE,
+      ),
+      'revision' => array(
+        'custom_settings' => FALSE,
+      ),
     ),
     'extra_fields' => array(
       'form' => array(
@@ -102,7 +117,14 @@ function cms_species_strongarm() {
           'weight' => '3',
         ),
       ),
-      'display' => array(),
+      'display' => array(
+        'domain' => array(
+          'default' => array(
+            'weight' => '1',
+            'visible' => TRUE,
+          ),
+        ),
+      ),
     ),
   );
   $export['field_bundle_settings_node__species'] = $strongarm;
@@ -150,6 +172,7 @@ function cms_species_strongarm() {
   $strongarm->name = 'node_options_species';
   $strongarm->value = array(
     0 => 'status',
+    1 => 'revision',
   );
   $export['node_options_species'] = $strongarm;
 
