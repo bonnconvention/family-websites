@@ -69,8 +69,6 @@ function thesaurus_external_sync_cronapi_run($bundle) {
  */
 function taxonomy_external_sync_form_taxonomy_form_vocabulary_alter(&$form, &$form_state) {
   $form += taxonomy_external_sync_taxonomy_form_element($form, $form_state);
-  $form['#validate'][] = 'taxonomy_external_sync_form_taxonomy_form_vocabulary_validate';
-  $form['#submit'][] = 'taxonomy_external_sync_form_taxonomy_form_vocabulary_submit';
 }
 
 
@@ -83,9 +81,6 @@ function taxonomy_external_sync_entity_info_alter(&$entity_info) {
     if (!empty($info[$bundle])) {
       $entity_info['taxonomy_term']['bundles'][$bundle]['tes'] = $info[$bundle];
     }
-    else {
-      $entity_info['taxonomy_term']['bundles'][$bundle]['tes'] = array('enable' => FALSE);
-    }
   }
 }
 
@@ -93,8 +88,13 @@ function taxonomy_external_sync_entity_info_alter(&$entity_info) {
  * Implements hook_entity_presave().
  */
 function taxonomy_external_sync_entity_presave($entity, $type) {
-  if (!empty($entity->machine_name) && !empty($entity->tes)) {
-    taxonomy_external_sync_config_save($entity->machine_name, $entity->tes);
+  if (!empty($entity->machine_name)) {
+    if (!empty($entity->tes['enable'])) {
+      taxonomy_external_sync_config_save($entity->machine_name, $entity->tes);
+    }
+    else {
+      taxonomy_external_sync_config_save($entity->machine_name, array());
+    }
   }
 }
 
@@ -112,9 +112,6 @@ function taxonomy_external_sync_entity_load($entities, $type) {
         $config = taxonomy_external_sync_config_load();
         if (!empty($config[$entity->machine_name])) {
           $entity->tes = $config[$entity->machine_name];
-        }
-        else {
-          $entity->tes = array('enable' => FALSE);
         }
       }
     }
@@ -180,40 +177,6 @@ function taxonomy_external_sync_get_configuration($vocabulary) {
     ->fetchField();
   $config = unserialize($q);
   return $config;
-}
-
-function taxonomy_external_sync_form_taxonomy_form_vocabulary_validate($form, $form_state) {
-  ///
-}
-
-function taxonomy_external_sync_form_taxonomy_form_vocabulary_submit($form, $form_state) {
-  if ($bundle = $form_state['values']['machine_name']) {
-    if ($tes_enable = !empty($form_state['values']['tes_enable'])) {
-      $config = array(
-        'enable' => $tes_enable,
-        'plugin' => $form_state['values']['tes_plugin'],
-        'mappings' => array()
-      );
-      // Mappings
-      $destination_fields = taxonomy_external_sync_get_taxonomy_fields($bundle);
-      foreach ($destination_fields as $field_name => $label) {
-        if (!empty($form_state['values']['tes_' . $field_name])) {
-          $config['mappings'][$field_name] = $form_state['values']['tes_' . $field_name];
-        }
-      }
-      // Plugin config
-      foreach($form_state['values'] as $k => $v) {
-        if (preg_match('/tes\_plugin\_config\_/', $k)) {
-          $key = substr($k, 18);
-          $config['plugin_config'][$key] = $v;
-        }
-      }
-      taxonomy_external_sync_config_save($bundle, $config);
-    }
-    else {
-      taxonomy_external_sync_config_save($bundle, array());
-    }
-  }
 }
 
 function taxonomy_external_sync_config_load() {
