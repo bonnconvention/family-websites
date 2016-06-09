@@ -24,7 +24,7 @@ function cms_instrument_field_default_field_instances() {
           'collapseTimer' => '',
           'expandPrefix' => '...',
           'expandText' => 'Read more »',
-          'slicePoint' => 400,
+          'slicePoint' => 500,
           'userCollapsePrefix' => '',
           'userCollapseText' => 'Collapse',
         ),

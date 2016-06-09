@@ -569,9 +569,9 @@ function cms_news_field_default_field_instances() {
     'required' => 0,
     'settings' => array(
       'description_field' => 1,
-      'entity_translation_sync' => FALSE,
+      'entity_translation_sync' => 0,
       'file_directory' => '',
-      'file_extensions' => 'txt pdf jpg jpeg gif png doc ppt',
+      'file_extensions' => 'txt pdf jpg jpeg gif png doc ppt xls',
       'max_filesize' => '10 MB',
       'user_register_form' => FALSE,
     ),

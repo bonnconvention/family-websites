@@ -86,13 +86,6 @@ function cms_species_default_services_endpoint() {
         ),
       ),
     ),
-    'eurobats-news' => array(
-      'operations' => array(
-        'index' => array(
-          'enabled' => '1',
-        ),
-      ),
-    ),
     'instruments' => array(
       'operations' => array(
         'index' => array(
@@ -114,7 +107,7 @@ function cms_species_default_services_endpoint() {
         ),
       ),
     ),
-    'news-cop11' => array(
+    'news-cms' => array(
       'operations' => array(
         'index' => array(
           'enabled' => '1',
@@ -202,7 +195,7 @@ function cms_species_default_services_endpoint() {
       ),
     ),
   );
-  $endpoint->debug = 1;
+  $endpoint->debug = 0;
   $export['ws'] = $endpoint;
 
   return $export;

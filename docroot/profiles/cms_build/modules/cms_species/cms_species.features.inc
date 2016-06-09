@@ -30,7 +30,7 @@ function cms_species_image_default_styles() {
     'name' => 'species_block',
     'label' => 'Species Block',
     'effects' => array(
-      4 => array(
+      3 => array(
         'label' => 'Scale',
         'help' => 'Scaling will maintain the aspect-ratio of the original image. If only a single dimension is specified, the other dimension will be calculated.',
         'effect callback' => 'image_scale_effect',

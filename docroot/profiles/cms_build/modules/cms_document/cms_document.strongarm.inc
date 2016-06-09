@@ -108,22 +108,22 @@ function cms_document_strongarm() {
           'weight' => '0',
         ),
         'path' => array(
-          'weight' => '19',
+          'weight' => '20',
         ),
         'domain' => array(
-          'weight' => '17',
+          'weight' => '18',
         ),
         'domain_path' => array(
-          'weight' => '18',
+          'weight' => '19',
         ),
         'language' => array(
           'weight' => '2',
         ),
         'redirect' => array(
-          'weight' => '20',
+          'weight' => '21',
         ),
         'metatags' => array(
-          'weight' => '21',
+          'weight' => '22',
         ),
       ),
       'display' => array(

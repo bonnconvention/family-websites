@@ -248,6 +248,55 @@ function cms_document_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-document-body'
+  $field_instances['node-document-body'] = array(
+    'bundle' => 'document',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => 'Use this text area to insert a description of the document',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 17,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'body',
+    'label' => 'Description',
+    'required' => 0,
+    'settings' => array(
+      'display_summary' => 1,
+      'entity_translation_sync' => FALSE,
+      'text_processing' => 1,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'rows' => 5,
+        'summary_rows' => 5,
+      ),
+      'type' => 'text_textarea_with_summary',
+      'weight' => 7,
+    ),
+  );
+
   // Exported field_instance: 'node-document-field_country'
   $field_instances['node-document-field_country'] = array(
     'bundle' => 'document',
@@ -340,7 +389,7 @@ function cms_document_field_default_field_instances() {
       'module' => 'field_collection',
       'settings' => array(),
       'type' => 'field_collection_embed',
-      'weight' => 10,
+      'weight' => 11,
     ),
   );
 
@@ -388,7 +437,7 @@ function cms_document_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 13,
+      'weight' => 14,
     ),
   );
 
@@ -488,7 +537,7 @@ function cms_document_field_default_field_instances() {
       'module' => 'field_collection',
       'settings' => array(),
       'type' => 'field_collection_embed',
-      'weight' => 11,
+      'weight' => 12,
     ),
   );
 
@@ -536,7 +585,7 @@ function cms_document_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 14,
+      'weight' => 15,
     ),
   );
 
@@ -584,7 +633,7 @@ function cms_document_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 16,
+      'weight' => 17,
     ),
   );
 
@@ -640,7 +689,7 @@ function cms_document_field_default_field_instances() {
         'year_range' => '1970:+0',
       ),
       'type' => 'date_popup',
-      'weight' => 9,
+      'weight' => 10,
     ),
   );
 
@@ -688,7 +737,7 @@ function cms_document_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 12,
+      'weight' => 13,
     ),
   );
 
@@ -739,7 +788,7 @@ function cms_document_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'options_select',
-      'weight' => 8,
+      'weight' => 9,
     ),
   );
 
@@ -838,7 +887,7 @@ function cms_document_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 7,
+      'weight' => 8,
     ),
   );
 
@@ -983,7 +1032,7 @@ function cms_document_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 15,
+      'weight' => 16,
     ),
   );
 
@@ -1040,6 +1089,7 @@ function cms_document_field_default_field_instances() {
   // Included for use with string extractors like potx.
   t('Auto-filled with earliest date from attachments\' published date');
   t('CMS Instrument');
+  t('Description');
   t('File');
   t('Files');
   t('If you have Private Files, please check this and upload your files below, in Private Files section.');
@@ -1060,6 +1110,7 @@ function cms_document_field_default_field_instances() {
   t('Threats');
   t('Title');
   t('Type');
+  t('Use this text area to insert a description of the document');
 
   return $field_instances;
 }

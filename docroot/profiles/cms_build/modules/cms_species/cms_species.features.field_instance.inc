@@ -2150,7 +2150,7 @@ function cms_species_field_default_field_instances() {
     'bundle' => 'species',
     'default_value' => NULL,
     'deleted' => 0,
-    'description' => 'The link to the corresponding species profile on the IUCN Red List page will be created automatically. Please only overwrite manually in case a wrong link has been inserted.',
+    'description' => 'Link to the IUCN Red List profile is automatically populated. However you can override it above with a corrected link in case of mismatch, (ex. http://www.iucnredlist.org/details/22693452/0)',
     'display' => array(
       'default' => array(
         'label' => 'inline',
@@ -3461,6 +3461,7 @@ function cms_species_field_default_field_instances() {
   t('If the global population is covered by the instrument, please insert “Global” as population name.');
   t('Images');
   t('Interval (years)');
+  t('Link to the IUCN Red List profile is automatically populated. However you can override it above with a corrected link in case of mismatch, (ex. http://www.iucnredlist.org/details/22693452/0)');
   t('Meetings');
   t('National reports');
   t('Notes');
@@ -3490,7 +3491,6 @@ function cms_species_field_default_field_instances() {
   t('Sub-Species');
   t('Synonyms');
   t('Territories');
-  t('The link to the corresponding species profile on the IUCN Red List page will be created automatically. Please only overwrite manually in case a wrong link has been inserted.');
   t('Threats');
   t('Title');
   t('Trend');
