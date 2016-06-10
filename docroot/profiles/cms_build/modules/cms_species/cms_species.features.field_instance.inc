@@ -1388,11 +1388,9 @@ function cms_species_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'entityreference',
-        'settings' => array(
-          'link' => FALSE,
-        ),
-        'type' => 'entityreference_label',
+        'module' => 'i18n_taxonomy',
+        'settings' => array(),
+        'type' => 'i18n_taxonomy_term_reference_link',
         'weight' => 55,
       ),
       'scs' => array(
@@ -1413,23 +1411,17 @@ function cms_species_field_default_field_instances() {
     'label' => 'CMS tags',
     'required' => 0,
     'settings' => array(
-      'behaviors' => array(
-        'taxonomy-index' => array(
-          'status' => TRUE,
-        ),
-      ),
       'entity_translation_sync' => FALSE,
       'user_register_form' => FALSE,
     ),
     'widget' => array(
-      'active' => 1,
-      'module' => 'entityreference',
+      'active' => 0,
+      'module' => 'taxonomy',
       'settings' => array(
-        'match_operator' => 'CONTAINS',
-        'path' => '',
+        'autocomplete_path' => 'taxonomy/autocomplete',
         'size' => 60,
       ),
-      'type' => 'entityreference_autocomplete_tags',
+      'type' => 'taxonomy_autocomplete',
       'weight' => 48,
     ),
   );

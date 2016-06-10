@@ -18,44 +18,33 @@ function cms_document_field_default_field_bases() {
     'entity_types' => array(),
     'field_name' => 'field_cms_tags',
     'foreign keys' => array(
-      'taxonomy_term_data' => array(
+      'tid' => array(
         'columns' => array(
-          'target_id' => 'tid',
+          'tid' => 'tid',
         ),
         'table' => 'taxonomy_term_data',
       ),
     ),
     'indexes' => array(
-      'target_id' => array(
-        0 => 'target_id',
+      'tid' => array(
+        0 => 'tid',
       ),
     ),
     'locked' => 0,
-    'module' => 'entityreference',
+    'module' => 'taxonomy',
     'settings' => array(
-      'entity_translation_sync' => FALSE,
-      'handler' => 'base',
-      'handler_settings' => array(
-        'behaviors' => array(
-          'entityqueue' => array(
-            'status' => 0,
-          ),
-          'views-select-list' => array(
-            'status' => 0,
-          ),
-        ),
-        'sort' => array(
-          'type' => 'none',
-        ),
-        'target_bundles' => array(
-          'thesaurus_cms' => 'thesaurus_cms',
+      'allowed_values' => array(
+        0 => array(
+          'vocabulary' => 'thesaurus_cms',
+          'parent' => 0,
         ),
       ),
+      'entity_translation_sync' => FALSE,
+      'options_list_callback' => 'i18n_taxonomy_allowed_values',
       'profile2_private' => FALSE,
-      'target_type' => 'taxonomy_term',
     ),
     'translatable' => 0,
-    'type' => 'entityreference',
+    'type' => 'taxonomy_term_reference',
   );
 
   // Exported field_base: 'field_document_file'

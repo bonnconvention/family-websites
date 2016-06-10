@@ -306,12 +306,10 @@ function cms_document_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'entityreference',
-        'settings' => array(
-          'link' => FALSE,
-        ),
-        'type' => 'entityreference_label',
-        'weight' => 18,
+        'module' => 'i18n_taxonomy',
+        'settings' => array(),
+        'type' => 'i18n_taxonomy_term_reference_link',
+        'weight' => 20,
       ),
       'scs' => array(
         'label' => 'above',
@@ -331,24 +329,18 @@ function cms_document_field_default_field_instances() {
     'label' => 'CMS tags',
     'required' => 0,
     'settings' => array(
-      'behaviors' => array(
-        'taxonomy-index' => array(
-          'status' => TRUE,
-        ),
-      ),
       'entity_translation_sync' => FALSE,
       'user_register_form' => FALSE,
     ),
     'widget' => array(
-      'active' => 1,
-      'module' => 'entityreference',
+      'active' => 0,
+      'module' => 'taxonomy',
       'settings' => array(
-        'match_operator' => 'CONTAINS',
-        'path' => '',
+        'autocomplete_path' => 'taxonomy/autocomplete',
         'size' => 60,
       ),
-      'type' => 'entityreference_autocomplete_tags',
-      'weight' => 23,
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 25,
     ),
   );
 
@@ -364,7 +356,7 @@ function cms_document_field_default_field_instances() {
         'module' => 'cms',
         'settings' => array(),
         'type' => 'cms_country_table_row_formatter',
-        'weight' => 14,
+        'weight' => 15,
       ),
       'scs' => array(
         'label' => 'above',
@@ -416,7 +408,7 @@ function cms_document_field_default_field_instances() {
           'view_mode' => 'full',
         ),
         'type' => 'field_collection_view',
-        'weight' => 7,
+        'weight' => 8,
       ),
       'scs' => array(
         'label' => 'above',
@@ -444,7 +436,7 @@ function cms_document_field_default_field_instances() {
       'module' => 'field_collection',
       'settings' => array(),
       'type' => 'field_collection_embed',
-      'weight' => 11,
+      'weight' => 12,
     ),
   );
 
@@ -462,7 +454,7 @@ function cms_document_field_default_field_instances() {
           'link' => 1,
         ),
         'type' => 'entityreference_label',
-        'weight' => 11,
+        'weight' => 12,
       ),
       'scs' => array(
         'label' => 'above',
@@ -492,7 +484,7 @@ function cms_document_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 14,
+      'weight' => 15,
     ),
   );
 
@@ -564,7 +556,7 @@ function cms_document_field_default_field_instances() {
           'view_mode' => 'full',
         ),
         'type' => 'field_collection_view',
-        'weight' => 8,
+        'weight' => 9,
       ),
       'scs' => array(
         'label' => 'above',
@@ -592,7 +584,7 @@ function cms_document_field_default_field_instances() {
       'module' => 'field_collection',
       'settings' => array(),
       'type' => 'field_collection_embed',
-      'weight' => 12,
+      'weight' => 13,
     ),
   );
 
@@ -610,7 +602,7 @@ function cms_document_field_default_field_instances() {
           'link' => 1,
         ),
         'type' => 'entityreference_label',
-        'weight' => 12,
+        'weight' => 13,
       ),
       'scs' => array(
         'label' => 'above',
@@ -640,7 +632,7 @@ function cms_document_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 15,
+      'weight' => 16,
     ),
   );
 
@@ -658,7 +650,7 @@ function cms_document_field_default_field_instances() {
           'link' => 1,
         ),
         'type' => 'entityreference_label',
-        'weight' => 13,
+        'weight' => 14,
       ),
       'scs' => array(
         'label' => 'above',
@@ -688,7 +680,7 @@ function cms_document_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 17,
+      'weight' => 18,
     ),
   );
 
@@ -762,7 +754,7 @@ function cms_document_field_default_field_instances() {
           'link' => 1,
         ),
         'type' => 'entityreference_label',
-        'weight' => 9,
+        'weight' => 10,
       ),
       'scs' => array(
         'label' => 'above',
@@ -792,7 +784,7 @@ function cms_document_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 13,
+      'weight' => 14,
     ),
   );
 
@@ -811,7 +803,7 @@ function cms_document_field_default_field_instances() {
           'render_tr' => TRUE,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
-        'weight' => 6,
+        'weight' => 7,
       ),
       'scs' => array(
         'label' => 'above',
@@ -862,7 +854,7 @@ function cms_document_field_default_field_instances() {
           'render_tr' => TRUE,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
-        'weight' => 4,
+        'weight' => 5,
       ),
       'scs' => array(
         'label' => 'above',
@@ -912,7 +904,7 @@ function cms_document_field_default_field_instances() {
           'render_tr' => TRUE,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
-        'weight' => 5,
+        'weight' => 6,
       ),
       'scs' => array(
         'label' => 'above',
@@ -1057,7 +1049,7 @@ function cms_document_field_default_field_instances() {
         'module' => 'i18n_taxonomy',
         'settings' => array(),
         'type' => 'i18n_taxonomy_term_reference_plain',
-        'weight' => 10,
+        'weight' => 11,
       ),
       'scs' => array(
         'label' => 'above',
@@ -1087,7 +1079,7 @@ function cms_document_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 16,
+      'weight' => 17,
     ),
   );
 
@@ -1102,7 +1094,7 @@ function cms_document_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 15,
+        'weight' => 18,
       ),
       'scs' => array(
         'label' => 'above',

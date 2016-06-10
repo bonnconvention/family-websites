@@ -53,7 +53,8 @@ function cms_document_ds_layout_settings_info() {
         20 => 'path',
         21 => 'redirect',
         22 => 'metatags',
-        23 => '_add_existing_field',
+        23 => 'field_cms_tags_1',
+        24 => '_add_existing_field',
       ),
     ),
     'fields' => array(
@@ -80,6 +81,7 @@ function cms_document_ds_layout_settings_info() {
       'path' => 'hidden',
       'redirect' => 'hidden',
       'metatags' => 'hidden',
+      'field_cms_tags_1' => 'hidden',
       '_add_existing_field' => 'hidden',
     ),
     'classes' => array(),
