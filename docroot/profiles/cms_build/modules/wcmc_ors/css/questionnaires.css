@@ -1,0 +1,11 @@
+.clear { clear: both; }
+.dl-horizontal {
+  float: left;
+}
+
+#respondents-chart {
+  float: right;
+  width: 50%;
+  height: 250px;
+}
+

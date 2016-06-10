@@ -1,0 +1,12 @@
+name = WCMC ORS
+description = Integration with WCMC online reporting system
+core = 7.x
+package = CMS
+version = 7.x-1.0
+project = wcmc_ors
+configure = admin/config/services/ors
+files[] = wcmc_ors.charts.inc
+files[] = wcmc_ors.class.inc
+files[] = wcmc_ors.client.inc
+files[] = includes/question.inc
+files[] = includes/questionnaire.inc
