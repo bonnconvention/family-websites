@@ -48,7 +48,10 @@ function wcmc_ors_questionnaires_form($form, &$form_state) {
     ),
   );
 
-  $values = $form_state['values'];
+  $values = array();
+  if (!empty($form_state['values'])) {
+    $values = $form_state['values'];
+  }
   $form['content'] = array(
     '#prefix' => '<div id="report-content">',
     '#suffix' => '</div>',
@@ -132,8 +135,9 @@ function wcmc_ors_questions_form($form, $form_state, $qid) {
     return $form;
   }
 
-  $questionnaire = $client->getQuestionnaire($qid);
-  drupal_set_title($questionnaire->getTitle());
+  if ($questionnaire = $client->getQuestionnaire($qid)) {
+    drupal_set_title($questionnaire->getTitle());
+  }
 
   $form['back'] = array(
     '#type' => 'item',
