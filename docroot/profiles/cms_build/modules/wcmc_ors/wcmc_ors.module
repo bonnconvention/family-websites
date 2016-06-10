@@ -4,6 +4,7 @@
  * Implements hook_menu().
  */
 function wcmc_ors_menu() {
+  $items = array();
   $items['reporting/questionnaires'] = array(
     'title' => 'ORS questionnaires',
     'page callback' => 'drupal_get_form',
