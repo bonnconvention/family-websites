@@ -67,46 +67,48 @@ function cms_project_ds_layout_settings_info() {
       ),
       'region_5_1_3' => array(
         30 => 'field_project_signed_date',
-        31 => 'field_project_closed_date',
-      ),
-      'region_6_1_1' => array(
-        32 => 'field_project_cofunding',
-        33 => 'field_project_encumbrance_number',
-        34 => 'field_project_obmo',
-        35 => 'field_project_responsible_unit',
-      ),
-      'region_6_1_2' => array(
-        36 => 'field_project_comments',
-        37 => 'field_project_folder',
-      ),
-      'region_7_1_1' => array(
-        38 => 'field_project_images',
-      ),
-      'region_7_1_2' => array(
-        39 => 'field_project_file',
-      ),
-      'budget_line_bac' => array(
-        40 => 'field_project_bac',
-      ),
-      'activity' => array(
-        41 => 'field_project_activity',
-      ),
-      'schedule_of_payments' => array(
-        42 => 'field_project_payments',
-      ),
-      'related_content_1_1' => array(
-        43 => 'field_threats',
-        44 => 'field_project_document',
-        45 => 'field_project_nat_plan',
-        46 => 'field_project_national_reports',
-      ),
-      'related_content_1_2' => array(
-        47 => 'field_project_species',
-        48 => 'field_project_publication',
-        49 => 'field_project_meeting',
+        32 => 'field_project_closed_date',
       ),
       'hidden' => array(
-        50 => '_add_existing_field',
+        31 => 'redirect',
+        41 => 'metatags',
+        52 => '_add_existing_field',
+      ),
+      'region_6_1_1' => array(
+        33 => 'field_project_cofunding',
+        34 => 'field_project_encumbrance_number',
+        35 => 'field_project_obmo',
+        36 => 'field_project_responsible_unit',
+      ),
+      'region_6_1_2' => array(
+        37 => 'field_project_comments',
+        38 => 'field_project_folder',
+      ),
+      'region_7_1_1' => array(
+        39 => 'field_project_images',
+      ),
+      'region_7_1_2' => array(
+        40 => 'field_project_file',
+      ),
+      'budget_line_bac' => array(
+        42 => 'field_project_bac',
+      ),
+      'activity' => array(
+        43 => 'field_project_activity',
+      ),
+      'schedule_of_payments' => array(
+        44 => 'field_project_payments',
+      ),
+      'related_content_1_1' => array(
+        45 => 'field_threats',
+        46 => 'field_project_document',
+        47 => 'field_project_nat_plan',
+        48 => 'field_project_national_reports',
+      ),
+      'related_content_1_2' => array(
+        49 => 'field_project_species',
+        50 => 'field_project_publication',
+        51 => 'field_project_meeting',
       ),
     ),
     'fields' => array(
@@ -141,6 +143,7 @@ function cms_project_ds_layout_settings_info() {
       'field_project_tech_report' => 'region_5_1_2',
       'field_project_sgp' => 'region_5_1_2',
       'field_project_signed_date' => 'region_5_1_3',
+      'redirect' => 'hidden',
       'field_project_closed_date' => 'region_5_1_3',
       'field_project_cofunding' => 'region_6_1_1',
       'field_project_encumbrance_number' => 'region_6_1_1',
@@ -150,6 +153,7 @@ function cms_project_ds_layout_settings_info() {
       'field_project_folder' => 'region_6_1_2',
       'field_project_images' => 'region_7_1_1',
       'field_project_file' => 'region_7_1_2',
+      'metatags' => 'hidden',
       'field_project_bac' => 'budget_line_bac',
       'field_project_activity' => 'activity',
       'field_project_payments' => 'schedule_of_payments',

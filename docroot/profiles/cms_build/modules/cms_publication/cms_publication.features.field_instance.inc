@@ -62,6 +62,58 @@ function cms_publication_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-publication-field_cms_tags'
+  $field_instances['node-publication-field_cms_tags'] = array(
+    'bundle' => 'publication',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'inline',
+        'module' => 'cms',
+        'settings' => array(
+          'render_plain_text' => 1,
+          'render_tr' => 1,
+          'use_comma_separator' => 1,
+        ),
+        'type' => 'cms_term_reference_field_table_row_formatter',
+        'weight' => 25,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_cms_tags',
+    'label' => 'CMS tags',
+    'required' => 0,
+    'settings' => array(
+      'entity_translation_sync' => FALSE,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'options',
+      'settings' => array(
+        'apply_chosen' => '',
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'options_select',
+      'weight' => 42,
+    ),
+  );
+
   // Exported field_instance: 'node-publication-field_country'
   $field_instances['node-publication-field_country'] = array(
     'bundle' => 'publication',
@@ -220,6 +272,7 @@ function cms_publication_field_default_field_instances() {
         'settings' => array(
           'render_plain_text' => 1,
           'render_tr' => TRUE,
+          'use_comma_separator' => FALSE,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 12,
@@ -322,6 +375,7 @@ function cms_publication_field_default_field_instances() {
         'settings' => array(
           'render_plain_text' => 1,
           'render_tr' => TRUE,
+          'use_comma_separator' => FALSE,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 14,
@@ -485,6 +539,7 @@ function cms_publication_field_default_field_instances() {
         'settings' => array(
           'render_plain_text' => 1,
           'render_tr' => TRUE,
+          'use_comma_separator' => FALSE,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 13,
@@ -1029,6 +1084,7 @@ function cms_publication_field_default_field_instances() {
         'settings' => array(
           'render_plain_text' => 1,
           'render_tr' => TRUE,
+          'use_comma_separator' => FALSE,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 10,
@@ -1212,6 +1268,7 @@ function cms_publication_field_default_field_instances() {
   t('Attachment');
   t('Author(s)');
   t('CMS Instrument');
+  t('CMS tags');
   t('City');
   t('Co-authors');
   t('Country');

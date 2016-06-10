@@ -12,5 +12,6 @@
 <?php if (check_display_field($content, 'field_news_attachments')): ?>
     <?php echo render($content['field_news_attachments']); ?>
 <?php endif; ?>
+<?php print render($content['field_cms_tags']); ?>
 <?php print render($block['content']); ?>
 

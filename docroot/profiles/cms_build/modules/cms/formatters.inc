@@ -83,6 +83,7 @@ function cms_field_formatter_info() {
             'settings' => array(
                 'render_tr' => TRUE, /* Render enclosing TR */
                 'render_plain_text' => '1', /* Render as anchor */
+                'use_comma_separator' => FALSE, /* Render a comma instead of <br /> */
             ),
         ),
         'cms_iucn_status_formatter' => array(
@@ -243,6 +244,11 @@ function cms_field_formatter_settings_form($field, $instance, $view_mode, $form,
                 '#type'           => 'checkbox',
                 '#title'          => t('Render as plain text'),
                 '#default_value'  => $settings['render_plain_text']
+            );
+            $element['use_comma_separator'] = array(
+                '#type'           => 'checkbox',
+                '#title'          => t('Use comma as separator'),
+                '#default_value'  => $settings['use_comma_separator']
             );
             break;
         case 'cms_region_formatter':
@@ -1046,7 +1052,10 @@ function theme_cms_term_reference_field_table_row_formatter($variables) {
                     $output .= ($value['#settings']['render_plain_text'] == 0) ? l($title, $href) : $title;
                 }else {
                     $output .= ($value['#settings']['render_plain_text'] == 0) ? l($title, $href) : $title;
-                    $output .= '<br />';
+                    $output .= (!empty($value['#settings']['use_comma_separator'])
+                      &&$value['#settings']['use_comma_separator'] != FALSE)
+                      ? ', '
+                      : '<br />';
                 }
             }
         }

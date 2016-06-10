@@ -62,6 +62,7 @@
                       <?php echo render($content['field_publication_order_code']); ?>
                       <?php echo render($content['field_instrument']); ?>
                       <?php echo render($content['field_publication_source']); ?>
+                      <?php echo render($content['field_cms_tags']); ?>
                       </tbody>
                   </table>
               </div>

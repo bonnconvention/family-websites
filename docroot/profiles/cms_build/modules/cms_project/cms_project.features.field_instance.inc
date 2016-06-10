@@ -648,6 +648,58 @@ function cms_project_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-project-field_cms_tags'
+  $field_instances['node-project-field_cms_tags'] = array(
+    'bundle' => 'project',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'inline',
+        'module' => 'cms',
+        'settings' => array(
+          'render_plain_text' => 1,
+          'render_tr' => 1,
+          'use_comma_separator' => 1,
+        ),
+        'type' => 'cms_term_reference_field_table_row_formatter',
+        'weight' => 47,
+      ),
+      'scs' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_cms_tags',
+    'label' => 'CMS tags',
+    'required' => 0,
+    'settings' => array(
+      'entity_translation_sync' => FALSE,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'options',
+      'settings' => array(
+        'apply_chosen' => '',
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'options_select',
+      'weight' => 51,
+    ),
+  );
+
   // Exported field_instance: 'node-project-field_country'
   $field_instances['node-project-field_country'] = array(
     'bundle' => 'project',
@@ -1656,6 +1708,7 @@ function cms_project_field_default_field_instances() {
         'settings' => array(
           'render_plain_text' => 1,
           'render_tr' => TRUE,
+          'use_comma_separator' => FALSE,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 16,
@@ -2615,6 +2668,7 @@ function cms_project_field_default_field_instances() {
         'settings' => array(
           'render_plain_text' => 1,
           'render_tr' => TRUE,
+          'use_comma_separator' => FALSE,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 5,
@@ -2716,6 +2770,7 @@ function cms_project_field_default_field_instances() {
         'settings' => array(
           'render_plain_text' => 1,
           'render_tr' => 1,
+          'use_comma_separator' => FALSE,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 2,
@@ -2765,6 +2820,7 @@ function cms_project_field_default_field_instances() {
         'settings' => array(
           'render_plain_text' => 1,
           'render_tr' => TRUE,
+          'use_comma_separator' => FALSE,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 7,
@@ -2906,6 +2962,7 @@ function cms_project_field_default_field_instances() {
   t('Budget line (BAC)');
   t('CMS Appendix');
   t('CMS Instrument');
+  t('CMS tags');
   t('Closed on date');
   t('Collaborating agencies');
   t('Comments');
