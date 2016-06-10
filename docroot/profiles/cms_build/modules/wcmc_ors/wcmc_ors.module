@@ -5,7 +5,7 @@
  */
 function wcmc_ors_menu() {
   $items = array();
-  $items['reporting/questionnaires'] = array(
+  $items['questionnaires'] = array(
     'title' => 'ORS questionnaires',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('wcmc_ors_questionnaires_form'),
@@ -14,7 +14,7 @@ function wcmc_ors_menu() {
     'file' => 'wcmc_ors.forms.inc',
     'type' => MENU_CALLBACK,
   );
-  $items['reporting/questionnaires/%/questions'] = array(
+  $items['questionnaires/%/questions'] = array(
     'title' => 'ORS questionnaire questions',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('wcmc_ors_questions_form', 2),

@@ -70,7 +70,7 @@ function wcmc_ors_questionnaires_form($form, &$form_state) {
 
     $form['content']['questions-link'] = array(
       '#type' => 'item',
-      '#markup' => l('View questions', "reporting/questionnaires/$qid/questions", array('attributes' => array('target' => '_blank'))),
+      '#markup' => l('View questions', "questionnaires/$qid/questions", array('attributes' => array('target' => '_blank'))),
     );
 
     // Respondents
