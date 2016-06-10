@@ -134,14 +134,13 @@ function wcmc_ors_questions_form($form, $form_state, $qid) {
     drupal_set_message('The system is not properly configured to make API calls to the ORS. Please contact technical support.', 'error');
     return $form;
   }
-
   if ($questionnaire = $client->getQuestionnaire($qid)) {
     drupal_set_title($questionnaire->getTitle());
   }
 
   $form['back'] = array(
     '#type' => 'item',
-    '#markup' => l('Back to the list', 'reporting/questionnaires'),
+    '#markup' => l('Back to the list', 'questionnaires'),
   );
 
   $questions = $client->getQuestionnaireQuestions($qid);
