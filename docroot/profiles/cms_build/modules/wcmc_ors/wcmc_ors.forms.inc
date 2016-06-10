@@ -4,11 +4,13 @@ function wcmc_ors_configuration_form($form, $form_state) {
   $form['wcmc_ors_api_key'] = array(
     '#type' => 'textfield',
     '#title' => 'API Key',
+    '#default_value' => variable_get('wcmc_ors_api_key'),
     '#description' => 'API key required to access the service. <a href="http://cms-ors-api.ort-staging.linode.unep-wcmc.org/users/new?lang=en" target="_blank">Sign up here for a key</a>, then login to your account where the key is located',
   );
   $form['wcmc_ors_api_url'] = array(
     '#type' => 'textfield',
     '#title' => 'API Endpoint URL',
+    '#default_value' => variable_get('wcmc_ors_api_url'),
     '#description' => 'Where is the service located'
   );
   return system_settings_form($form);
