@@ -58,32 +58,19 @@ function wcmc_ors_questionnaires_form($form, &$form_state) {
     /** @var ORSQuestionnaire $questionnaire */
     $questionnaire = $questionnaires[$qid];
     $form_state['questionnaire'] = $questionnaire;
-
     // Questionnaire details
-    $content = "<h2>" . $questionnaire->getTitle() . "</h2><dl class='dl-horizontal'>";
-    if (!empty($questionnaire->getStatus())) {
-      $content .= "<dt>Status</dt><dd>" . $questionnaire->getStatus() . "</dd>";
-    }
-    if (!empty($questionnaire->getActivatedOn())) {
-      $content .= "<dt>Activated on</dt><dd>" . $questionnaire->getActivatedOn() . "</dd>";
-    }
-    if (!empty($questionnaire->getLanguage())) {
-      $content .= "<dt>Language</dt><dd>{$questionnaire->getLanguage()}</dd>";
-    }
-    if (!empty($questionnaire->getLanguages())) {
-      $content .= "<dt>Languages</dt><dd>" . implode(', ' , $questionnaire->getLanguages()) . "</dd>";
-    }
-    $content .= "<dt>Submission percentage</dt><dd>" . sprintf('%.2f%%', $questionnaire->getSubmissionPercentage()) . "</dd>";
-    if (user_is_logged_in()) {
-      $content .= "<dt>URL</dt><dd>" . $questionnaire->getUrl() . "</dd>";
-      $content .= "<dt>Questions URL</dt><dd>" . $questionnaire->getQuestionsUrl() . "</dd>";
-    }
-    $content .= "</dl>";
+    $content = "<h2>" . $questionnaire->getTitle() . "</h2>";
+    $content .= QuestionnaireUIHelper::detailsPane($questionnaire);
     $content .= '<div id="respondents-chart"></div><div class="clear"></div>';
 
     $form['content']['summary'] = array(
       '#type' => 'item',
       '#markup' => $content
+    );
+
+    $form['content']['questions-link'] = array(
+      '#type' => 'item',
+      '#markup' => l('View questions', "reporting/questionnaires/$qid/questions", array('attributes' => array('target' => '_blank'))),
     );
 
     // Respondents
@@ -132,6 +119,29 @@ function ajax_example_autocheckboxes_callback($form, $form_state) {
 }
 
 
-function wcmc_ors_questions_form($form, $form_state) {
+function wcmc_ors_questions_form($form, $form_state, $qid) {
+  drupal_add_css(drupal_get_path('module', 'wcmc_ors') . '/css/questions.css');
+  $form = array('#tree' => TRUE);
+  $config = array(
+    'wcmc_ors_api_key' => variable_get('wcmc_ors_api_key'),
+    'wcmc_ors_api_url' => variable_get('wcmc_ors_api_url'),
+  );
+  $client = new WCMCOrsClient($config);
+  if (!$client->isConfigured()) {
+    drupal_set_message('The system is not properly configured to make API calls to the ORS. Please contact technical support.', 'error');
+    return $form;
+  }
 
+  $questionnaire = $client->getQuestionnaire($qid);
+  drupal_set_title($questionnaire->getTitle());
+
+  $form['back'] = array(
+    '#type' => 'item',
+    '#markup' => l('Back to the list', 'reporting/questionnaires'),
+  );
+
+  $questions = $client->getQuestionnaireQuestions($qid);
+  $form['questions'] = QuestionnaireUIHelper::questionnaireQuestions($questions);
+
+  return $form;
 }

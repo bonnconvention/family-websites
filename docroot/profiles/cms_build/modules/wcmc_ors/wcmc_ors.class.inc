@@ -1,110 +1,58 @@
 <?php
 
 
-interface ORSQuestionnaire {
-
-  function getId();
-  function getTitle();
-  function getLanguage();
-  function getLanguages();
-  function getStatus();
-  function getActivatedOn();
-  function getSubmissionPercentage();
-  function getQuestionsUrl();
-  function getUrl();
-}
-
-
 class ORSQuestionnaireFactory {
 
-  static function create($item) {
+  static function createQuestionnaire($item) {
     return new ORSQuestionnaireV1($item);
+  }
+
+  static function createQuestion($item) {
+    return new ORSQuestionV1($item);
   }
 }
 
 
-class ORSQuestionnaireV1 implements ORSQuestionnaire {
+class QuestionnaireUIHelper {
 
-  protected $id;
-  protected $submission_percentage;
-
-  public function __construct($item) {
-    $this->submission_percentage = t('Unknown');
-    foreach ($item as $k => $v) {
-      $this->$k = $v;
+  /**
+   * @param ORSQuestionnaire $questionnaire
+   * @return string
+   */
+  static function detailsPane($questionnaire) {
+    // Questionnaire details
+    $content = "<dl class='dl-horizontal'>";
+    if (!empty($questionnaire->getStatus())) {
+      $content .= "<dt>Status</dt><dd>" . $questionnaire->getStatus() . "</dd>";
     }
-
-    $languages = language_list();
-    if (!empty($this->language) && !empty($languages[strtolower($this->language)])) {
-      $l = $languages[strtolower($this->language)];
-      $this->language = $l->name;
+    if (!empty($questionnaire->getActivatedOn())) {
+      $content .= "<dt>Activated on</dt><dd>" . $questionnaire->getActivatedOn() . "</dd>";
     }
+    if (!empty($questionnaire->getLanguage())) {
+      $content .= "<dt>Language</dt><dd>{$questionnaire->getLanguage()}</dd>";
+    }
+    if (!empty($questionnaire->getLanguages())) {
+      $content .= "<dt>Languages</dt><dd>" . implode(', ' , $questionnaire->getLanguages()) . "</dd>";
+    }
+    $content .= "<dt>Submission percentage</dt><dd>" . sprintf('%.2f%%', $questionnaire->getSubmissionPercentage()) . "</dd>";
+    if (user_is_logged_in()) {
+      $content .= "<dt>URL</dt><dd>" . $questionnaire->getUrl() . "</dd>";
+      $content .= "<dt>Questions URL</dt><dd>" . $questionnaire->getQuestionsUrl() . "</dd>";
+    }
+    $content .= "</dl>";
+    return $content;
+  }
 
-    $langs = array();
-    if (!empty($this->languages)) {
-      foreach ($this->languages as &$language) {
-        if (!empty($language) && !empty($languages[strtolower($language)])) {
-          $l = $languages[strtolower($language)];
-          $langs[] = $l->name;
-        }
+  static function questionnaireQuestions($questions) {
+    $ret = array('#tree' => TRUE);
+    $i = 0;
+    /** @var $question ORSQuestion */
+    foreach($questions as $id => $question) {
+      if ($element = $question->getFormElement(++$i)) {
+        $ret[$id] = $element;
       }
     }
-    $this->languages = $langs;
-    $this->prepareQuestionnaireRespondents();
+    return $ret;
   }
 
-  public function getId() {
-    return $this->id;
-  }
-
-  public function getTitle() {
-    return $this->title;
-  }
-
-  public function getLanguage() {
-    return $this->language;
-  }
-
-  public function getLanguages() {
-    return $this->languages;
-  }
-
-  public function getStatus() {
-    return $this->status;
-  }
-
-  public function getActivatedOn() {
-    return $this->activated_on;
-  }
-
-  public function getSubmissionPercentage() {
-    return $this->submission_percentage;
-  }
-
-  public function getQuestionsUrl() {
-    return $this->questions_url;
-  }
-
-  public function getUrl() {
-    return $this->url;
-
-  }
-
-  private function prepareQuestionnaireRespondents() {
-    $this->submission_percentage = 0;
-    if (!empty($this->respondents)) {
-      $submitted = 0;
-      foreach ($this->respondents as &$value) {
-        if (!empty($value['respondent'])) {
-          $value = (object)$value['respondent'];
-          if (strtolower($value->status) == 'submitted') {
-            $submitted++;
-          }
-        }
-      }
-      if ($submitted > 0) {
-        $this->submission_percentage = $submitted * 100 / count($this->respondents);
-      }
-    }
-  }
 }

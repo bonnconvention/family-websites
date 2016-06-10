@@ -19,9 +19,32 @@ class WCMCOrsClient {
     if (!empty($response['questionnaires']) && is_array($response['questionnaires'])) {
       foreach ($response['questionnaires'] as $item) {
         if (!empty($item['questionnaire'])) {
-          $row = ORSQuestionnaireFactory::create($item['questionnaire']);
+          $row = ORSQuestionnaireFactory::createQuestionnaire($item['questionnaire']);
           $ret[$row->getId()] = $row;
         }
+      }
+    }
+    return $ret;
+  }
+
+  public function getQuestionnaire($id) {
+    $ret = array();
+    $url = $this->url('/api/v1/questionnaires/' . $id);
+    $response = $this->ajaxCall($url);
+    if (!empty($response['questionnaire'])) {
+      $ret = ORSQuestionnaireFactory::createQuestionnaire($response['questionnaire']);
+    }
+    return $ret;
+  }
+
+  public function getQuestionnaireQuestions($id) {
+    $ret = array();
+    $url = $this->url('/api/v1/questionnaires/' . $id . '/questions');
+    $response = $this->ajaxCall($url);
+    if (!empty($response['questions'])) {
+      foreach ($response['questions'] as $item) {
+        $row = ORSQuestionnaireFactory::createQuestion($item['question']);
+        $ret[$row->getId()] = $row;
       }
     }
     return $ret;

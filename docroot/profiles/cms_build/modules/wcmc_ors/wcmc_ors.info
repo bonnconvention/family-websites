@@ -8,3 +8,5 @@ configure = admin/config/services/ors
 files[] = wcmc_ors.charts.inc
 files[] = wcmc_ors.class.inc
 files[] = wcmc_ors.client.inc
+files[] = includes/question.inc
+files[] = includes/questionnaire.inc
