@@ -685,12 +685,13 @@ function cms_project_field_default_field_instances() {
     ),
     'widget' => array(
       'active' => 0,
-      'module' => 'taxonomy',
+      'module' => 'options',
       'settings' => array(
+        'apply_chosen' => '',
         'autocomplete_path' => 'taxonomy/autocomplete',
         'size' => 60,
       ),
-      'type' => 'taxonomy_autocomplete',
+      'type' => 'options_select',
       'weight' => 51,
     ),
   );
@@ -1703,6 +1704,7 @@ function cms_project_field_default_field_instances() {
         'settings' => array(
           'render_plain_text' => 1,
           'render_tr' => TRUE,
+          'use_comma_separator' => FALSE,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 16,
@@ -2662,6 +2664,7 @@ function cms_project_field_default_field_instances() {
         'settings' => array(
           'render_plain_text' => 1,
           'render_tr' => TRUE,
+          'use_comma_separator' => FALSE,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 5,
@@ -2763,6 +2766,7 @@ function cms_project_field_default_field_instances() {
         'settings' => array(
           'render_plain_text' => 1,
           'render_tr' => 1,
+          'use_comma_separator' => FALSE,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 2,
@@ -2812,6 +2816,7 @@ function cms_project_field_default_field_instances() {
         'settings' => array(
           'render_plain_text' => 1,
           'render_tr' => TRUE,
+          'use_comma_separator' => FALSE,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 7,

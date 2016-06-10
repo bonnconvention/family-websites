@@ -76,8 +76,8 @@ function cms_news_field_default_field_instances() {
         'label' => 'above',
         'module' => 'i18n_taxonomy',
         'settings' => array(),
-        'type' => 'i18n_taxonomy_term_reference_link',
-        'weight' => 21,
+        'type' => 'i18n_taxonomy_term_reference_plain',
+        'weight' => 9,
       ),
       'scs' => array(
         'label' => 'above',
@@ -102,12 +102,13 @@ function cms_news_field_default_field_instances() {
     ),
     'widget' => array(
       'active' => 0,
-      'module' => 'taxonomy',
+      'module' => 'options',
       'settings' => array(
+        'apply_chosen' => '',
         'autocomplete_path' => 'taxonomy/autocomplete',
         'size' => 60,
       ),
-      'type' => 'taxonomy_autocomplete',
+      'type' => 'options_select',
       'weight' => 43,
     ),
   );
@@ -175,7 +176,7 @@ function cms_news_field_default_field_instances() {
         'label' => 'hidden',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 19,
+        'weight' => 20,
       ),
       'scs' => array(
         'label' => 'above',
@@ -288,7 +289,7 @@ function cms_news_field_default_field_instances() {
         'module' => 'list',
         'settings' => array(),
         'type' => 'list_default',
-        'weight' => 15,
+        'weight' => 16,
       ),
       'scs' => array(
         'label' => 'above',
@@ -342,7 +343,7 @@ function cms_news_field_default_field_instances() {
           'colorbox_node_style_first' => 'medium_thumbnail',
         ),
         'type' => 'colorbox',
-        'weight' => 16,
+        'weight' => 17,
       ),
       'scs' => array(
         'label' => 'above',
@@ -402,7 +403,7 @@ function cms_news_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 18,
+        'weight' => 19,
       ),
       'scs' => array(
         'label' => 'above',
@@ -452,7 +453,7 @@ function cms_news_field_default_field_instances() {
         'module' => 'list',
         'settings' => array(),
         'type' => 'list_default',
-        'weight' => 17,
+        'weight' => 18,
       ),
       'scs' => array(
         'label' => 'above',
@@ -549,7 +550,7 @@ function cms_news_field_default_field_instances() {
         'module' => 'text',
         'settings' => array(),
         'type' => 'text_default',
-        'weight' => 9,
+        'weight' => 10,
       ),
       'scs' => array(
         'label' => 'above',
@@ -595,7 +596,7 @@ function cms_news_field_default_field_instances() {
         'module' => 'file',
         'settings' => array(),
         'type' => 'file_default',
-        'weight' => 14,
+        'weight' => 15,
       ),
       'scs' => array(
         'label' => 'above',
@@ -650,7 +651,7 @@ function cms_news_field_default_field_instances() {
           'multiple_to' => '',
         ),
         'type' => 'date_default',
-        'weight' => 12,
+        'weight' => 13,
       ),
       'scs' => array(
         'label' => 'above',
@@ -705,7 +706,7 @@ function cms_news_field_default_field_instances() {
         'module' => 'link',
         'settings' => array(),
         'type' => 'link_default',
-        'weight' => 11,
+        'weight' => 12,
       ),
       'scs' => array(
         'label' => 'above',
@@ -770,7 +771,7 @@ function cms_news_field_default_field_instances() {
         'module' => 'taxonomy',
         'settings' => array(),
         'type' => 'taxonomy_term_reference_plain',
-        'weight' => 13,
+        'weight' => 14,
       ),
       'scs' => array(
         'label' => 'above',
@@ -816,7 +817,7 @@ function cms_news_field_default_field_instances() {
         'module' => 'taxonomy',
         'settings' => array(),
         'type' => 'taxonomy_term_reference_plain',
-        'weight' => 10,
+        'weight' => 11,
       ),
       'scs' => array(
         'label' => 'above',
@@ -1065,7 +1066,7 @@ function cms_news_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 20,
+        'weight' => 21,
       ),
       'scs' => array(
         'label' => 'above',
