@@ -80,6 +80,7 @@
                         <?php
                         }
                         echo render($content['field_project_collab_agency']);
+                        echo render($content['field_cms_tags']);
                         ?>
                         </tbody>
                     </table>

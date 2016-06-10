@@ -95,6 +95,12 @@ function cms_project_strongarm() {
       'email_textalt' => array(
         'custom_settings' => FALSE,
       ),
+      'scs' => array(
+        'custom_settings' => TRUE,
+      ),
+      'revision' => array(
+        'custom_settings' => FALSE,
+      ),
     ),
     'extra_fields' => array(
       'form' => array(
