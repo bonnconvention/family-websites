@@ -305,11 +305,14 @@ function cms_document_field_default_field_instances() {
     'description' => '',
     'display' => array(
       'default' => array(
-        'label' => 'above',
-        'module' => 'i18n_taxonomy',
-        'settings' => array(),
-        'type' => 'i18n_taxonomy_term_reference_link',
-        'weight' => 20,
+        'label' => 'inline',
+        'module' => 'cms',
+        'settings' => array(
+          'render_plain_text' => 1,
+          'render_tr' => 1,
+        ),
+        'type' => 'cms_term_reference_field_table_row_formatter',
+        'weight' => 7,
       ),
       'scs' => array(
         'label' => 'above',
@@ -340,7 +343,7 @@ function cms_document_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'taxonomy_autocomplete',
-      'weight' => 25,
+      'weight' => 11,
     ),
   );
 
@@ -803,7 +806,7 @@ function cms_document_field_default_field_instances() {
           'render_tr' => TRUE,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
-        'weight' => 7,
+        'weight' => 6,
       ),
       'scs' => array(
         'label' => 'above',
@@ -854,7 +857,7 @@ function cms_document_field_default_field_instances() {
           'render_tr' => TRUE,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
-        'weight' => 5,
+        'weight' => 4,
       ),
       'scs' => array(
         'label' => 'above',
@@ -904,7 +907,7 @@ function cms_document_field_default_field_instances() {
           'render_tr' => TRUE,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
-        'weight' => 6,
+        'weight' => 5,
       ),
       'scs' => array(
         'label' => 'above',
