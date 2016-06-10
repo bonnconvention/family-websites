@@ -44,7 +44,7 @@ function wcmc_ors_questionnaires_form($form, &$form_state) {
     '#type' => 'select',
     '#options' => $options,
     '#ajax' => array(
-      'callback' => 'ajax_example_autocheckboxes_callback',
+      'callback' => 'wcmc_ors_questionnaires_form_ajax',
     ),
   );
 
@@ -110,7 +110,7 @@ function wcmc_ors_questionnaires_form($form, &$form_state) {
  * Since #ajax['callback'] return can be HTML or a renderable array (or an
  * array of commands), we can just return a piece of the form.
  */
-function ajax_example_autocheckboxes_callback($form, $form_state) {
+function wcmc_ors_questionnaires_form_ajax($form, $form_state) {
   $commands = array(
     ajax_command_replace('#report-content', drupal_render($form['content']))
   );

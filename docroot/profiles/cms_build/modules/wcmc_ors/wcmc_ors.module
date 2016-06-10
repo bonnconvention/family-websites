@@ -17,7 +17,7 @@ function wcmc_ors_menu() {
   $items['questionnaires/%/questions'] = array(
     'title' => 'ORS questionnaire questions',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('wcmc_ors_questions_form', 2),
+    'page arguments' => array('wcmc_ors_questions_form', 1),
     'access callback' => 'user_access',
     'access arguments' => array('access content'),
     'file' => 'wcmc_ors.forms.inc',
