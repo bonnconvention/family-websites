@@ -310,6 +310,7 @@ function cms_document_field_default_field_instances() {
         'settings' => array(
           'render_plain_text' => 1,
           'render_tr' => 1,
+          'use_comma_separator' => 1,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 7,
@@ -804,6 +805,7 @@ function cms_document_field_default_field_instances() {
         'settings' => array(
           'render_plain_text' => 1,
           'render_tr' => TRUE,
+          'use_comma_separator' => FALSE,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 6,
@@ -855,6 +857,7 @@ function cms_document_field_default_field_instances() {
         'settings' => array(
           'render_plain_text' => 1,
           'render_tr' => TRUE,
+          'use_comma_separator' => FALSE,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 4,
@@ -905,6 +908,7 @@ function cms_document_field_default_field_instances() {
         'settings' => array(
           'render_plain_text' => 1,
           'render_tr' => TRUE,
+          'use_comma_separator' => FALSE,
         ),
         'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 5,
