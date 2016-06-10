@@ -22,5 +22,16 @@ function wcmc_ors_menu() {
     'file' => 'wcmc_ors.forms.inc',
     'type' => MENU_CALLBACK,
   );
+  $items['admin/config/services/ors'] = array(
+    'title' => 'ORS configuration',
+    'description' => 'Configuration screen for the WCMC ORS integration module',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wcmc_ors_configuration_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'wcmc_ors.forms.inc',
+    'menu_name' => 'management',
+    'type' => MENU_NORMAL_ITEM,
+  );
   return $items;
 }

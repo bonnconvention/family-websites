@@ -1,13 +1,31 @@
 <?php
 
+function wcmc_ors_configuration_form($form, $form_state) {
+  $form['wcmc_ors_api_key'] = array(
+    '#type' => 'textfield',
+    '#title' => 'API Key',
+    '#description' => 'API key required to access the service. <a href="http://cms-ors-api.ort-staging.linode.unep-wcmc.org/users/new?lang=en" target="_blank">Sign up here for a key</a>, then login to your account where the key is located',
+  );
+  $form['wcmc_ors_api_url'] = array(
+    '#type' => 'textfield',
+    '#title' => 'API Endpoint URL',
+    '#description' => 'Where is the service located'
+  );
+  return system_settings_form($form);
+}
+
 function wcmc_ors_questionnaires_form($form, &$form_state) {
   drupal_set_title('Online Report System');
   $form = array('#tree' => TRUE);
   $config = array(
-    'api_key' => 'ZBOfgOmHKzEajv5Xw0p',
-    'url' => 'http://cms-ors-api.ort-staging.linode.unep-wcmc.org',
+    'wcmc_ors_api_key' => variable_get('wcmc_ors_api_key'),
+    'wcmc_ors_api_url' => variable_get('wcmc_ors_api_url'),
   );
   $client = new WCMCOrsClient($config);
+  if (!$client->isConfigured()) {
+    drupal_set_message('The system is not properly configured to make API calls to the ORS. Please contact technical support.', 'error');
+    return $form;
+  }
   drupal_add_js('https://www.gstatic.com/charts/loader.js');
   drupal_add_js(drupal_get_path('module', 'wcmc_ors') . '/js/questionnaires.js');
   drupal_add_css(drupal_get_path('module', 'wcmc_ors') . '/css/questionnaires.css');

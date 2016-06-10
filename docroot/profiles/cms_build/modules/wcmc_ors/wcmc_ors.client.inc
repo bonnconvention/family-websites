@@ -8,6 +8,10 @@ class WCMCOrsClient {
     $this->config = $config;
   }
 
+  public function isConfigured() {
+    return !empty($this->config['wcmc_ors_api_key']) && !empty($this->config['wcmc_ors_api_url']);
+  }
+
   public function getQuestionnaires() {
     $ret = array();
     $url = $this->url('/api/v1/questionnaires');
@@ -25,14 +29,14 @@ class WCMCOrsClient {
 
 
   public function url($suffix) {
-    return $this->config['url'] . '/' . $suffix;
+    return $this->config['wcmc_ors_api_url'] . '/' . $suffix;
   }
 
 
   public function ajaxCall($url, $headers = array()) {
     $ret = NULL;
     if (empty($headers['X-Authentication-Token'])) {
-      $headers[] = 'X-Authentication-Token:' . $this->config['api_key'];
+      $headers[] = 'X-Authentication-Token:' . $this->config['wcmc_ors_api_key'];
     }
     if ($content = $this->httpCall($url, $headers)) {
       $ret = json_decode($content, TRUE);
