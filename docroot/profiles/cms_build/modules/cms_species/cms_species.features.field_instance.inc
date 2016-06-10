@@ -1387,10 +1387,14 @@ function cms_species_field_default_field_instances() {
     'description' => '',
     'display' => array(
       'default' => array(
-        'label' => 'above',
-        'module' => 'i18n_taxonomy',
-        'settings' => array(),
-        'type' => 'i18n_taxonomy_term_reference_link',
+        'label' => 'inline',
+        'module' => 'cms',
+        'settings' => array(
+          'render_plain_text' => 1,
+          'render_tr' => 1,
+          'use_comma_separator' => 1,
+        ),
+        'type' => 'cms_term_reference_field_table_row_formatter',
         'weight' => 55,
       ),
       'scs' => array(

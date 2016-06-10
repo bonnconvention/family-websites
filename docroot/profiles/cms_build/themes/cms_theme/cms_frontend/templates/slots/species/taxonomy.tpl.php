@@ -38,5 +38,9 @@
             echo render($content['field_species_synonyms']);
         }
 
+        if(check_display_field($content, 'field_cms_tags')) {
+            echo render($content['field_cms_tags']);
+        }
+
         ?>
     </table>
