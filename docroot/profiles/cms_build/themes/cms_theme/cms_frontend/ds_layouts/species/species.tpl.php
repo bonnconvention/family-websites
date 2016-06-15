@@ -8,6 +8,8 @@
   <?php print render($title_suffix['contextual_links']); ?>
 <?php endif; ?>
 
+<?php print $top_row; ?>
+
 <div id="accordion" class="panel-group">
   <div class="panel panel-default">
     <div class="panel-heading">

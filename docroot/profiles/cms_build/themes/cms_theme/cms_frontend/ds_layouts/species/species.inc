@@ -8,6 +8,7 @@ function ds_species() {
   return array(
     'label' => t('Species'),
     'regions' => array(
+      'top_row' => t('Top row'),
       'taxonomy_1_1' => t('Taxonomy (row 1, column 1)'),
       'taxonomy_1_2' => t('Taxonomy (row 1, column 2)'),
       'taxonomy_1_3' => t('Taxonomy (row 1, column 3)'),

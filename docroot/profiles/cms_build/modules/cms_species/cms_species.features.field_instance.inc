@@ -1331,7 +1331,7 @@ function cms_species_field_default_field_instances() {
         'summary_rows' => 5,
       ),
       'type' => 'text_textarea_with_summary',
-      'weight' => 19,
+      'weight' => 35,
     ),
   );
 
@@ -1375,7 +1375,7 @@ function cms_species_field_default_field_instances() {
       'module' => 'field_collection',
       'settings' => array(),
       'type' => 'field_collection_embed',
-      'weight' => 38,
+      'weight' => 47,
     ),
   );
 
@@ -1427,7 +1427,7 @@ function cms_species_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'options_select',
-      'weight' => 48,
+      'weight' => 39,
     ),
   );
 
@@ -1485,7 +1485,7 @@ function cms_species_field_default_field_instances() {
         'year_range' => '1979:+0',
       ),
       'type' => 'date_select',
-      'weight' => 17,
+      'weight' => 21,
     ),
   );
 
@@ -1543,7 +1543,7 @@ function cms_species_field_default_field_instances() {
         'year_range' => '1979:+0',
       ),
       'type' => 'date_select',
-      'weight' => 18,
+      'weight' => 22,
     ),
   );
 
@@ -1594,7 +1594,7 @@ function cms_species_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'taxonomy_autocomplete',
-      'weight' => 11,
+      'weight' => 7,
     ),
   );
 
@@ -1645,7 +1645,7 @@ function cms_species_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'taxonomy_autocomplete',
-      'weight' => 4,
+      'weight' => 1,
     ),
   );
 
@@ -1698,7 +1698,7 @@ function cms_species_field_default_field_instances() {
         'display_label' => 1,
       ),
       'type' => 'options_onoff',
-      'weight' => 21,
+      'weight' => 16,
     ),
   );
 
@@ -1751,7 +1751,7 @@ function cms_species_field_default_field_instances() {
         'display_label' => 1,
       ),
       'type' => 'options_onoff',
-      'weight' => 22,
+      'weight' => 17,
     ),
   );
 
@@ -1802,7 +1802,7 @@ function cms_species_field_default_field_instances() {
         'rows' => 5,
       ),
       'type' => 'text_textarea',
-      'weight' => 25,
+      'weight' => 36,
     ),
   );
 
@@ -1850,7 +1850,7 @@ function cms_species_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 45,
+      'weight' => 32,
     ),
   );
 
@@ -1897,7 +1897,7 @@ function cms_species_field_default_field_instances() {
         'size' => 30,
       ),
       'type' => 'text_textfield',
-      'weight' => 39,
+      'weight' => 9,
     ),
   );
 
@@ -1948,7 +1948,7 @@ function cms_species_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'taxonomy_autocomplete',
-      'weight' => 6,
+      'weight' => 4,
     ),
   );
 
@@ -1999,7 +1999,7 @@ function cms_species_field_default_field_instances() {
         'size' => 30,
       ),
       'type' => 'text_textfield',
-      'weight' => 16,
+      'weight' => 15,
     ),
   );
 
@@ -2050,7 +2050,7 @@ function cms_species_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'taxonomy_autocomplete',
-      'weight' => 7,
+      'weight' => 3,
     ),
   );
 
@@ -2106,7 +2106,7 @@ function cms_species_field_default_field_instances() {
         'progress_indicator' => 'throbber',
       ),
       'type' => 'image_image',
-      'weight' => 34,
+      'weight' => 38,
     ),
   );
 
@@ -2150,7 +2150,7 @@ function cms_species_field_default_field_instances() {
       'module' => 'field_collection',
       'settings' => array(),
       'type' => 'field_collection_embed',
-      'weight' => 36,
+      'weight' => 23,
     ),
   );
 
@@ -2197,7 +2197,7 @@ function cms_species_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 26,
+      'weight' => 44,
     ),
   );
 
@@ -2248,7 +2248,7 @@ function cms_species_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 27,
+      'weight' => 18,
     ),
   );
 
@@ -2296,7 +2296,7 @@ function cms_species_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 41,
+      'weight' => 28,
     ),
   );
 
@@ -2347,7 +2347,7 @@ function cms_species_field_default_field_instances() {
         'size' => 30,
       ),
       'type' => 'text_textfield',
-      'weight' => 15,
+      'weight' => 14,
     ),
   );
 
@@ -2398,7 +2398,7 @@ function cms_species_field_default_field_instances() {
         'size' => 30,
       ),
       'type' => 'text_textfield',
-      'weight' => 12,
+      'weight' => 11,
     ),
   );
 
@@ -2449,7 +2449,7 @@ function cms_species_field_default_field_instances() {
         'size' => 30,
       ),
       'type' => 'text_textfield',
-      'weight' => 14,
+      'weight' => 13,
     ),
   );
 
@@ -2500,7 +2500,7 @@ function cms_species_field_default_field_instances() {
         'size' => 30,
       ),
       'type' => 'text_textfield',
-      'weight' => 13,
+      'weight' => 12,
     ),
   );
 
@@ -2548,7 +2548,7 @@ function cms_species_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 44,
+      'weight' => 31,
     ),
   );
 
@@ -2599,7 +2599,7 @@ function cms_species_field_default_field_instances() {
         'rows' => 5,
       ),
       'type' => 'text_textarea',
-      'weight' => 28,
+      'weight' => 37,
     ),
   );
 
@@ -2650,7 +2650,7 @@ function cms_species_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'taxonomy_autocomplete',
-      'weight' => 5,
+      'weight' => 2,
     ),
   );
 
@@ -2698,7 +2698,7 @@ function cms_species_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 46,
+      'weight' => 33,
     ),
   );
 
@@ -2743,7 +2743,7 @@ function cms_species_field_default_field_instances() {
       'module' => 'field_collection',
       'settings' => array(),
       'type' => 'field_collection_embed',
-      'weight' => 31,
+      'weight' => 26,
     ),
   );
 
@@ -2791,7 +2791,7 @@ function cms_species_field_default_field_instances() {
         'size' => 30,
       ),
       'type' => 'text_textfield',
-      'weight' => 23,
+      'weight' => 19,
     ),
   );
 
@@ -2853,7 +2853,7 @@ function cms_species_field_default_field_instances() {
         'year_range' => '1983:+0',
       ),
       'type' => 'date_select',
-      'weight' => 24,
+      'weight' => 20,
     ),
   );
 
@@ -2898,7 +2898,7 @@ function cms_species_field_default_field_instances() {
       'module' => 'field_collection',
       'settings' => array(),
       'type' => 'field_collection_embed',
-      'weight' => 32,
+      'weight' => 27,
     ),
   );
 
@@ -2946,7 +2946,7 @@ function cms_species_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 43,
+      'weight' => 30,
     ),
   );
 
@@ -2994,7 +2994,7 @@ function cms_species_field_default_field_instances() {
         'apply_chosen' => '',
       ),
       'type' => 'options_select',
-      'weight' => 42,
+      'weight' => 29,
     ),
   );
 
@@ -3039,7 +3039,7 @@ function cms_species_field_default_field_instances() {
       'module' => 'field_collection',
       'settings' => array(),
       'type' => 'field_collection_embed',
-      'weight' => 29,
+      'weight' => 24,
     ),
   );
 
@@ -3090,7 +3090,7 @@ function cms_species_field_default_field_instances() {
         'rows' => 5,
       ),
       'type' => 'text_textarea',
-      'weight' => 30,
+      'weight' => 25,
     ),
   );
 
@@ -3141,7 +3141,7 @@ function cms_species_field_default_field_instances() {
         'size' => 5,
       ),
       'type' => 'text_textfield',
-      'weight' => 10,
+      'weight' => 43,
     ),
   );
 
@@ -3192,7 +3192,7 @@ function cms_species_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'taxonomy_autocomplete',
-      'weight' => 8,
+      'weight' => 5,
     ),
   );
 
@@ -3242,7 +3242,7 @@ function cms_species_field_default_field_instances() {
         'size' => 30,
       ),
       'type' => 'text_textfield',
-      'weight' => 33,
+      'weight' => 8,
     ),
   );
 
@@ -3286,7 +3286,7 @@ function cms_species_field_default_field_instances() {
       'module' => 'field_collection',
       'settings' => array(),
       'type' => 'field_collection_embed',
-      'weight' => 37,
+      'weight' => 46,
     ),
   );
 
@@ -3337,7 +3337,7 @@ function cms_species_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'taxonomy_autocomplete',
-      'weight' => 9,
+      'weight' => 6,
     ),
   );
 
@@ -3387,7 +3387,7 @@ function cms_species_field_default_field_instances() {
         'size' => 30,
       ),
       'type' => 'text_textfield',
-      'weight' => 40,
+      'weight' => 10,
     ),
   );
 
@@ -3431,7 +3431,7 @@ function cms_species_field_default_field_instances() {
       'module' => 'field_collection',
       'settings' => array(),
       'type' => 'field_collection_embed',
-      'weight' => 35,
+      'weight' => 34,
     ),
   );
 
@@ -3480,7 +3480,7 @@ function cms_species_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => -5,
+      'weight' => 0,
     ),
   );
 

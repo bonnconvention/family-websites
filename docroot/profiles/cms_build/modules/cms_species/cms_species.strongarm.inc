@@ -108,19 +108,19 @@ function cms_species_strongarm() {
           'weight' => '0',
         ),
         'domain' => array(
-          'weight' => '2',
+          'weight' => '41',
         ),
         'domain_path' => array(
-          'weight' => '1',
-        ),
-        'path' => array(
-          'weight' => '3',
-        ),
-        'metatags' => array(
           'weight' => '40',
         ),
+        'path' => array(
+          'weight' => '42',
+        ),
+        'metatags' => array(
+          'weight' => '48',
+        ),
         'redirect' => array(
-          'weight' => '30',
+          'weight' => '45',
         ),
       ),
       'display' => array(
