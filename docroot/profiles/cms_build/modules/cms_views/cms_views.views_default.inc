@@ -18673,6 +18673,12 @@ return "";';
       'empty_column' => 0,
     ),
   );
+  /* Header: Global: Text area */
+  $handler->display->display_options['header']['area']['id'] = 'area';
+  $handler->display->display_options['header']['area']['table'] = 'views';
+  $handler->display->display_options['header']['area']['field'] = 'area';
+  $handler->display->display_options['header']['area']['content'] = 'This screen allows you to define the way you want to have the decisions ordered in the InforMEA page. Use the mouse to drag and drop, and once you are satisfied with the sorting, press the \'Save\' button.';
+  $handler->display->display_options['header']['area']['format'] = 'full_html';
   /* Field: Draggableviews: Content */
   $handler->display->display_options['fields']['draggableviews']['id'] = 'draggableviews';
   $handler->display->display_options['fields']['draggableviews']['table'] = 'node';
@@ -18773,6 +18779,7 @@ return "";';
     t('Sort by'),
     t('Asc'),
     t('Desc'),
+    t('This screen allows you to define the way you want to have the decisions ordered in the InforMEA page. Use the mouse to drag and drop, and once you are satisfied with the sorting, press the \'Save\' button.'),
     t('Content'),
     t('Number'),
     t('Has taxonomy term'),
