@@ -3297,8 +3297,9 @@ return "";';
     'field_document_publish_date' => 'field_document_publish_date',
     'field_instrument' => 'field_instrument',
     'field_document_type' => 'field_document_type',
+    'status' => 'status',
   );
-  $handler->display->display_options['style_options']['default'] = 'title';
+  $handler->display->display_options['style_options']['default'] = 'field_document_publish_date';
   $handler->display->display_options['style_options']['info'] = array(
     'field_document_number' => array(
       'sortable' => 1,
@@ -3316,19 +3317,24 @@ return "";';
     ),
     'field_document_publish_date' => array(
       'sortable' => 1,
-      'default_sort_order' => 'asc',
+      'default_sort_order' => 'desc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
     ),
     'field_instrument' => array(
-      'sortable' => 1,
-      'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
     ),
     'field_document_type' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'status' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
@@ -3349,7 +3355,7 @@ return "";';
   $handler->display->display_options['style_options']['pages'] = array(
     'pagination_style' => 'full_numbers',
     'length_change' => 1,
-    'display_length' => '25',
+    'display_length' => '50',
     'processing' => 0,
     'server_side' => 1,
     'items_per_page_options' => '10, 25, 50, 100',
@@ -4504,6 +4510,13 @@ return "";';
   $handler->display->display_options['defaults']['pager'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'none';
   $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['defaults']['sorts'] = FALSE;
+  /* Sort criterion: Field collection item: Status date (field_country_ratification_date) */
+  $handler->display->display_options['sorts']['field_country_ratification_date_value']['id'] = 'field_country_ratification_date_value';
+  $handler->display->display_options['sorts']['field_country_ratification_date_value']['table'] = 'field_data_field_country_ratification_date';
+  $handler->display->display_options['sorts']['field_country_ratification_date_value']['field'] = 'field_country_ratification_date_value';
+  $handler->display->display_options['sorts']['field_country_ratification_date_value']['relationship'] = 'field_country_instrument_status_value';
+  $handler->display->display_options['sorts']['field_country_ratification_date_value']['order'] = 'DESC';
   $handler->display->display_options['defaults']['arguments'] = FALSE;
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['filter_groups']['groups'] = array(
@@ -4727,6 +4740,17 @@ return "";';
   $handler->display->display_options['fields']['field_region']['field'] = 'field_region';
   $handler->display->display_options['fields']['field_region']['type'] = 'i18n_taxonomy_term_reference_plain';
   $handler->display->display_options['fields']['field_region']['delta_offset'] = '0';
+  $handler->display->display_options['defaults']['sorts'] = FALSE;
+  /* Sort criterion: Content: Title */
+  $handler->display->display_options['sorts']['title']['id'] = 'title';
+  $handler->display->display_options['sorts']['title']['table'] = 'node';
+  $handler->display->display_options['sorts']['title']['field'] = 'title';
+  /* Sort criterion: Field collection item: Status date (field_country_ratification_date) */
+  $handler->display->display_options['sorts']['field_country_ratification_date_value']['id'] = 'field_country_ratification_date_value';
+  $handler->display->display_options['sorts']['field_country_ratification_date_value']['table'] = 'field_data_field_country_ratification_date';
+  $handler->display->display_options['sorts']['field_country_ratification_date_value']['field'] = 'field_country_ratification_date_value';
+  $handler->display->display_options['sorts']['field_country_ratification_date_value']['relationship'] = 'field_country_instrument_status_value';
+  $handler->display->display_options['sorts']['field_country_ratification_date_value']['order'] = 'DESC';
   $handler->display->display_options['defaults']['arguments'] = FALSE;
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
@@ -8837,7 +8861,7 @@ return "";';
   /* Display: Leaflets and Brochures */
   $handler = $view->new_display('page', 'Leaflets and Brochures', 'leaflets_brochures');
   $handler->display->display_options['defaults']['title'] = FALSE;
-  $handler->display->display_options['title'] = 'Leaflets and Brochures';
+  $handler->display->display_options['title'] = 'Outreach Material';
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Content: Published */
@@ -8893,27 +8917,14 @@ return "";';
   $handler->display->display_options['filters']['field_publication_type_tid_1']['id'] = 'field_publication_type_tid_1';
   $handler->display->display_options['filters']['field_publication_type_tid_1']['table'] = 'field_data_field_publication_type';
   $handler->display->display_options['filters']['field_publication_type_tid_1']['field'] = 'field_publication_type_tid';
-  $handler->display->display_options['filters']['field_publication_type_tid_1']['operator'] = 'not';
   $handler->display->display_options['filters']['field_publication_type_tid_1']['value'] = array(
-    232 => '232',
     507 => '507',
     500 => '500',
-    229 => '229',
-    517 => '517',
-    495 => '495',
-    564 => '564',
-    233 => '233',
+    231 => '231',
+    226 => '226',
     224 => '224',
-    516 => '516',
-    222 => '222',
-    230 => '230',
-    223 => '223',
-    497 => '497',
-    511 => '511',
-    496 => '496',
-    494 => '494',
-    515 => '515',
-    498 => '498',
+    228 => '228',
+    227 => '227',
   );
   $handler->display->display_options['filters']['field_publication_type_tid_1']['type'] = 'select';
   $handler->display->display_options['filters']['field_publication_type_tid_1']['vocabulary'] = 'publication_types';
@@ -9317,6 +9328,7 @@ return "";';
     t('Newsletter'),
     t('Scientific Publications'),
     t('Leaflets and Brochures'),
+    t('Outreach Material'),
     t('Instrument\'s Publications'),
     t('Content entity referenced from field_instrument'),
     t('All'),
@@ -11575,30 +11587,24 @@ return "";';
   $handler->display->display_options['style_plugin'] = 'datatables';
   $handler->display->display_options['style_options']['columns'] = array(
     'title' => 'title',
-    'field_meeting_start' => 'field_meeting_start',
-    'field_instrument' => 'field_instrument',
+    'event_calendar_date' => 'event_calendar_date',
     'field_meeting_type' => 'field_meeting_type',
     'field_meeting_status' => 'field_meeting_status',
     'field_country' => 'field_country',
     'field_meeting_city' => 'field_meeting_city',
+    'status' => 'status',
+    'created' => 'created',
   );
-  $handler->display->display_options['style_options']['default'] = '-1';
+  $handler->display->display_options['style_options']['default'] = 'created';
   $handler->display->display_options['style_options']['info'] = array(
     'title' => array(
-      'sortable' => 1,
+      'sortable' => 0,
       'default_sort_order' => 'asc',
       'align' => 'views-align-left',
       'separator' => '',
       'empty_column' => 0,
     ),
-    'field_meeting_start' => array(
-      'sortable' => 0,
-      'default_sort_order' => 'asc',
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    ),
-    'field_instrument' => array(
+    'event_calendar_date' => array(
       'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
@@ -11620,8 +11626,6 @@ return "";';
       'empty_column' => 0,
     ),
     'field_country' => array(
-      'sortable' => 0,
-      'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
@@ -11629,6 +11633,20 @@ return "";';
     'field_meeting_city' => array(
       'sortable' => 0,
       'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'status' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'created' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'desc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
@@ -11648,7 +11666,7 @@ return "";';
   $handler->display->display_options['style_options']['pages'] = array(
     'pagination_style' => 'full_numbers',
     'length_change' => 1,
-    'display_length' => '10',
+    'display_length' => '50',
     'processing' => 0,
     'server_side' => 0,
     'items_per_page_options' => '10, 25, 50, 100',
@@ -11656,6 +11674,13 @@ return "";';
   $handler->display->display_options['defaults']['style_options'] = FALSE;
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
   $handler->display->display_options['defaults']['row_options'] = FALSE;
+  $handler->display->display_options['defaults']['header'] = FALSE;
+  /* Header: Global: Text area */
+  $handler->display->display_options['header']['area']['id'] = 'area';
+  $handler->display->display_options['header']['area']['table'] = 'views';
+  $handler->display->display_options['header']['area']['field'] = 'area';
+  $handler->display->display_options['header']['area']['content'] = '<a class="btn btn-xs btn-success" style="margin-bottom:5px;" href="/manage/en/node/add/documents">Create documents</a>';
+  $handler->display->display_options['header']['area']['format'] = 'full_html';
   $handler->display->display_options['defaults']['empty'] = FALSE;
   /* No results behavior: Global: Text area */
   $handler->display->display_options['empty']['area']['id'] = 'area';
@@ -11715,6 +11740,14 @@ return "";';
   $handler->display->display_options['fields']['status']['label'] = 'Status';
   $handler->display->display_options['fields']['status']['type'] = 'unicode-yes-no';
   $handler->display->display_options['fields']['status']['not'] = 0;
+  /* Field: Content: Post date */
+  $handler->display->display_options['fields']['created']['id'] = 'created';
+  $handler->display->display_options['fields']['created']['table'] = 'node';
+  $handler->display->display_options['fields']['created']['field'] = 'created';
+  $handler->display->display_options['fields']['created']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['created']['date_format'] = 'convention_date';
+  $handler->display->display_options['fields']['created']['second_date_format'] = 'cms_date';
+  $handler->display->display_options['defaults']['sorts'] = FALSE;
   $handler->display->display_options['path'] = 'meeting/listing';
 
   /* Display: Publication meetings */
@@ -11947,11 +11980,13 @@ return "";';
     t('Published'),
     t('CMS Instrument'),
     t('Meetings listing'),
+    t('<a class="btn btn-xs btn-success" style="margin-bottom:5px;" href="/manage/en/node/add/documents">Create documents</a>'),
     t('<br />
 
 <div class="alert">
   <strong>No existing entries for current filtering!</strong>
 </div>'),
+    t('Post date'),
     t('Publication meetings'),
     t('Content entity referenced from field_meeting_publication'),
     t('All'),
@@ -12264,6 +12299,14 @@ return "";';
     'CMS' => 'CMS',
   );
   $handler->display->display_options['filters']['field_featured_in_instances_value']['reduce_duplicates'] = TRUE;
+  /* Filter criterion: Content: Imported (field_imported) */
+  $handler->display->display_options['filters']['field_imported_value']['id'] = 'field_imported_value';
+  $handler->display->display_options['filters']['field_imported_value']['table'] = 'field_data_field_imported';
+  $handler->display->display_options['filters']['field_imported_value']['field'] = 'field_imported_value';
+  $handler->display->display_options['filters']['field_imported_value']['operator'] = 'not';
+  $handler->display->display_options['filters']['field_imported_value']['value'] = array(
+    1 => '1',
+  );
   $handler->display->display_options['path'] = 'cms-news';
 
   /* Display: News Eurobats */
@@ -12336,6 +12379,9 @@ return "";';
     t('field_species_group'),
     t('field_keywords'),
     t('field_news_further_resources'),
+    t('field_in_slideshow'),
+    t('field_featured_in_instances'),
+    t('created'),
     t('News Aewa'),
     t('News CMS'),
     t('News Eurobats'),
