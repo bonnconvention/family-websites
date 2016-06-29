@@ -1707,7 +1707,7 @@ class ContractingPartiesServicesXMLFormatter extends ServicesXMLFormatter {
           $key = preg_replace('/^([0-9]+)/', '_$1', $key);
         }
         // Ignore these fields
-        if(in_array($key, array('nid', 'ISO2', 'ISO3'))) {
+        if(in_array($key, array('nid', 'ISO2', 'ISO3', 'field_collection_item_field_data_field_country_instrument_st'))) {
           continue;
         }
 //        die(var_dump($data));
