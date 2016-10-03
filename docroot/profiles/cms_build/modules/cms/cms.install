@@ -173,3 +173,24 @@ function cms_configure_text_format($arr_configuration) {
 function cms_update_7004() {
     module_disable(array('uuid_default_entities_example'));
 }
+
+/**
+ * Clenup - drupal core update
+ * For more information, see "https://www.drupal.org/node/2487215"
+ */
+function cms_update_7005() {
+    $modules = array(
+      'contacts',
+      'apachesolr',
+      'apachesolr_access',
+      'apachesolr_search',
+      'apachesolr_attachments',
+      'context',
+      'memcache_admin',
+      'simpletest_monitor',
+    );
+    db_delete('system')
+      ->condition('name', $modules, 'IN')
+      ->condition('type', 'module')
+      ->execute();
+}
