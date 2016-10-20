@@ -55,7 +55,7 @@ class CMSContactsExport {
         'postalcode' => 'Zip Code',
         'street' => 'Address',
         'o' => 'Organization',
-        'ou' => 'Departament',
+        'ou' => 'Department',
         'workphonenumbers' => 'Work Phone',
         'homephone' => 'Home Phone',
         'faxnumbers' => 'Fax',
