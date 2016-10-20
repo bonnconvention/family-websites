@@ -679,7 +679,7 @@ class CMSContact extends CMSContactBase {
 
     public $instruments_data = array();
 
-    static $hidden_view_fields = array('uid', 'conventions', 'count', 'dn', 'objectclass','countryfrench',
+    static $hidden_view_fields = array('uid', 'conventions', 'count', 'dn', 'cn', 'objectclass','countryfrench', 'preferredlanguages',
         'countryspanish', 'countryenglish', 'statusorganization', 'statusperson', 'lastmodifiedtime', 'lastmodifiedby', 'mailinglists');
 
     static $key_labels = array(
@@ -716,6 +716,42 @@ class CMSContact extends CMSContactBase {
         'organization_status' => 'Status Organization',
         'person_status' => 'Status Person',
         'mailing_lists' => 'Mailing Lists',
+    );
+
+    static $key_weight = array(
+      'personaltitle' => 0,
+      'cn' => -1,
+      'givenname' => 1,
+      'sn' => 2,
+      'uid' => -1,
+      'mail' => 14,
+      'title' => 3,
+      'iso2' => 9,
+      'cpiso2' => 11,
+      'personalemail' => 15,
+      'st' => 8,
+      'postalcode' => 7,
+      'street' => 6,
+      'o' => 5,
+      'ou' => 4,
+      'workphonenumbers' => 12,
+      'homephone' => 17,
+      'faxnumbers' => 13,
+      'mobilephonenumbers' => 16,
+      'websites' => 18,
+
+      'skype' => 19,
+      'description' => 20,
+      'region' => 10,
+      'cmsavailability' => 21,
+
+      'preferredlanguages' => -1,
+      'additionalemails' => -1,
+
+      'instrument' => -1,
+      'organization_status' => -1,
+      'person_status' => -1,
+      'mailing_lists' => -1,
     );
 
     static $field_options = array(

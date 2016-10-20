@@ -323,8 +323,8 @@ function cms_contacts_view_contact($contact) {
     drupal_set_title($contact->clean_contact['cn']);
     //Set breadcrumb
     $breadcrumb = array();
-    $breadcrumb[] = l('Home', '<front>');
-    $breadcrumb[] = l('Contacts', 'contacts/listing');
+    $breadcrumb[] = l(t('Home'), '<front>');
+    $breadcrumb[] = l(t('Contacts'), 'contacts/listing');
     drupal_set_breadcrumb($breadcrumb);
 
     $return['btn_edit'] = array(
@@ -341,7 +341,8 @@ function cms_contacts_view_contact($contact) {
     );
 
     $return['btn_delete'] = array(
-        '#text' => t('Delete'), '#theme' => 'link',
+        '#theme' => 'link',
+        '#text' => t('Delete'),
         '#path' => $contact->delete_link,
         '#options' => array(
             'attributes' => array(
@@ -355,9 +356,12 @@ function cms_contacts_view_contact($contact) {
     $rows = array();
     if (!empty($contact->clean_contact['lastmodifiedtime'])) {
         $rows [] = array(
-            array('data' => 'Last updated', 'header' => TRUE),
-            array('data' => date('d-m-Y', $contact->clean_contact['lastmodifiedtime'])
-                            .' by '. $contact->clean_contact['lastmodifiedby']),
+            array('data' => t('Last updated'), 'header' => TRUE),
+            array('data' => t('@lastmodifiedtime by @user', array(
+              '@lastmodifiedtime' => date('d-m-Y', $contact->clean_contact['lastmodifiedtime']),
+              '@user' => $contact->clean_contact['lastmodifiedby']
+            ))),
+            'weight' => -2,
         );
     }
 
@@ -368,17 +372,28 @@ function cms_contacts_view_contact($contact) {
                 $countries = cms_contacts_get_country_names_cached();
                 $row []= array(
                     'data' => (!empty(CMSContact::$key_labels[$key])) ? CMSContact::$key_labels[$key] : $key,
-                    'header' => TRUE);
+                    'header' => TRUE,
+                );
                 $row []= array('data' => $countries[$value]);
+                $row['weight'] = (!empty(CMSContact::$key_weight[$key])) ? CMSContact::$key_weight[$key] : -1;
                 $rows []= $row;
             } else {
                 $row []= array(
                     'data' => (!empty(CMSContact::$key_labels[$key])) ? CMSContact::$key_labels[$key] : $key,
-                    'header' => TRUE);
+                    'header' => TRUE
+                );
                 $row []= array('data' => CMSContactsUIHelper::render_contact_value($value));
+                $row['weight'] = (!empty(CMSContact::$key_weight[$key])) ? CMSContact::$key_weight[$key] : -1;
                 $rows []= $row;
             }
         }
+    }
+
+    uasort($rows, 'drupal_sort_weight');
+
+    foreach ($rows as $key => $row) {
+        unset($row['weight']);
+        $rows[$key] = $row;
     }
 
     $table = array(
