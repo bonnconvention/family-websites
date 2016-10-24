@@ -1,4 +1,4 @@
-FROM php:apache
+FROM php:5.6-apache
 MAINTAINER cristian@romanescu.ro
 
 RUN apt-get update && apt-get install -yq \
