@@ -1,21 +1,16 @@
 version: '2'
 services:
-  web:
-    build: .docker/web
-    ports:
-      - "8084:80"
-    volumes:
-      - ./project:/var/www
   db:
     image: mariadb
-    # volumes:
+    volumes:
+      - ../dumps/:/docker-entrypoint-initdb.d/
     #  - .docker/db/conf:/etc/mysql/conf.d/
     #  - .docker/blob/db:/var/lib/mysql/
     # ports:
     #  - "3306:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=secret
+      - MYSQL_DATABASE=drupal
     restart: always
 
   cli:
@@ -25,3 +20,14 @@ services:
     links:
       - db
       - web
+  web:
+    build: .docker/web
+    ports:
+      - "8084:80"
+    volumes:
+      - ./docroot:/var/www/html
+      - .docker/web/php.ini:/usr/local/etc/php/php.ini
+      - ./docroot/sites/default/files:/var/www/html/sites/default/files
+    # Don't start unless we have a working db instance
+    depends_on:
+      - db
