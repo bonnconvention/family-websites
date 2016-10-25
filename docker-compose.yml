@@ -1,6 +1,7 @@
 version: '2'
 services:
   db:
+    restart: always
     image: mariadb
     volumes:
       - ../dumps/:/docker-entrypoint-initdb.d/
@@ -11,9 +12,9 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=drupal
-    restart: always
 
   cli:
+    restart: always
     build: .docker/cli
     volumes_from:
       - web
@@ -21,6 +22,7 @@ services:
       - db
       - web
   web:
+    restart: always
     build: .docker/web
     ports:
       - "8084:80"
