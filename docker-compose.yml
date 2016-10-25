@@ -4,7 +4,7 @@ services:
     restart: always
     image: mariadb
     volumes:
-      - ../dumps/:/docker-entrypoint-initdb.d/
+      - ../.sql/:/docker-entrypoint-initdb.d/
       - ./.docker/db/conf:/etc/mysql/conf.d/
     # Access container db from host using mysql client
     # ports:
