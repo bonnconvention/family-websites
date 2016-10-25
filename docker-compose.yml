@@ -1,12 +1,12 @@
 version: '2'
 services:
   db:
-    restart: always
     image: mariadb
+    restart: always
     volumes:
       - ../.sql/:/docker-entrypoint-initdb.d/
       - ./.docker/db/conf:/etc/mysql/conf.d/
-    # Access container db from host using mysql client
+    # Map port to host for debugging
     # ports:
     #  - "3306:3306"
     environment:
@@ -14,8 +14,8 @@ services:
       - MYSQL_DATABASE=drupal
 
   cli:
-    restart: always
     build: .docker/cli
+    restart: always
     volumes_from:
       - web
     links:
@@ -26,20 +26,20 @@ services:
     image: solr:5.5
     restart: always
     # Map port to host for debugging
-    ports:
-      - "8983:8983"
+    # ports:
+    #  - "8983:8983"
     volumes:
       - ./.docker/solr:/opt/solr/server/solr
 
   web:
-    restart: always
     build: .docker/web
+    restart: always
     ports:
       - "8084:80"
     volumes:
       - ./docroot:/var/www/html
       - .docker/web/php.ini:/usr/local/etc/php/php.ini
       - ./docroot/sites/default/files:/var/www/html/sites/default/files
-    # Don't start unless we have a working db instance
     depends_on:
       - db
+      - solr
