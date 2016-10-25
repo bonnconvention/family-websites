@@ -5,8 +5,8 @@ services:
     image: mariadb
     volumes:
       - ../dumps/:/docker-entrypoint-initdb.d/
-    #  - .docker/db/conf:/etc/mysql/conf.d/
-    #  - .docker/blob/db:/var/lib/mysql/
+      - ./.docker/db/conf:/etc/mysql/conf.d/
+    # Access container db from host using mysql client
     # ports:
     #  - "3306:3306"
     environment:
