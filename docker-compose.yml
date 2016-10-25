@@ -21,6 +21,16 @@ services:
     links:
       - db
       - web
+
+  solr:
+    image: solr:5.5
+    restart: always
+    # Map port to host for debugging
+    ports:
+      - "8983:8983"
+    volumes:
+      - ./.docker/solr:/opt/solr/server/solr
+
   web:
     restart: always
     build: .docker/web
