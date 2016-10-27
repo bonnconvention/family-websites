@@ -4,7 +4,7 @@ services:
     image: mariadb
     restart: always
     volumes:
-      - ../.sql/:/docker-entrypoint-initdb.d/
+      - ./.sql/:/docker-entrypoint-initdb.d/
       - ./.docker/db/conf:/etc/mysql/conf.d/
     # Map port to host for debugging
     # ports:
@@ -40,6 +40,8 @@ services:
       - ./docroot:/var/www/html
       - .docker/web/php.ini:/usr/local/etc/php/php.ini
       - ./docroot/sites/default/files:/var/www/html/sites/default/files
+      - ./private:/var/local/cms/files_private
+      - ./tmp:/var/local/cms/tmp
     depends_on:
       - db
       - solr
