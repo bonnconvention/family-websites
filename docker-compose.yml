@@ -45,3 +45,14 @@ services:
     depends_on:
       - db
       - solr
+
+  ldap:
+    image: osixia/openldap
+    #restart: always
+    #volumes:
+    #  - ./.docker/ldap/etc/slapd.d:/etc/openldap/slapd.d
+    #  - ./.docker/ldap/var:/var/lib/ldap
+    #ports:
+    #  - "389:389"
+    #depends_on:
+    #  - db
