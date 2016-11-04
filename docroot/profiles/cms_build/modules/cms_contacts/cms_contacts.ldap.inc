@@ -434,6 +434,7 @@ class CMSContactsLDAP {
             if($the_data = CMSContactsCacheHelper::cache_get('people_partial_attributes')) {
             } else {
                 $statusperson = $this->get_people_statusperson();
+                $personstatus = $this->get_statusperson_people();
                 $statusorganization = $this->get_people_statusorganization();
                 $people_instrument = $this->get_people_instrument();
                 $instrument_people = $this->get_instrument_people();
@@ -446,7 +447,7 @@ class CMSContactsLDAP {
                 $rows = $this->ldap_search_cms($filter, NULL, $attributes);
                 foreach($rows as $u) {
                     $the_data[$u['dn']] = $this->init_ldap_user($u,
-                        $statusperson, $statusorganization, $people_instrument, $instrument_people, $mailing_lists_people
+                        $statusperson, $personstatus, $statusorganization, $people_instrument, $instrument_people, $mailing_lists_people
                     );
                 }
                 $this->ldap_free_last_result();
@@ -490,10 +491,22 @@ class CMSContactsLDAP {
      * @param array $instrument_people
      * @return CMSContact user object
      */
-    private function init_ldap_user($ldap, $statusperson, $statusorganization, $people_instrument, $instrument_people, $mailing_lists_people) {
+    private function init_ldap_user($ldap, $statusperson, $personstatus, $statusorganization, $people_instrument, $instrument_people, $mailing_lists_people) {
         $ob = new CMSContactBase($ldap);
         if(array_key_exists($ob->dn, $statusperson)) {
             $ob->statusperson = $statusperson[$ob->dn];
+
+            foreach ($ob->statusperson as $dn) {
+                if(array_key_exists($dn, $personstatus)) {
+                    $ob->statusperson_rendered[] = $personstatus[$dn]->title;
+                }
+            }
+
+            if(!empty($ob->statusperson_rendered)) {
+                $ob->statusperson_rendered = implode(', ', $ob->statusperson_rendered);
+            } else {
+                $ob->statusperson_rendered = '';
+            }
         }
         if(array_key_exists($ob->dn, $statusorganization)) {
             $ob->statusorganization = $statusorganization[$ob->dn];
