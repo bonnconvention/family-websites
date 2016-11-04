@@ -519,6 +519,7 @@ class CMSContactBase {
     public $country;
     public $country_rendered;
 
+    public $department;
     public $organization;
 
     public $country_post;
@@ -549,6 +550,7 @@ class CMSContactBase {
         if(!empty($ldap['givenname'][0])) { $this->first_name =  $ldap['givenname'][0]; }
         if(!empty($ldap['sn'][0])) { $this->last_name = $ldap['sn'][0]; }
         if(!empty($ldap['o'][0])) { $this->organization = $ldap['o'][0]; }
+        if(!empty($ldap['ou'][0])) { $this->department = $ldap['ou'][0]; }
         if(!empty($ldap['region'][0])) { $this->region = $ldap['region'][0]; }
         $this->availability = !empty($ldap['cmsavailability'][0]) && $ldap['cmsavailability'][0] == 'TRUE';
 
