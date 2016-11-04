@@ -24,8 +24,13 @@ function cms_contacts_list() {
         '#theme' => 'table',
         '#header' => array(
             array('data' => '#'),
-            t('First name'), t('Last name'), t('Organization'), t('Country'),
-            t('Instruments'), t('Actions')),
+            t('First name'),
+            t('Last name'),
+            t('Organization'),
+            t('Country'),
+            t('Status person'),
+            t('Instruments'),
+            t('Actions')),
         '#prefix' => '<div class="row">', '#suffix' => '</div>',
         '#rows' => array(),
         '#attributes' => array(
@@ -42,6 +47,7 @@ function cms_contacts_list() {
             array('sTitle' => t('Last name'), 'bSortable' => TRUE),
             array('sTitle' => t('Organization'), 'bSortable' => TRUE),
             array('sTitle' => t('Country'), 'bSortable' => TRUE),
+            array('sTitle' => t('Status person'), 'bSortable' => TRUE),
             array('sTitle' => t('Instruments'), 'bSortable' => FALSE),
             array('sTitle' => t('Actions'), 'bSortable' => FALSE),
         ),
@@ -270,6 +276,7 @@ function cms_contacts_list_ajax() {
     $ret['iTotalDisplayRecords'] = count($users);
     $users = array_slice($users, $offset, $page_size);
     $display = array();
+
     foreach($users as $idx => $row) {
         $display[] = (object)array(
             $idx + $offset + 1,
@@ -277,6 +284,7 @@ function cms_contacts_list_ajax() {
             $row->last_name,
             $row->organization,
             $row->country_rendered,
+            $row->statusperson_rendered,
             $row->instruments_rendered,
             l(t('View'), $row->view_link)
                 . ' | ' . l(t('Edit'), $row->edit_link)
