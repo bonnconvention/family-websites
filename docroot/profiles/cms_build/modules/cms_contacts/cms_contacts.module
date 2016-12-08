@@ -217,12 +217,17 @@ function cms_contacts_ajax_get_contact_summary($contact) {
  * @param $contact
  */
 function cms_contacts_get_item_list_contact($contact) {
-
     $rows = array();
+    $personal_title = '';
+
+    if(!empty($contact->clean_contact['personaltitle'])) {
+        $personal_title .=  $contact->clean_contact['personaltitle'] . ' ';
+    }
+
     if (!empty($contact)) {
         $rows []= array(
             array('data' => t('Name'), 'header' => TRUE),
-            array('data' => $contact->first_name .' ' . $contact->last_name),
+            array('data' => $personal_title . $contact->first_name .' ' . $contact->last_name),
         );
         foreach(CMSContact::$item_list_fields as $field_key => $label) {
             if (!empty($contact->{$field_key}) || !empty($contact->clean_contact[$field_key])) {
@@ -288,7 +293,6 @@ function cms_contacts_get_item_list_contact($contact) {
 
     print drupal_render($return);
     exit();
-
 }
 
 /**

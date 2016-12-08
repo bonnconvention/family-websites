@@ -785,14 +785,18 @@ class CMSContact extends CMSContactBase {
     );
 
     static $item_list_fields = array (
-        'country_rendered' => 'Country',
-        'region' => 'Region',
-        'o' => 'Organization',
+        'title' => 'Position',
         'ou' => 'Department',
-        'workphonenumbers' => 'Phone',
-        'faxnumbers' => 'Fax',
-        'mobilephonenumbers' => 'Mobile',
+        'o' => 'Organization',
+        'street' => 'Address',
+        'st' => 'City',
+        'postalcode' => 'Zip Code',
+        'region' => 'Region',
+        'country_rendered' => 'Country',
         'mail' => 'Email',
+        'workphonenumbers' => 'Phone',
+        'mobilephonenumbers' => 'Mobile',
+        'faxnumbers' => 'Fax',
     );
 
 
