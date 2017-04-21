@@ -13,7 +13,7 @@ function cms_thesaurus_taxonomy_default_vocabularies() {
       'name' => 'Thesaurus - CMS',
       'machine_name' => 'thesaurus_cms',
       'description' => 'Main CMS thesaurus',
-      'hierarchy' => 0,
+      'hierarchy' => 1,
       'module' => 'taxonomy',
       'weight' => 0,
       'language' => 'und',
@@ -69,6 +69,7 @@ function cms_thesaurus_taxonomy_default_vocabularies() {
         'mappings' => array(
           'description_field' => 'definition',
           'field_taxonomy_term_uri' => 'uri',
+          'field_term_reference_url' => 'relatedMatch',
           'name_field' => 'prefLabel',
         ),
       ),
