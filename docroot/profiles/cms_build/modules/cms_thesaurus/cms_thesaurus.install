@@ -3,7 +3,7 @@
 /**
  * Link thesaurus_cms terms to Vocbench terms
  */
-function cms_thesaurus_update_7003() {
+function cms_thesaurus_update_7001() {
   $config = [
     'url' => 'http://informea.org/sites/default/files/export/cms.rdf',
     'id_field' => 'uri',
