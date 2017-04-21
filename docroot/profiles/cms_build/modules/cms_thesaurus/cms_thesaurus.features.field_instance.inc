@@ -96,6 +96,42 @@ function cms_thesaurus_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance:
+  // 'taxonomy_term-thesaurus_cms-field_term_reference_url'.
+  $field_instances['taxonomy_term-thesaurus_cms-field_term_reference_url'] = array(
+    'bundle' => 'thesaurus_cms',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 3,
+      ),
+    ),
+    'entity_type' => 'taxonomy_term',
+    'field_name' => 'field_term_reference_url',
+    'label' => 'Term reference URL',
+    'required' => 0,
+    'settings' => array(
+      'entity_translation_sync' => FALSE,
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 42,
+    ),
+  );
+
   // Exported field_instance: 'taxonomy_term-thesaurus_cms-name_field'.
   $field_instances['taxonomy_term-thesaurus_cms-name_field'] = array(
     'bundle' => 'thesaurus_cms',

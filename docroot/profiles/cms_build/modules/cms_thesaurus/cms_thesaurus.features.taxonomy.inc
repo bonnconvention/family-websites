@@ -33,6 +33,21 @@ function cms_thesaurus_taxonomy_default_vocabularies() {
           ),
         ),
       ),
+      'tes' => array(
+        'enable' => 1,
+        'plugin' => 'Drupal\\taxonomy_external_sync\\plugin\\source\\VocBenchRDFSource',
+        'plugin_config' => array(
+          'url' => 'http://informea.org/sites/default/files/export/cms.rdf',
+          'id_field' => 'uri',
+          'parent_field' => 'broader',
+        ),
+        'mappings' => array(
+          'description_field' => 'definition',
+          'field_related_informea_terms' => '',
+          'field_term_reference_url' => 'relatedMatch',
+          'name_field' => 'prefLabel',
+        ),
+      ),
     ),
     'thesaurus_informea' => array(
       'name' => 'Thesaurus - InforMEA',
