@@ -1,0 +1,107 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function cms_odata_schema(){
+  $schema = array();
+
+  $schema['odata_focal_point'] = array(
+    'description' => 'The base table for the OData Focal Point entity',
+    'fields' => array(
+      'id' => array(
+        'description' => 'Primary key of the OData Focal Point entity',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'first_name' => array(
+        'description' => 'First name of the Focal Point.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'last_name' => array(
+        'description' => 'Last name of the Focal Point.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'position' => array(
+        'description' => 'Position of the Focal Point.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'address' => array(
+        'description' => 'Address of the Focal Point.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'country' => array(
+        'description' => 'Country of the Focal Point.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'country_iso2' => array(
+        'description' => 'Country ISO2 of the Focal Point.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'organization' => array(
+        'description' => 'Organization of the Focal Point.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'country_post' => array(
+        'description' => 'Country post of the Focal Point.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'country_post_iso2' => array(
+        'description' => 'Country post ISO2 of the Focal Point.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'work_email' => array(
+        'description' => 'Work email of the Focal Point.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'telephone' => array(
+        'description' => 'Telephone of the Focal Point.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'fax' => array(
+        'description' => 'Fax of the Focal Point.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'instruments' => array(
+        'description' => 'Instruments of the Focal Point.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'status_person' => array(
+        'description' => 'Status Person for the Focal Point.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      )
+    ),
+    'primary key' => array('id'),
+  );
+
+  return $schema;
+}

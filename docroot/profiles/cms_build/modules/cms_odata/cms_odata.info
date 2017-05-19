@@ -1,0 +1,9 @@
+name = OData service
+description = Integration with OData
+core = 7.x
+package = CMS
+version = 7.x-1.0
+project = cms_odata
+dependencies[] = entity
+dependencies[] = cms_contacts
+files[] = includes/cms_odata.utils.inc
