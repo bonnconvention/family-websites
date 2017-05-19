@@ -1,5 +1,6 @@
 <?php
 
+include_once 'cms_odata.features.inc';
 module_load_include('inc', 'cms_odata', 'includes/cms_odata.utils');
 
 /**
