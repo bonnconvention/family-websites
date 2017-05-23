@@ -20,7 +20,7 @@ function get_ldap_contacts($filters) {
       $user->address = CMSContactBase::get_single_valued_attribute($contact[0], 'street');
       $user->work_email = get_multi_valued_attribute($contact[0], 'mail');
       $user->telephone = get_multi_valued_attribute($contact[0], 'workphonenumbers');
-      $user->fax = get_multi_valued_attribute($contact[0], 'workphonenumbers');
+      $user->fax = get_multi_valued_attribute($contact[0], 'faxnumbers');
     }
   }
 

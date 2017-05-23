@@ -30,7 +30,7 @@ function cms_odata_entity_info(){
 
 function cms_odata_cron() {
   $cron_last = variable_get('cron_last');
-  $instance_name = variable_get('site_name','CMS');
+  $instance_name = CMSUtils::get_current_profile();
 
   $filters = array(
     'instruments' => array(ODATA_CMS_INSTRUMENT),
@@ -38,14 +38,14 @@ function cms_odata_cron() {
   );
 
   if (date('ymd', $cron_last) != date('ymd', time())) {
-    switch ($instance_name){
-      case 'AEWA':
+    switch ($instance_name) {
+      case 'aewa':
         $filters = array(
           'instruments' => array(ODATA_AEWA_INSTRUMENT),
           'status_person' => array(ODATA_AEWA_STATUS_PERSON)
         );
         break;
-      case 'ASCOBANS':
+      case 'ascobans':
         $filters = array(
           'instruments' => array(ODATA_ASCOBANS_INSTRUMENT),
           'status_person' => array(ODATA_ASCOBANS_STATUS_PERSON)
