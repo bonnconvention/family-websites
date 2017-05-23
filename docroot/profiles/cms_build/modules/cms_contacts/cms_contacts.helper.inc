@@ -513,6 +513,12 @@ class CMSContactBase {
 
     public $region;
 
+    public $position;
+    public $address;
+    public $work_email;
+    public $telephone;
+    public $fax;
+
     public $mail = array();
 
     // Computed fields
