@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * cms_odata.features.inc
+ */
 
 /**
  * Implements hook_views_api().
