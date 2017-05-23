@@ -15,6 +15,12 @@ function cms_odata_schema(){
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
+      'dn' => array(
+        'description' => 'User unique identifier in LDAP',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
       'first_name' => array(
         'description' => 'First name of the Focal Point.',
         'type' => 'varchar',
