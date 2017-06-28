@@ -18,6 +18,7 @@ function get_ldap_contacts($filters) {
     if (!empty($contact[0])) {
       $user->dn = $contact[0]['dn'];
       $user->address = CMSContactBase::get_single_valued_attribute($contact[0], 'street');
+      $user->title = CMSContactBase::get_single_valued_attribute($contact[0], 'personaltitle');
       $user->work_email = get_multi_valued_attribute($contact[0], 'mail');
       $user->telephone = get_multi_valued_attribute($contact[0], 'workphonenumbers');
       $user->fax = get_multi_valued_attribute($contact[0], 'faxnumbers');

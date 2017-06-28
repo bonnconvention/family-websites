@@ -21,6 +21,12 @@ function cms_odata_schema(){
         'length' => '255',
         'not null' => TRUE,
       ),
+      'title' => array(
+        'description' => 'Person title.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
       'first_name' => array(
         'description' => 'First name of the Focal Point.',
         'type' => 'varchar',

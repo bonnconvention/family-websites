@@ -79,6 +79,7 @@ function cms_odata_cron() {
         $entity->fax = $fp->fax;
         $entity->instruments = $fp->instruments_rendered;
         $entity->status_person = $fp->statusperson_rendered;
+        $entity->title = $fp->title;
         $entity->save();
       }
       watchdog('info', 'Successfully updated ldap users for odata on '.$instance_name.'.');
