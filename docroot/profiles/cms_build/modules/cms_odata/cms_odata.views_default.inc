@@ -234,6 +234,10 @@ function cms_odata_views_default_views() {
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
   $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Focal point (OData): Country */
+  $handler->display->display_options['fields']['country']['id'] = 'country';
+  $handler->display->display_options['fields']['country']['table'] = 'odata_focal_point';
+  $handler->display->display_options['fields']['country']['field'] = 'country';
   /* Field: Focal point (OData): Country_post */
   $handler->display->display_options['fields']['country_post']['id'] = 'country_post';
   $handler->display->display_options['fields']['country_post']['table'] = 'odata_focal_point';
@@ -262,13 +266,6 @@ function cms_odata_views_default_views() {
   $handler->display->display_options['fields']['address']['id'] = 'address';
   $handler->display->display_options['fields']['address']['table'] = 'odata_focal_point';
   $handler->display->display_options['fields']['address']['field'] = 'address';
-  $handler->display->display_options['fields']['address']['label'] = 'address';
-  /* Field: Focal point (OData): Country */
-  $handler->display->display_options['fields']['country']['id'] = 'country';
-  $handler->display->display_options['fields']['country']['table'] = 'odata_focal_point';
-  $handler->display->display_options['fields']['country']['field'] = 'country';
-  $handler->display->display_options['fields']['country']['label'] = 'country';
-  $handler->display->display_options['fields']['country']['exclude'] = TRUE;
   /* Field: Focal point (OData): Country_iso2 */
   $handler->display->display_options['fields']['country_iso2']['id'] = 'country_iso2';
   $handler->display->display_options['fields']['country_iso2']['table'] = 'odata_focal_point';
@@ -294,12 +291,11 @@ function cms_odata_views_default_views() {
   $handler->display->display_options['fields']['work_email']['id'] = 'work_email';
   $handler->display->display_options['fields']['work_email']['table'] = 'odata_focal_point';
   $handler->display->display_options['fields']['work_email']['field'] = 'work_email';
-  $handler->display->display_options['fields']['work_email']['label'] = 'work_email';
+  $handler->display->display_options['fields']['work_email']['label'] = 'Email';
   /* Field: Focal point (OData): Telephone */
   $handler->display->display_options['fields']['telephone']['id'] = 'telephone';
   $handler->display->display_options['fields']['telephone']['table'] = 'odata_focal_point';
   $handler->display->display_options['fields']['telephone']['field'] = 'telephone';
-  $handler->display->display_options['fields']['telephone']['label'] = 'telephone';
   /* Field: Focal point (OData): Fax */
   $handler->display->display_options['fields']['fax']['id'] = 'fax';
   $handler->display->display_options['fields']['fax']['table'] = 'odata_focal_point';
@@ -318,6 +314,11 @@ function cms_odata_views_default_views() {
   $handler->display->display_options['fields']['status_person']['field'] = 'status_person';
   $handler->display->display_options['fields']['status_person']['label'] = 'status_person';
   $handler->display->display_options['fields']['status_person']['exclude'] = TRUE;
+  $handler->display->display_options['defaults']['sorts'] = FALSE;
+  /* Sort criterion: Focal point (OData): Country */
+  $handler->display->display_options['sorts']['country']['id'] = 'country';
+  $handler->display->display_options['sorts']['country']['table'] = 'odata_focal_point';
+  $handler->display->display_options['sorts']['country']['field'] = 'country';
   $translatables['odata_focal_points_api'] = array(
     t('Master'),
     t('OData focal points API'),
@@ -348,10 +349,13 @@ function cms_odata_views_default_views() {
     t('First name'),
     t('Name'),
     t('[first_name] [last_name]'),
+    t('Address'),
     t('Position / Organization'),
     t('[position]
 <br>
 [organization]'),
+    t('Email'),
+    t('Telephone'),
   );
   $export['odata_focal_points_api'] = $view;
 
