@@ -32,6 +32,10 @@ function cms_odata_views_default_views() {
   $handler->display->display_options['pager']['options']['offset'] = '0';
   $handler->display->display_options['style_plugin'] = 'default';
   $handler->display->display_options['row_plugin'] = 'fields';
+  /* Field: Focal point (OData): Title */
+  $handler->display->display_options['fields']['title']['id'] = 'title';
+  $handler->display->display_options['fields']['title']['table'] = 'odata_focal_point';
+  $handler->display->display_options['fields']['title']['field'] = 'title';
   /* Field: Focal point (OData): First_name */
   $handler->display->display_options['fields']['first_name']['id'] = 'first_name';
   $handler->display->display_options['fields']['first_name']['table'] = 'odata_focal_point';
@@ -111,6 +115,12 @@ function cms_odata_views_default_views() {
   $handler = $view->new_display('block', 'NFP', 'block_cms');
   $handler->display->display_options['defaults']['title'] = FALSE;
   $handler->display->display_options['title'] = 'The list of national focal points';
+  $handler->display->display_options['defaults']['cache'] = FALSE;
+  $handler->display->display_options['cache']['type'] = 'time_per_domain';
+  $handler->display->display_options['cache']['results_lifespan'] = '-1';
+  $handler->display->display_options['cache']['results_lifespan_custom'] = '0';
+  $handler->display->display_options['cache']['output_lifespan'] = '21600';
+  $handler->display->display_options['cache']['output_lifespan_custom'] = '0';
   $handler->display->display_options['defaults']['style_plugin'] = FALSE;
   $handler->display->display_options['style_plugin'] = 'table';
   $handler->display->display_options['style_options']['columns'] = array(
@@ -234,15 +244,14 @@ function cms_odata_views_default_views() {
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
   $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Focal point (OData): Title */
+  $handler->display->display_options['fields']['title']['id'] = 'title';
+  $handler->display->display_options['fields']['title']['table'] = 'odata_focal_point';
+  $handler->display->display_options['fields']['title']['field'] = 'title';
   /* Field: Focal point (OData): Country */
   $handler->display->display_options['fields']['country']['id'] = 'country';
   $handler->display->display_options['fields']['country']['table'] = 'odata_focal_point';
   $handler->display->display_options['fields']['country']['field'] = 'country';
-  /* Field: Focal point (OData): Country_post */
-  $handler->display->display_options['fields']['country_post']['id'] = 'country_post';
-  $handler->display->display_options['fields']['country_post']['table'] = 'odata_focal_point';
-  $handler->display->display_options['fields']['country_post']['field'] = 'country_post';
-  $handler->display->display_options['fields']['country_post']['label'] = 'Country';
   /* Field: Focal point (OData): First_name */
   $handler->display->display_options['fields']['first_name']['id'] = 'first_name';
   $handler->display->display_options['fields']['first_name']['table'] = 'odata_focal_point';
@@ -328,6 +337,7 @@ function cms_odata_views_default_views() {
     t('Sort by'),
     t('Asc'),
     t('Desc'),
+    t('Title'),
     t('first_name'),
     t('last_name'),
     t('position'),

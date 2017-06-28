@@ -18,7 +18,7 @@ function cms_odata_entity_info(){
     'entity class' => 'Entity',
     'controller class' => 'EntityAPIController',
     'fieldable' => TRUE,
-    'views controller class' => 'EntityDefaultViewsController',
+    'views controller class' => 'NFPViewsController',
   );
 
   return $info;
