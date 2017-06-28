@@ -8,6 +8,7 @@ class cms_odata_views_handler_email extends views_handler_field {
    */
   function render($values) {
     static $pub_key, $priv_key = null;
+    module_load_include('module', 'recaptcha_mailhide');
     _recaptcha_mailhide_load_library();
     if (empty($pub_key)) {
       $pub_key = variable_get('recaptcha_mailhide_public_key');
