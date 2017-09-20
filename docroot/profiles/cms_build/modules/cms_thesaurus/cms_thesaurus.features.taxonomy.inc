@@ -13,7 +13,7 @@ function cms_thesaurus_taxonomy_default_vocabularies() {
       'name' => 'Thesaurus - CMS',
       'machine_name' => 'thesaurus_cms',
       'description' => 'Main CMS thesaurus',
-      'hierarchy' => 0,
+      'hierarchy' => 1,
       'module' => 'taxonomy',
       'weight' => 0,
       'language' => 'und',
@@ -31,6 +31,21 @@ function cms_thesaurus_taxonomy_default_vocabularies() {
           'predicates' => array(
             0 => 'rdfs:comment',
           ),
+        ),
+      ),
+      'tes' => array(
+        'enable' => 1,
+        'plugin' => 'Drupal\\taxonomy_external_sync\\plugin\\source\\VocBenchRDFSource',
+        'plugin_config' => array(
+          'url' => 'http://informea.org/sites/default/files/export/cms.rdf',
+          'id_field' => 'uri',
+          'parent_field' => 'broader',
+        ),
+        'mappings' => array(
+          'description_field' => 'definition',
+          'field_related_informea_terms' => '',
+          'field_term_reference_url' => 'relatedMatch',
+          'name_field' => 'prefLabel',
         ),
       ),
     ),
@@ -69,6 +84,7 @@ function cms_thesaurus_taxonomy_default_vocabularies() {
         'mappings' => array(
           'description_field' => 'definition',
           'field_taxonomy_term_uri' => 'uri',
+          'field_term_reference_url' => 'relatedMatch',
           'name_field' => 'prefLabel',
         ),
       ),

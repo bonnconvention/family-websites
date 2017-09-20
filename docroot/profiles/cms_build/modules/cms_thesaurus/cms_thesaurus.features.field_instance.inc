@@ -10,7 +10,7 @@
 function cms_thesaurus_field_default_field_instances() {
   $field_instances = array();
 
-  // Exported field_instance: 'taxonomy_term-thesaurus_cms-description_field'
+  // Exported field_instance: 'taxonomy_term-thesaurus_cms-description_field'.
   $field_instances['taxonomy_term-thesaurus_cms-description_field'] = array(
     'bundle' => 'thesaurus_cms',
     'default_value' => NULL,
@@ -57,7 +57,8 @@ function cms_thesaurus_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'taxonomy_term-thesaurus_cms-field_related_informea_terms'
+  // Exported field_instance:
+  // 'taxonomy_term-thesaurus_cms-field_related_informea_terms'.
   $field_instances['taxonomy_term-thesaurus_cms-field_related_informea_terms'] = array(
     'bundle' => 'thesaurus_cms',
     'default_value' => NULL,
@@ -95,7 +96,43 @@ function cms_thesaurus_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'taxonomy_term-thesaurus_cms-name_field'
+  // Exported field_instance:
+  // 'taxonomy_term-thesaurus_cms-field_term_reference_url'.
+  $field_instances['taxonomy_term-thesaurus_cms-field_term_reference_url'] = array(
+    'bundle' => 'thesaurus_cms',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 3,
+      ),
+    ),
+    'entity_type' => 'taxonomy_term',
+    'field_name' => 'field_term_reference_url',
+    'label' => 'Term reference URL',
+    'required' => 0,
+    'settings' => array(
+      'entity_translation_sync' => FALSE,
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 42,
+    ),
+  );
+
+  // Exported field_instance: 'taxonomy_term-thesaurus_cms-name_field'.
   $field_instances['taxonomy_term-thesaurus_cms-name_field'] = array(
     'bundle' => 'thesaurus_cms',
     'default_value' => NULL,
@@ -137,7 +174,8 @@ function cms_thesaurus_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'taxonomy_term-thesaurus_informea-description_field'
+  // Exported field_instance:
+  // 'taxonomy_term-thesaurus_informea-description_field'.
   $field_instances['taxonomy_term-thesaurus_informea-description_field'] = array(
     'bundle' => 'thesaurus_informea',
     'default_value' => NULL,
@@ -184,7 +222,8 @@ function cms_thesaurus_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'taxonomy_term-thesaurus_informea-field_taxonomy_term_uri'
+  // Exported field_instance:
+  // 'taxonomy_term-thesaurus_informea-field_taxonomy_term_uri'.
   $field_instances['taxonomy_term-thesaurus_informea-field_taxonomy_term_uri'] = array(
     'bundle' => 'thesaurus_informea',
     'default_value' => NULL,
@@ -233,7 +272,42 @@ function cms_thesaurus_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'taxonomy_term-thesaurus_informea-name_field'
+  // Exported field_instance:
+  // 'taxonomy_term-thesaurus_informea-field_term_reference_url'.
+  $field_instances['taxonomy_term-thesaurus_informea-field_term_reference_url'] = array(
+    'bundle' => 'thesaurus_informea',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 3,
+      ),
+    ),
+    'entity_type' => 'taxonomy_term',
+    'field_name' => 'field_term_reference_url',
+    'label' => 'Term reference URL',
+    'required' => 0,
+    'settings' => array(
+      'entity_translation_sync' => FALSE,
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 42,
+    ),
+  );
+
+  // Exported field_instance: 'taxonomy_term-thesaurus_informea-name_field'.
   $field_instances['taxonomy_term-thesaurus_informea-name_field'] = array(
     'bundle' => 'thesaurus_informea',
     'default_value' => NULL,
@@ -281,6 +355,7 @@ function cms_thesaurus_field_default_field_instances() {
   t('Name');
   t('Related InforMEA terms');
   t('Taxonomy term URI');
+  t('Term reference URL');
 
   return $field_instances;
 }

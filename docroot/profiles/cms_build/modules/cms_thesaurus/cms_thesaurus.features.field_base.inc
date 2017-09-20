@@ -10,21 +10,13 @@
 function cms_thesaurus_field_default_field_bases() {
   $field_bases = array();
 
-  // Exported field_base: 'description_field'
+  // Exported field_base: 'description_field'.
   $field_bases['description_field'] = array(
     'active' => 1,
     'cardinality' => 1,
     'deleted' => 0,
     'entity_types' => array(),
     'field_name' => 'description_field',
-    'foreign keys' => array(
-      'format' => array(
-        'columns' => array(
-          'format' => 'format',
-        ),
-        'table' => 'filter_format',
-      ),
-    ),
     'indexes' => array(
       'format' => array(
         0 => 'format',
@@ -39,21 +31,13 @@ function cms_thesaurus_field_default_field_bases() {
     'type' => 'text_with_summary',
   );
 
-  // Exported field_base: 'field_related_informea_terms'
+  // Exported field_base: 'field_related_informea_terms'.
   $field_bases['field_related_informea_terms'] = array(
     'active' => 1,
     'cardinality' => -1,
     'deleted' => 0,
     'entity_types' => array(),
     'field_name' => 'field_related_informea_terms',
-    'foreign keys' => array(
-      'taxonomy_term_data' => array(
-        'columns' => array(
-          'target_id' => 'tid',
-        ),
-        'table' => 'taxonomy_term_data',
-      ),
-    ),
     'indexes' => array(
       'target_id' => array(
         0 => 'target_id',
@@ -87,14 +71,13 @@ function cms_thesaurus_field_default_field_bases() {
     'type' => 'entityreference',
   );
 
-  // Exported field_base: 'field_taxonomy_term_uri'
+  // Exported field_base: 'field_taxonomy_term_uri'.
   $field_bases['field_taxonomy_term_uri'] = array(
     'active' => 1,
     'cardinality' => 1,
     'deleted' => 0,
     'entity_types' => array(),
     'field_name' => 'field_taxonomy_term_uri',
-    'foreign keys' => array(),
     'indexes' => array(),
     'locked' => 0,
     'module' => 'link',
@@ -119,21 +102,36 @@ function cms_thesaurus_field_default_field_bases() {
     'type' => 'link_field',
   );
 
-  // Exported field_base: 'name_field'
+  // Exported field_base: 'field_term_reference_url'.
+  $field_bases['field_term_reference_url'] = array(
+    'active' => 1,
+    'cardinality' => -1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_term_reference_url',
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(
+      'entity_translation_sync' => FALSE,
+      'max_length' => 768,
+      'profile2_private' => FALSE,
+    ),
+    'translatable' => 0,
+    'type' => 'text',
+  );
+
+  // Exported field_base: 'name_field'.
   $field_bases['name_field'] = array(
     'active' => 1,
     'cardinality' => 1,
     'deleted' => 0,
     'entity_types' => array(),
     'field_name' => 'name_field',
-    'foreign keys' => array(
-      'format' => array(
-        'columns' => array(
-          'format' => 'format',
-        ),
-        'table' => 'filter_format',
-      ),
-    ),
     'indexes' => array(
       'format' => array(
         0 => 'format',

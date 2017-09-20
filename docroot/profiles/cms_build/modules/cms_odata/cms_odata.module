@@ -1,0 +1,90 @@
+<?php
+
+include_once 'cms_odata.features.inc';
+module_load_include('inc', 'cms_odata', 'includes/cms_odata.utils');
+
+/**
+ * Implements hook_entity_info().
+ */
+function cms_odata_entity_info(){
+  $info = array();
+
+  $info['odata_focal_point'] = array(
+    'label' => t('Focal point (OData)'),
+    'base table' => 'odata_focal_point',
+    'entity keys' => array(
+      'id' => 'id'
+    ),
+    'entity class' => 'Entity',
+    'controller class' => 'EntityAPIController',
+    'fieldable' => TRUE,
+    'views controller class' => 'NFPViewsController',
+  );
+
+  return $info;
+}
+
+/**
+ * Implementation of hook_cron().
+ */
+
+function cms_odata_cron() {
+  $cron_last = variable_get('cron_last');
+  $instance_name = CMSUtils::get_current_profile();
+
+  $filters = array(
+    'instruments' => array(ODATA_CMS_INSTRUMENT),
+    'status_person' => array(ODATA_CMS_STATUS_PERSON)
+  );
+
+  if (date('ymd', $cron_last) != date('ymd', time())) {
+    switch ($instance_name) {
+      case 'aewa':
+        $filters = array(
+          'instruments' => array(ODATA_AEWA_INSTRUMENT),
+          'status_person' => array(ODATA_AEWA_STATUS_PERSON)
+        );
+        break;
+      case 'ascobans':
+        $filters = array(
+          'instruments' => array(ODATA_ASCOBANS_INSTRUMENT),
+          'status_person' => array(ODATA_ASCOBANS_STATUS_PERSON)
+        );
+        break;
+    }
+
+    $focal_points = get_ldap_contacts($filters);
+
+    if (!empty($focal_points)) {
+      // remove all the data
+      $results = entity_load('odata_focal_point');
+      $entity_ids = array_keys($results);
+      entity_delete_multiple('odata_focal_point', $entity_ids);
+
+      // add new results
+      foreach($focal_points as $fp) {
+        $entity = entity_create('odata_focal_point', array());
+        $entity->dn = $fp->dn;
+        $entity->first_name = $fp->first_name;
+        $entity->last_name = $fp->last_name;
+        $entity->position = $fp->position;
+        $entity->address = $fp->address;
+        $entity->country = $fp->country_rendered;
+        $entity->country_iso2 = $fp->country;
+        $entity->organization = $fp->organization;
+        $entity->country_post = $fp->country_post_rendered;
+        $entity->country_post_iso2 = $fp->country_post;
+        $entity->work_email = $fp->work_email;
+        $entity->telephone = $fp->telephone;
+        $entity->fax = $fp->fax;
+        $entity->instruments = $fp->instruments_rendered;
+        $entity->status_person = $fp->statusperson_rendered;
+        $entity->title = $fp->title;
+        $entity->save();
+      }
+      watchdog('info', 'Successfully updated ldap users for odata on '.$instance_name.'.');
+    } else {
+      watchdog('warning', 'No ldap users retreived for odata '.$instance_name.'.');
+    }
+  }
+}

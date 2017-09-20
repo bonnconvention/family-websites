@@ -2037,12 +2037,15 @@ return "";';
   $handler->display->display_options['fields']['changed']['table'] = 'node';
   $handler->display->display_options['fields']['changed']['field'] = 'changed';
   $handler->display->display_options['fields']['changed']['label'] = 'updated';
-  $handler->display->display_options['fields']['changed']['date_format'] = 'convention_date';
+  $handler->display->display_options['fields']['changed']['date_format'] = 'custom';
+  $handler->display->display_options['fields']['changed']['custom_date_format'] = 'U';
+  $handler->display->display_options['fields']['changed']['second_date_format'] = 'cms_date';
   /* Field: Content: Title */
   $handler->display->display_options['fields']['title']['id'] = 'title';
   $handler->display->display_options['fields']['title']['table'] = 'node';
   $handler->display->display_options['fields']['title']['field'] = 'title';
   $handler->display->display_options['fields']['title']['label'] = 'title';
+  $handler->display->display_options['fields']['title']['link_to_node'] = FALSE;
   /* Field: Content: Description */
   $handler->display->display_options['fields']['body_1']['id'] = 'body_1';
   $handler->display->display_options['fields']['body_1']['table'] = 'field_data_body';
@@ -5365,6 +5368,16 @@ return "";';
   $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
   $handler->display->display_options['fields']['title_field']['field'] = 'title_field';
   $handler->display->display_options['fields']['title_field']['link_to_entity'] = 1;
+  /* Field: Content: Website URL */
+  $handler->display->display_options['fields']['field_instrument_website']['id'] = 'field_instrument_website';
+  $handler->display->display_options['fields']['field_instrument_website']['table'] = 'field_data_field_instrument_website';
+  $handler->display->display_options['fields']['field_instrument_website']['field'] = 'field_instrument_website';
+  $handler->display->display_options['fields']['field_instrument_website']['label'] = 'Website';
+  $handler->display->display_options['fields']['field_instrument_website']['click_sort_column'] = 'url';
+  $handler->display->display_options['fields']['field_instrument_website']['type'] = 'link_url';
+  $handler->display->display_options['fields']['field_instrument_website']['settings'] = array(
+    'strip_www' => 1,
+  );
   /* Sort criterion: Content: Title */
   $handler->display->display_options['sorts']['title']['id'] = 'title';
   $handler->display->display_options['sorts']['title']['table'] = 'node';
@@ -5397,10 +5410,52 @@ return "";';
   $handler = $view->new_display('page', 'Agreements', 'agreements');
   $handler->display->display_options['defaults']['title'] = FALSE;
   $handler->display->display_options['title'] = 'Agreements';
+  $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Content: Title */
+  $handler->display->display_options['fields']['title_field']['id'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
+  $handler->display->display_options['fields']['title_field']['field'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['label'] = 'Acronym';
+  $handler->display->display_options['fields']['title_field']['link_to_entity'] = 1;
+  /* Field: Content: Instrument name */
+  $handler->display->display_options['fields']['field_instrument_name']['id'] = 'field_instrument_name';
+  $handler->display->display_options['fields']['field_instrument_name']['table'] = 'field_data_field_instrument_name';
+  $handler->display->display_options['fields']['field_instrument_name']['field'] = 'field_instrument_name';
+  $handler->display->display_options['fields']['field_instrument_name']['label'] = 'Instrument Name';
+  /* Field: Content: Website URL */
+  $handler->display->display_options['fields']['field_instrument_website']['id'] = 'field_instrument_website';
+  $handler->display->display_options['fields']['field_instrument_website']['table'] = 'field_data_field_instrument_website';
+  $handler->display->display_options['fields']['field_instrument_website']['field'] = 'field_instrument_website';
+  $handler->display->display_options['fields']['field_instrument_website']['label'] = 'Website';
+  $handler->display->display_options['fields']['field_instrument_website']['click_sort_column'] = 'url';
+  $handler->display->display_options['fields']['field_instrument_website']['type'] = 'link_url';
+  $handler->display->display_options['fields']['field_instrument_website']['settings'] = array(
+    'strip_www' => 1,
+  );
   $handler->display->display_options['path'] = 'cms-instruments/agreements';
 
   /* Display: MoU */
   $handler = $view->new_display('page', 'MoU', 'mou');
+  $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Content: Title */
+  $handler->display->display_options['fields']['title_field']['id'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
+  $handler->display->display_options['fields']['title_field']['field'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['link_to_entity'] = 1;
+  /* Field: Content: Instrument name */
+  $handler->display->display_options['fields']['field_instrument_name']['id'] = 'field_instrument_name';
+  $handler->display->display_options['fields']['field_instrument_name']['table'] = 'field_data_field_instrument_name';
+  $handler->display->display_options['fields']['field_instrument_name']['field'] = 'field_instrument_name';
+  /* Field: Content: Website URL */
+  $handler->display->display_options['fields']['field_instrument_website']['id'] = 'field_instrument_website';
+  $handler->display->display_options['fields']['field_instrument_website']['table'] = 'field_data_field_instrument_website';
+  $handler->display->display_options['fields']['field_instrument_website']['field'] = 'field_instrument_website';
+  $handler->display->display_options['fields']['field_instrument_website']['label'] = 'Website';
+  $handler->display->display_options['fields']['field_instrument_website']['click_sort_column'] = 'url';
+  $handler->display->display_options['fields']['field_instrument_website']['type'] = 'link_url';
+  $handler->display->display_options['fields']['field_instrument_website']['settings'] = array(
+    'strip_www' => 1,
+  );
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Content: Published */
@@ -5468,8 +5523,12 @@ return "";';
     t('Asc'),
     t('Desc'),
     t('Title'),
+    t('Website'),
     t('Agreements'),
+    t('Acronym'),
+    t('Instrument Name'),
     t('MoU'),
+    t('Instrument name'),
     t('Initiatives'),
     t('Special Species Initiatives'),
   );
@@ -7903,7 +7962,7 @@ return "";';
     'field_document_publish_date' => 'field_document_publish_date',
     'field_document_meeting' => 'field_document_meeting',
   );
-  $handler->display->display_options['style_options']['default'] = 'field_document_publish_date';
+  $handler->display->display_options['style_options']['default'] = 'field_document_number';
   $handler->display->display_options['style_options']['info'] = array(
     'title_field' => array(
       'sortable' => 1,
@@ -7914,7 +7973,7 @@ return "";';
     ),
     'field_document_number' => array(
       'sortable' => 1,
-      'default_sort_order' => 'asc',
+      'default_sort_order' => 'desc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
@@ -9016,6 +9075,7 @@ return "";';
   $handler->display->display_options['filters']['field_meeting_type_tid']['table'] = 'field_data_field_meeting_type';
   $handler->display->display_options['filters']['field_meeting_type_tid']['field'] = 'field_meeting_type_tid';
   $handler->display->display_options['filters']['field_meeting_type_tid']['value'] = array(
+    2923 => '2923',
     1641 => '1641',
     1646 => '1646',
     1648 => '1648',
@@ -11909,6 +11969,7 @@ return "";';
   $handler->display->display_options['filters']['type']['field'] = 'type';
   $handler->display->display_options['filters']['type']['value'] = array(
     'publication' => 'publication',
+    'simplenews' => 'simplenews',
   );
   /* Filter criterion: Content: Type (field_publication_type) */
   $handler->display->display_options['filters']['field_publication_type_tid']['id'] = 'field_publication_type_tid';
@@ -11929,7 +11990,7 @@ return "";';
   /* Display: Scientific */
   $handler = $view->new_display('page', 'Scientific', 'scientific');
   $handler->display->display_options['defaults']['title'] = FALSE;
-  $handler->display->display_options['title'] = 'Scientific Publications';
+  $handler->display->display_options['title'] = 'Scientific Articles';
   $handler->display->display_options['defaults']['style_plugin'] = FALSE;
   $handler->display->display_options['style_plugin'] = 'datatables';
   $handler->display->display_options['style_options']['columns'] = array(
@@ -12010,12 +12071,8 @@ return "";';
   $handler->display->display_options['filters']['field_publication_type_tid']['table'] = 'field_data_field_publication_type';
   $handler->display->display_options['filters']['field_publication_type_tid']['field'] = 'field_publication_type_tid';
   $handler->display->display_options['filters']['field_publication_type_tid']['value'] = array(
-    229 => '229',
-    224 => '224',
     230 => '230',
-    223 => '223',
   );
-  $handler->display->display_options['filters']['field_publication_type_tid']['exposed'] = TRUE;
   $handler->display->display_options['filters']['field_publication_type_tid']['expose']['operator_id'] = 'field_publication_type_tid_op';
   $handler->display->display_options['filters']['field_publication_type_tid']['expose']['label'] = 'Type';
   $handler->display->display_options['filters']['field_publication_type_tid']['expose']['operator'] = 'field_publication_type_tid_op';
@@ -12043,7 +12100,7 @@ return "";';
   $handler->display->display_options['filters']['field_instrument_target_id']['table'] = 'field_data_field_instrument';
   $handler->display->display_options['filters']['field_instrument_target_id']['field'] = 'field_instrument_target_id';
   $handler->display->display_options['filters']['field_instrument_target_id']['value']['value'] = '1';
-  $handler->display->display_options['path'] = 'publications/scientific-publications';
+  $handler->display->display_options['path'] = 'publications/scientific-articles';
   $handler->display->display_options['menu']['title'] = 'Scientific';
   $handler->display->display_options['menu']['weight'] = '0';
   $handler->display->display_options['menu']['name'] = '810f12118bc3b060d5e1bf8c18c7725f';
@@ -12135,9 +12192,9 @@ return "";';
   $handler->display->display_options['filters']['field_publication_type_tid']['field'] = 'field_publication_type_tid';
   $handler->display->display_options['filters']['field_publication_type_tid']['value'] = array(
     225 => '225',
-    1662 => '1662',
     231 => '231',
     226 => '226',
+    224 => '224',
     228 => '228',
     227 => '227',
   );
@@ -12159,6 +12216,7 @@ return "";';
     10 => 0,
     11 => 0,
     12 => 0,
+    13 => 0,
   );
   $handler->display->display_options['filters']['field_publication_type_tid']['expose']['reduce'] = TRUE;
   $handler->display->display_options['filters']['field_publication_type_tid']['reduce_duplicates'] = TRUE;
@@ -12169,6 +12227,29 @@ return "";';
   $handler->display->display_options['filters']['field_instrument_target_id']['table'] = 'field_data_field_instrument';
   $handler->display->display_options['filters']['field_instrument_target_id']['field'] = 'field_instrument_target_id';
   $handler->display->display_options['filters']['field_instrument_target_id']['value']['value'] = '1';
+  /* Filter criterion: Content: Type (field_publication_type) */
+  $handler->display->display_options['filters']['field_publication_type_tid_1']['id'] = 'field_publication_type_tid_1';
+  $handler->display->display_options['filters']['field_publication_type_tid_1']['table'] = 'field_data_field_publication_type';
+  $handler->display->display_options['filters']['field_publication_type_tid_1']['field'] = 'field_publication_type_tid';
+  $handler->display->display_options['filters']['field_publication_type_tid_1']['operator'] = 'not';
+  $handler->display->display_options['filters']['field_publication_type_tid_1']['value'] = array(
+    232 => '232',
+    1684 => '1684',
+    1662 => '1662',
+    1942 => '1942',
+    229 => '229',
+    1682 => '1682',
+    222 => '222',
+    230 => '230',
+    2823 => '2823',
+    223 => '223',
+  );
+  $handler->display->display_options['filters']['field_publication_type_tid_1']['expose']['operator_id'] = 'field_publication_type_tid_1_op';
+  $handler->display->display_options['filters']['field_publication_type_tid_1']['expose']['label'] = 'Type (field_publication_type)';
+  $handler->display->display_options['filters']['field_publication_type_tid_1']['expose']['operator'] = 'field_publication_type_tid_1_op';
+  $handler->display->display_options['filters']['field_publication_type_tid_1']['expose']['identifier'] = 'field_publication_type_tid_1';
+  $handler->display->display_options['filters']['field_publication_type_tid_1']['type'] = 'select';
+  $handler->display->display_options['filters']['field_publication_type_tid_1']['vocabulary'] = 'publication_types';
   $handler->display->display_options['path'] = 'publications/outreach-materials';
   $handler->display->display_options['menu']['title'] = 'Leaflets and Brochures';
   $handler->display->display_options['menu']['weight'] = '0';
@@ -12987,6 +13068,182 @@ return "";';
     'publication' => 'publication',
   );
   $handler->display->display_options['path'] = 'guidelines';
+
+  /* Display: E-newsletter */
+  $handler = $view->new_display('page', 'E-newsletter', 'e_newsletter');
+  $handler->display->display_options['defaults']['title'] = FALSE;
+  $handler->display->display_options['title'] = 'E-Newsletter';
+  $handler->display->display_options['defaults']['style_plugin'] = FALSE;
+  $handler->display->display_options['style_plugin'] = 'datatables';
+  $handler->display->display_options['style_options']['columns'] = array(
+    'title_field' => 'title_field',
+    'created' => 'created',
+  );
+  $handler->display->display_options['style_options']['default'] = 'created';
+  $handler->display->display_options['style_options']['info'] = array(
+    'title_field' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'created' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'desc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+  );
+  $handler->display->display_options['style_options']['elements'] = array(
+    'search_box' => 1,
+    'table_info' => 1,
+    'save_state' => 0,
+    'enable_tabletools' => 0,
+  );
+  $handler->display->display_options['style_options']['layout'] = array(
+    'autowidth' => 0,
+    'themeroller' => 0,
+    'sdom' => '',
+  );
+  $handler->display->display_options['style_options']['pages'] = array(
+    'pagination_style' => '0',
+    'length_change' => 1,
+    'display_length' => '10',
+    'processing' => 1,
+    'server_side' => 1,
+    'items_per_page_options' => '10, 25, 50, 100',
+  );
+  $handler->display->display_options['defaults']['style_options'] = FALSE;
+  $handler->display->display_options['defaults']['row_plugin'] = FALSE;
+  $handler->display->display_options['defaults']['row_options'] = FALSE;
+  $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Content: Title */
+  $handler->display->display_options['fields']['title_field']['id'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
+  $handler->display->display_options['fields']['title_field']['field'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['label'] = 'Publication';
+  $handler->display->display_options['fields']['title_field']['link_to_entity'] = 1;
+  /* Field: Content: Post date */
+  $handler->display->display_options['fields']['created']['id'] = 'created';
+  $handler->display->display_options['fields']['created']['table'] = 'node';
+  $handler->display->display_options['fields']['created']['field'] = 'created';
+  $handler->display->display_options['fields']['created']['label'] = 'Posted';
+  $handler->display->display_options['fields']['created']['date_format'] = 'cms_date';
+  $handler->display->display_options['fields']['created']['second_date_format'] = 'cms_date';
+  $handler->display->display_options['defaults']['filter_groups'] = FALSE;
+  $handler->display->display_options['defaults']['filters'] = FALSE;
+  /* Filter criterion: Content: Published */
+  $handler->display->display_options['filters']['status']['id'] = 'status';
+  $handler->display->display_options['filters']['status']['table'] = 'node';
+  $handler->display->display_options['filters']['status']['field'] = 'status';
+  $handler->display->display_options['filters']['status']['value'] = 1;
+  $handler->display->display_options['filters']['status']['group'] = 1;
+  $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+  /* Filter criterion: Content: Type */
+  $handler->display->display_options['filters']['type']['id'] = 'type';
+  $handler->display->display_options['filters']['type']['table'] = 'node';
+  $handler->display->display_options['filters']['type']['field'] = 'type';
+  $handler->display->display_options['filters']['type']['value'] = array(
+    'simplenews' => 'simplenews',
+  );
+  $handler->display->display_options['path'] = 'publications/e-newsletter';
+
+  /* Display: Technical Reports */
+  $handler = $view->new_display('page', 'Technical Reports', 'page_1');
+  $handler->display->display_options['defaults']['title'] = FALSE;
+  $handler->display->display_options['title'] = 'Technical Reports';
+  $handler->display->display_options['defaults']['style_plugin'] = FALSE;
+  $handler->display->display_options['style_plugin'] = 'datatables';
+  $handler->display->display_options['style_options']['columns'] = array(
+    'title_field' => 'title_field',
+    'field_publication_publisher' => 'field_publication_publisher',
+    'field_publication_type' => 'field_publication_type',
+    'field_publication_published_date' => 'field_publication_published_date',
+  );
+  $handler->display->display_options['style_options']['default'] = 'field_publication_published_date';
+  $handler->display->display_options['style_options']['info'] = array(
+    'title_field' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_publication_publisher' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_publication_type' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_publication_published_date' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'desc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+  );
+  $handler->display->display_options['style_options']['elements'] = array(
+    'search_box' => 1,
+    'table_info' => 1,
+    'save_state' => 0,
+    'enable_tabletools' => 0,
+  );
+  $handler->display->display_options['style_options']['layout'] = array(
+    'autowidth' => 0,
+    'themeroller' => 0,
+    'sdom' => '',
+  );
+  $handler->display->display_options['style_options']['pages'] = array(
+    'pagination_style' => '0',
+    'length_change' => 1,
+    'display_length' => '10',
+    'processing' => 1,
+    'server_side' => 1,
+    'items_per_page_options' => '10, 25, 50, 100',
+  );
+  $handler->display->display_options['defaults']['style_options'] = FALSE;
+  $handler->display->display_options['defaults']['row_plugin'] = FALSE;
+  $handler->display->display_options['defaults']['row_options'] = FALSE;
+  $handler->display->display_options['defaults']['filter_groups'] = FALSE;
+  $handler->display->display_options['defaults']['filters'] = FALSE;
+  /* Filter criterion: Content: Published */
+  $handler->display->display_options['filters']['status']['id'] = 'status';
+  $handler->display->display_options['filters']['status']['table'] = 'node';
+  $handler->display->display_options['filters']['status']['field'] = 'status';
+  $handler->display->display_options['filters']['status']['value'] = 1;
+  $handler->display->display_options['filters']['status']['group'] = 1;
+  $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+  /* Filter criterion: Content: Type */
+  $handler->display->display_options['filters']['type']['id'] = 'type';
+  $handler->display->display_options['filters']['type']['table'] = 'node';
+  $handler->display->display_options['filters']['type']['field'] = 'type';
+  $handler->display->display_options['filters']['type']['value'] = array(
+    'publication' => 'publication',
+  );
+  /* Filter criterion: Content: Type (field_publication_type) */
+  $handler->display->display_options['filters']['field_publication_type_tid']['id'] = 'field_publication_type_tid';
+  $handler->display->display_options['filters']['field_publication_type_tid']['table'] = 'field_data_field_publication_type';
+  $handler->display->display_options['filters']['field_publication_type_tid']['field'] = 'field_publication_type_tid';
+  $handler->display->display_options['filters']['field_publication_type_tid']['value'] = array(
+    0 => '2823',
+  );
+  $handler->display->display_options['filters']['field_publication_type_tid']['reduce_duplicates'] = TRUE;
+  $handler->display->display_options['filters']['field_publication_type_tid']['vocabulary'] = 'publication_types';
+  $handler->display->display_options['path'] = 'publications/technical-reports';
+  $handler->display->display_options['menu']['title'] = 'Proceedings';
+  $handler->display->display_options['menu']['weight'] = '0';
+  $handler->display->display_options['menu']['name'] = '810f12118bc3b060d5e1bf8c18c7725f';
+  $handler->display->display_options['menu']['context'] = 0;
+  $handler->display->display_options['menu']['context_only_inline'] = 0;
   $translatables['front_end_publications'] = array(
     t('Master'),
     t('Scientific'),
@@ -13008,9 +13265,10 @@ return "";';
     t('Type'),
     t('Published Date'),
     t('Newsletter'),
-    t('Scientific Publications'),
+    t('Scientific Articles'),
     t('Leaflets and Brochures'),
     t('Outreach Materials'),
+    t('Type (field_publication_type)'),
     t('MoUs Publications'),
     t('Publications'),
     t('All'),
@@ -13030,6 +13288,10 @@ return "";';
     t('Fact Sheets'),
     t('MoUs Publication/Guidelines'),
     t('Guidelines'),
+    t('E-newsletter'),
+    t('E-Newsletter'),
+    t('Posted'),
+    t('Technical Reports'),
   );
   $export['front_end_publications'] = $view;
 
@@ -15524,6 +15786,68 @@ return "";';
   $handler->display->display_options['pager']['options']['offset'] = '0';
   $handler->display->display_options['pager']['options']['id'] = '0';
   $handler->display->display_options['pager']['options']['quantity'] = '9';
+  $handler->display->display_options['defaults']['style_plugin'] = FALSE;
+  $handler->display->display_options['style_plugin'] = 'table';
+  $handler->display->display_options['style_options']['columns'] = array(
+    'field_document_number' => 'field_document_number',
+    'title_field' => 'title_field',
+    'nid' => 'nid',
+    'body' => 'body',
+    'field_document_files' => 'field_document_files',
+    'field_document_private_files' => 'field_document_private_files',
+    'title' => 'title',
+  );
+  $handler->display->display_options['style_options']['default'] = '-1';
+  $handler->display->display_options['style_options']['info'] = array(
+    'field_document_number' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'title_field' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'nid' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'body' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 1,
+    ),
+    'field_document_files' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_document_private_files' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'title' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+  );
+  $handler->display->display_options['defaults']['style_options'] = FALSE;
+  $handler->display->display_options['defaults']['row_plugin'] = FALSE;
+  $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['defaults']['footer'] = FALSE;
   /* Footer: Global: Text area */
   $handler->display->display_options['footer']['area']['id'] = 'area';
@@ -15548,6 +15872,12 @@ return "";';
   $handler->display->display_options['fields']['nid']['table'] = 'node';
   $handler->display->display_options['fields']['nid']['field'] = 'nid';
   $handler->display->display_options['fields']['nid']['exclude'] = TRUE;
+  /* Field: Content: Description */
+  $handler->display->display_options['fields']['body']['id'] = 'body';
+  $handler->display->display_options['fields']['body']['table'] = 'field_data_body';
+  $handler->display->display_options['fields']['body']['field'] = 'body';
+  $handler->display->display_options['fields']['body']['label'] = '';
+  $handler->display->display_options['fields']['body']['element_label_colon'] = FALSE;
   /* Field: Content: Files */
   $handler->display->display_options['fields']['field_document_files']['id'] = 'field_document_files';
   $handler->display->display_options['fields']['field_document_files']['table'] = 'field_data_field_document_files';
