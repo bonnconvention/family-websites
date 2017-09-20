@@ -3,7 +3,7 @@
 # DIRECTORY_SEPARATOR is a name too long for a constant :D
 define('_DS_', DIRECTORY_SEPARATOR);
 
-module_load_include('module', 'contacts', 'contacts');
+//module_load_include('module', 'contacts', 'contacts');
 
 final class CMSUtils {
     public static $regions = array(
