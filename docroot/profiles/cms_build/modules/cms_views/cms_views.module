@@ -108,7 +108,7 @@ function cms_views_views_pre_render(&$view) {
             foreach ($view->result as &$result) {
               if (!empty($result->field_field_featured_image)) {
                 foreach ($result->field_field_featured_image as &$image) {
-                  $image_style = image_style_path('newsroom_featured_image', $image['rendered']['uri']);
+                  $image_style = image_style_url('newsroom_featured_image', $image['rendered']['uri']);
                   if (!empty($image_style)) {
                     $image['rendered']['uri'] = $image_style;
                     $image['raw']['uri'] = $image_style;
