@@ -2137,7 +2137,7 @@ return "";';
   $handler->display->display_options['filters']['created']['table'] = 'node';
   $handler->display->display_options['filters']['created']['field'] = 'created';
   $handler->display->display_options['filters']['created']['operator'] = '>';
-  $handler->display->display_options['filters']['created']['value']['value'] = '2014-10-01 00:00:00';
+  $handler->display->display_options['filters']['created']['value']['value'] = '2016-10-01 00:00:00';
   $handler->display->display_options['path'] = 'news-cms';
   $translatables['api_species'] = array(
     t('Master'),
