@@ -10233,14 +10233,6 @@ return "";';
   $handler->display->display_options['filters']['field_news_type_tid']['reduce_duplicates'] = TRUE;
   $handler->display->display_options['filters']['field_news_type_tid']['type'] = 'select';
   $handler->display->display_options['filters']['field_news_type_tid']['vocabulary'] = 'news_type';
-  /* Filter criterion: Entity translation: Language */
-  $handler->display->display_options['filters']['language']['id'] = 'language';
-  $handler->display->display_options['filters']['language']['table'] = 'entity_translation';
-  $handler->display->display_options['filters']['language']['field'] = 'language';
-  $handler->display->display_options['filters']['language']['relationship'] = 'entity_translations';
-  $handler->display->display_options['filters']['language']['value'] = array(
-    '***CURRENT_LANGUAGE***' => '***CURRENT_LANGUAGE***',
-  );
   /* Filter criterion: Content: Title (title_field:language) */
   $handler->display->display_options['filters']['language_1']['id'] = 'language_1';
   $handler->display->display_options['filters']['language_1']['table'] = 'field_data_title_field';
@@ -10751,7 +10743,7 @@ return "";';
   $handler = $view->new_display('default', 'Master', 'default');
   $handler->display->display_options['title'] = 'Projects';
   $handler->display->display_options['use_more_always'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['exposed_form']['type'] = 'basic';
@@ -10941,7 +10933,7 @@ return "";';
   /* Display: Projects */
   $handler = $view->new_display('page', 'Projects', 'projects');
   $handler->display->display_options['defaults']['access'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Content: Published */
@@ -11094,7 +11086,7 @@ return "";';
   /* Display: MoUs Projects */
   $handler = $view->new_display('page', 'MoUs Projects', 'mous_projects');
   $handler->display->display_options['defaults']['access'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['defaults']['arguments'] = FALSE;
   /* Contextual filter: Field: CMS Instrument (field_instrument) */
   $handler->display->display_options['arguments']['field_instrument_target_id']['id'] = 'field_instrument_target_id';
@@ -13309,7 +13301,7 @@ return "";';
   $handler = $view->new_display('default', 'Master', 'default');
   $handler->display->display_options['title'] = 'Species';
   $handler->display->display_options['use_more_always'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['query']['options']['pure_distinct'] = TRUE;
@@ -13577,7 +13569,7 @@ return "";';
   /* Display: List */
   $handler = $view->new_display('page', 'List', 'species_list');
   $handler->display->display_options['defaults']['access'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['defaults']['style_plugin'] = FALSE;
   $handler->display->display_options['style_plugin'] = 'datatables';
   $handler->display->display_options['style_options']['columns'] = array(
@@ -13936,7 +13928,7 @@ return "";';
   /* Display: MoUs List */
   $handler = $view->new_display('page', 'MoUs List', 'mous_species_list');
   $handler->display->display_options['defaults']['access'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['defaults']['header'] = FALSE;
   $handler->display->display_options['defaults']['fields'] = FALSE;
   /* Field: Content: Title */
@@ -14896,7 +14888,7 @@ return "";';
   /* Display: Random species */
   $handler = $view->new_display('page', 'Random species', 'random_species');
   $handler->display->display_options['defaults']['access'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['defaults']['pager'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'none';
   $handler->display->display_options['pager']['options']['offset'] = '0';
@@ -14963,7 +14955,7 @@ return "";';
   /* Display: Random Species With Images */
   $handler = $view->new_display('page', 'Random Species With Images', 'random_species_with_images');
   $handler->display->display_options['defaults']['access'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['defaults']['pager'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'none';
   $handler->display->display_options['pager']['options']['offset'] = '0';
@@ -20453,7 +20445,7 @@ return "";';
   /* Display: Front-end List */
   $handler = $view->new_display('page', 'Front-end List', 'fe_list');
   $handler->display->display_options['defaults']['access'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['defaults']['pager'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'full';
   $handler->display->display_options['pager']['options']['items_per_page'] = '15';
