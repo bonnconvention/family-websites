@@ -64,7 +64,6 @@ function cms_odata_cron() {
       // add new results
       foreach($focal_points as $fp) {
         $entity = entity_create('odata_focal_point', array());
-        $entity->dn_md5 = md5($fp->dn);
         $entity->dn = $fp->dn;
         $entity->first_name = $fp->first_name;
         $entity->last_name = $fp->last_name;

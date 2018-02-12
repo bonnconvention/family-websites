@@ -15,12 +15,6 @@ function cms_odata_schema(){
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-      'dn_md5' => array(
-        'description' => 'User unique identifier in LDAP',
-        'type' => 'varchar',
-        'length' => '255',
-        'not null' => TRUE,
-      ),
       'dn' => array(
         'description' => 'User unique identifier in LDAP',
         'type' => 'varchar',
@@ -122,13 +116,4 @@ function cms_odata_schema(){
   );
 
   return $schema;
-}
-
-/**
- * Add new column dn_md5 to the odata_focal_point table
- */
-function cms_odata_update_7001() {
-  db_add_field('odata_focal_point', 'dn_md5', array(
-    'type' => 'varchar', 'length' => 255, 'default' => '', 'not null' => TRUE)
-  );
 }
