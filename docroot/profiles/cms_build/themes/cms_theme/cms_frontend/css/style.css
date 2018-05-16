@@ -6750,3 +6750,9 @@ td.radio {
 .field-widget-powertagging-ui {
   width: 100%;
 }
+#edit-field-leo-tags-en-powertagging-language-error,
+#edit-field-leo-tags-fr-powertagging-language-error,
+#edit-field-leo-tags-es-powertagging-language-error,
+#edit-field-leo-tags-und-powertagging-language-error {
+  display: none;
+}
