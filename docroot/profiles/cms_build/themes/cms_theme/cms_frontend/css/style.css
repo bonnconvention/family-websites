@@ -6747,7 +6747,7 @@ td.radio {
   padding: 0;
   margin: 4px 0 0 0;
 }
-.field-widget-powertagging-ui {
+.field-widget-powertagging-ui fieldset {
   width: 100%;
 }
 #edit-field-leo-tags-en-powertagging-language-error,
