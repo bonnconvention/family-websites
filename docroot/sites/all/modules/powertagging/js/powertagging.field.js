@@ -3,7 +3,7 @@ Drupal.behaviors.powertagging_field = {
   attach: function (context, settings) {
 
     $("div.field-type-powertagging").once(function() {
-      $(this).find("input[type=\"submit\"]").click(function(event) {
+      $(this).find("input[type=\"submit\"],button").click(function(event) {
         event.preventDefault();
         var field_id = $(this).parent().parent().parent().attr("id").substr(5).replace(/-/g, "_");
         var html_id = "#edit-" + field_id.replace(/_/g, "-");
