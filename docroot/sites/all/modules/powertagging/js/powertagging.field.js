@@ -42,6 +42,11 @@ Drupal.behaviors.powertagging_field = {
           case "file":
             data.files = data.files.concat(collect_content_file(field.field_name, field.widget));
             break;
+
+          case "field_collection":
+            var text_content = collect_content_field_collection_text(field.field_name, field.widget) || "";
+            data.content += (data.content.length > 0 ? " " : "") + text_content;
+            break;
         }
       });
       return data;
@@ -84,6 +89,28 @@ Drupal.behaviors.powertagging_field = {
           break;
       }
       return "";
+    }
+
+    /**
+     * Collect the data from file descriptions inside a field collection
+     */
+    function collect_content_field_collection_text (field, widget) {
+      var field_id = "#edit-" + field.replace(/_/g, "-");
+      switch (widget) {
+        case "field_collection_embed":
+          var text = "";
+          $(field_id + " input[type=text]").each(function() {
+            var name = $(this).attr("name");
+            if (name) {
+              if ($(this).attr("name").indexOf("[description]") > 0) {
+                text += $(this).val() + " ";
+              }
+            }
+          });
+          return text;
+          break;
+      }
+      return [];
     }
 
     /**

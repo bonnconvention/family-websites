@@ -455,13 +455,13 @@ function powertagging_field_list(array $instance, $type) {
       'text_textarea_with_summary',
     ),
     'file' => array('file_generic'),
+    'field_collection' => array('field_collection_embed'),
   );
   $allowed_modules = array_keys($allowed_widgets);
 
   $entity_info = field_info_instances($instance['entity_type'], $instance['bundle']);
   uasort($entity_info, 'powertagging_sort_by_weight');
   $result = array();
-
   switch ($type) {
     case 'instance_settings_form':
       // Add fields specific to entity types.
