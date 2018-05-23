@@ -1190,7 +1190,9 @@ function powertagging_taxonomy_build_node_index($node) {
         foreach (field_available_languages('node', $field) as $langcode) {
           if (!empty($items[$langcode])) {
             foreach ($items[$langcode] as $item) {
-              $tid_all[$item['tid']] = $item['tid'];
+              if (!empty($item['tid'])) {
+                $tid_all[$item['tid']] = $item['tid'];
+              }
             }
           }
         }
