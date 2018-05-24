@@ -85,3 +85,15 @@ index 73987e9..fe8caff 100644
              }
            }
          }
+@@ -639,9 +639,9 @@ function powertagging_update_entity_tags($entity_ids, $entity_type, $fieldname,
+             }
+             // Any other content.
+             else {
+-              $tag_content = strip_tags(render(field_view_field($entity_type, $entity, $field_id, array(
++              $tag_content = strip_tags(str_replace('<', ' <', render(field_view_field($entity_type, $entity, $field_id, array(
+                 'label' => 'hidden',
+-              ))));
++              )))));
+               if (!empty($tag_content)) {
+                 $tag_contents[] = $tag_content;
+               }

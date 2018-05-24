@@ -618,7 +618,7 @@ function powertagging_update_entity_tags($entity_ids, $entity_type, $fieldname, 
             // Body field --> include summary.
             if ($field_id == 'body') {
               // Add the summary.
-              if ($field_value_language[0]['summary'] != $field_value_language[0]['value']) {
+              if ($field_vazlue_language[0]['summary'] != $field_value_language[0]['value']) {
                 $summary = strip_tags($field_value_language[0]['summary']);
                 if (!empty($summary)) {
                   $tag_contents[] = $summary;
@@ -639,9 +639,9 @@ function powertagging_update_entity_tags($entity_ids, $entity_type, $fieldname, 
             }
             // Any other content.
             else {
-              $tag_content = strip_tags(render(field_view_field($entity_type, $entity, $field_id, array(
+              $tag_content = strip_tags(str_replace('<', ' <', render(field_view_field($entity_type, $entity, $field_id, array(
                 'label' => 'hidden',
-              ))));
+              )))));
               if (!empty($tag_content)) {
                 $tag_contents[] = $tag_content;
               }
