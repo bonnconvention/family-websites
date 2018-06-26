@@ -34,12 +34,14 @@ function cms_thesaurus_taxonomy_default_vocabularies() {
         ),
       ),
       'tes' => array(
-        'enable' => 1,
+        'enable' => TRUE,
         'plugin' => 'Drupal\\taxonomy_external_sync\\plugin\\source\\VocBenchRDFSource',
         'plugin_config' => array(
-          'url' => 'http://informea.org/sites/default/files/export/cms.rdf',
+          'url' => 'https://thesaurus.informea.org/export/cms.rdf',
           'id_field' => 'uri',
           'parent_field' => 'broader',
+          'delete_deprecated_terms' => 0,
+          'delete_missing_terms' => 0,
         ),
         'mappings' => array(
           'description_field' => 'definition',
@@ -74,12 +76,14 @@ function cms_thesaurus_taxonomy_default_vocabularies() {
         ),
       ),
       'tes' => array(
-        'enable' => 1,
+        'enable' => TRUE,
         'plugin' => 'Drupal\\taxonomy_external_sync\\plugin\\source\\VocBenchRDFSource',
         'plugin_config' => array(
-          'url' => 'http://informea.org/sites/default/files/export/informea.rdf',
+          'url' => 'https://thesaurus.informea.org/export/informea.rdf',
           'id_field' => 'uri',
           'parent_field' => 'broader',
+          'delete_deprecated_terms' => 0,
+          'delete_missing_terms' => 0,
         ),
         'mappings' => array(
           'description_field' => 'definition',

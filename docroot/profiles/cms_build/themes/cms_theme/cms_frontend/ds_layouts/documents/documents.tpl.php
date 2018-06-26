@@ -17,6 +17,12 @@
   </div><!-- .col-md-6 -->
 </div><!-- .row -->
 
+<div class="row">
+  <div class="col-md-12">
+    <?php print $region_1_1_3; ?>
+  </div>
+</div>
+
 <div id="accordion" class="panel-group">
   <div class="panel panel-default">
     <div class="panel-heading">

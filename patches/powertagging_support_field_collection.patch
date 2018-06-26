@@ -1,0 +1,99 @@
+diff --git a/includes/powertagging.field.inc b/includes/powertagging.field.inc
+index 750bc16..d1cb0cc 100644
+--- a/includes/powertagging.field.inc
++++ b/includes/powertagging.field.inc
+@@ -455,6 +455,7 @@ function powertagging_field_list(array $instance, $type) {
+       'text_textarea_with_summary',
+     ),
+     'file' => array('file_generic'),
++    'field_collection' => array('field_collection_embed'),
+   );
+   $allowed_modules = array_keys($allowed_widgets);
+ 
+diff --git a/js/powertagging.field.js b/js/powertagging.field.js
+index 3f3bbeb..6249890 100644
+--- a/js/powertagging.field.js
++++ b/js/powertagging.field.js
+@@ -1,4 +1,4 @@
+-(function ($) {
++st(function ($) {
+ Drupal.behaviors.powertagging_field = {
+   attach: function (context, settings) {
+ 
+@@ -42,6 +42,11 @@ Drupal.behaviors.powertagging_field = {
+           case "file":
+             data.files = data.files.concat(collect_content_file(field.field_name, field.widget));
+             break;
++
++          case "field_collection":
++            var text_content = collect_content_field_collection_text(field.field_name, field.widget) || "";
++            data.content += (data.content.length > 0 ? " " : "") + text_content;
++            break;
+         }
+       });
+       return data;
+@@ -87,6 +92,28 @@ Drupal.behaviors.powertagging_field = {
+     }
+ 
+     /**
++     * Collect the data from file descriptions inside a field collection
++     */
++    function collect_content_field_collection_text (field, widget) {
++      var field_id = "#edit-" + field.replace(/_/g, "-");
++      switch (widget) {
++        case "field_collection_embed":
++          var text = "";
++          $(field_id + " input[type=text]").each(function() {
++            var name = $(this).attr("name");
++            if (name) {
++              if ($(this).attr("name").indexOf("[description]") > 0) {
++                text += $(this).val() + " ";
++              }
++            }
++          });
++          return text;
++          break;
++      }
++      return [];
++    }
++
++    /**
+      * Collect the data from different file field types
+      */
+     function collect_content_file (field, widget) {
+@@ -239,7 +266,7 @@ Drupal.behaviors.powertagging_field = {
+             var html_field_id = "#edit-" + field_id.replace(/_/g, '-');
+             var field_settings = Drupal.settings.powertagging[field_id][Object.keys(Drupal.settings.powertagging[field_id])[0]].settings;
+             check_entity_language(html_field_id, field_settings);
+-            
++
+             // Update the the autocomplete path.
+             $(html_field_id + " #powertagging-tag-result").closest(".field-type-powertagging").find("input.powertagging_autocomplete_tags").autocomplete(
+               'option', 'source', Drupal.settings.basePath + "powertagging/autocomplete_tags/" + settings.settings.powertagging_id + '/' + settings.settings.project_id + '/' + settings.settings.entity_language
+diff --git a/powertagging.module b/powertagging.module
+index 73987e9..fe8caff 100644
+--- a/powertagging.module
++++ b/powertagging.module
+@@ -1190,7 +1190,9 @@ function powertagging_taxonomy_build_node_index($node) {
+         foreach (field_available_languages('node', $field) as $langcode) {
+           if (!empty($items[$langcode])) {
+             foreach ($items[$langcode] as $item) {
+-              $tid_all[$item['tid']] = $item['tid'];
++              if (!empty($item['tid'])) {
++                $tid_all[$item['tid']] = $item['tid'];
++              }
+             }
+           }
+         }
+@@ -639,9 +639,9 @@ function powertagging_update_entity_tags($entity_ids, $entity_type, $fieldname,
+             }
+             // Any other content.
+             else {
+-              $tag_content = strip_tags(render(field_view_field($entity_type, $entity, $field_id, array(
++              $tag_content = strip_tags(str_replace('<', ' <', render(field_view_field($entity_type, $entity, $field_id, array(
+                 'label' => 'hidden',
+-              ))));
++              )))));
+               if (!empty($tag_content)) {
+                 $tag_contents[] = $tag_content;
+               }

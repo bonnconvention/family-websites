@@ -105,3 +105,13 @@ span.unpublished-icon {
 .node-meeting-form .form-item-event-calendar-date-und-0-value2-time {
     /*display: none;*/
 }
+.field-widget-powertagging-ui fieldset {
+    width: 100%;
+}
+#edit-field-leo-tags-en-powertagging-language-error,
+#edit-field-leo-tags-fr-powertagging-language-error,
+#edit-field-leo-tags-es-powertagging-language-error,
+#edit-field-leo-tags-und-powertagging-language-error {
+    display: none;
+}
+

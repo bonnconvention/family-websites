@@ -25,22 +25,23 @@
             </div>
 
             <?php ob_start(); render_slot($node, 'details', 'document', $content); $details = ob_get_contents(); ob_end_clean(); ?>
-
             <?php
             $sidebar_blocks = block_get_blocks_by_region('sidebar_second');
             unset($sidebar_blocks['#sorted']);
             ?>
 
-            <?php if(!empty($details) || !empty($sidebar_blocks)): ?>
-                <div class="col-md-4 profile">
-                    <?php if(!empty($details)) { ?>
-                        <div class="document-right well">
-                            <table class="table table-condensed table-hover two-columns">
-                                <tbody>
+
+          <?php if(!empty($details) || !empty($sidebar_blocks)): ?>
+              <div class="col-md-4 profile">
+                  <?php if(!empty($details)) { ?>
+                      <div class="document-right well">
+                          <table class="table table-condensed table-hover two-columns">
+                              <tbody>
                                 <?php echo $details; ?>
                                 </tbody>
-                            </table>
-                        </div>
+                          </table>
+                        <?php echo render($content['field_leo_tags']); ?>
+                      </div>
                     <?php } ?>
 
                     <!-- Render sidebar blocks -->
