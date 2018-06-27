@@ -107,3 +107,18 @@ function cms_meeting_update_7008() {
       ))->execute();
   }
 }
+
+/**
+ * refs #5177 - Disable Memcache Storage module. Install and configure Varnish, Expire and CMS Varnish modules.
+ */
+function cms_meeting_update_7009() {
+  module_disable(array('memcache_storage'));
+  module_enable(
+    array(
+      'varnish',
+      'expire',
+      'cms_varnish',
+      )
+  );
+  features_revert_module('cms_varnish');
+}
