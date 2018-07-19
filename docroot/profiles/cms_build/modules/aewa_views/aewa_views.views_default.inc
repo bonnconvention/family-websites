@@ -6858,6 +6858,382 @@ return "";';
   $handler->display->display_options['filters']['field_document_type_tid']['type'] = 'select';
   $handler->display->display_options['filters']['field_document_type_tid']['vocabulary'] = 'document_type';
   $handler->display->display_options['path'] = 'fe-species-other-documents';
+
+  /* Display: MOP Resolutions */
+  $handler = $view->new_display('page', 'MOP Resolutions', 'page_1');
+  $handler->display->display_options['defaults']['title'] = FALSE;
+  $handler->display->display_options['title'] = 'Resolutions of the AEWA Meetings of the Parties (MOP)';
+  $handler->display->display_options['defaults']['style_plugin'] = FALSE;
+  $handler->display->display_options['style_plugin'] = 'datatables';
+  $handler->display->display_options['style_options']['columns'] = array(
+    'title_field' => 'title_field',
+    'field_document_number' => 'field_document_number',
+    'field_document_publish_date' => 'field_document_publish_date',
+    'field_document_meeting' => 'field_document_meeting',
+  );
+  $handler->display->display_options['style_options']['default'] = 'field_document_number';
+  $handler->display->display_options['style_options']['info'] = array(
+    'title_field' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_document_number' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'desc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_document_publish_date' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'desc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_document_meeting' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+  );
+  $handler->display->display_options['style_options']['elements'] = array(
+    'search_box' => 1,
+    'table_info' => 1,
+    'save_state' => 0,
+    'enable_tabletools' => 0,
+  );
+  $handler->display->display_options['style_options']['layout'] = array(
+    'autowidth' => 0,
+    'themeroller' => 0,
+    'sdom' => '',
+  );
+  $handler->display->display_options['style_options']['pages'] = array(
+    'pagination_style' => 'full_numbers',
+    'length_change' => 1,
+    'display_length' => '50',
+    'processing' => 1,
+    'server_side' => 1,
+    'items_per_page_options' => '10, 25, 50, All',
+  );
+  $handler->display->display_options['defaults']['style_options'] = FALSE;
+  $handler->display->display_options['defaults']['row_plugin'] = FALSE;
+  $handler->display->display_options['defaults']['row_options'] = FALSE;
+  $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Content: Title */
+  $handler->display->display_options['fields']['title_field']['id'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
+  $handler->display->display_options['fields']['title_field']['field'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['link_to_entity'] = 1;
+  /* Field: Content: Number */
+  $handler->display->display_options['fields']['field_document_number']['id'] = 'field_document_number';
+  $handler->display->display_options['fields']['field_document_number']['table'] = 'field_data_field_document_number';
+  $handler->display->display_options['fields']['field_document_number']['field'] = 'field_document_number';
+  $handler->display->display_options['fields']['field_document_number']['label'] = 'Document Number';
+  /* Field: Content: Publish date */
+  $handler->display->display_options['fields']['field_document_publish_date']['id'] = 'field_document_publish_date';
+  $handler->display->display_options['fields']['field_document_publish_date']['table'] = 'field_data_field_document_publish_date';
+  $handler->display->display_options['fields']['field_document_publish_date']['field'] = 'field_document_publish_date';
+  $handler->display->display_options['fields']['field_document_publish_date']['settings'] = array(
+    'format_type' => 'convention_date',
+    'fromto' => 'both',
+    'multiple_number' => '',
+    'multiple_from' => '',
+    'multiple_to' => '',
+  );
+  /* Field: Content: Meetings */
+  $handler->display->display_options['fields']['field_document_meeting']['id'] = 'field_document_meeting';
+  $handler->display->display_options['fields']['field_document_meeting']['table'] = 'field_data_field_document_meeting';
+  $handler->display->display_options['fields']['field_document_meeting']['field'] = 'field_document_meeting';
+  $handler->display->display_options['fields']['field_document_meeting']['settings'] = array(
+    'link' => 1,
+  );
+  $handler->display->display_options['fields']['field_document_meeting']['delta_offset'] = '0';
+  $handler->display->display_options['defaults']['sorts'] = FALSE;
+  /* Sort criterion: Content: Publish date (field_document_publish_date) */
+  $handler->display->display_options['sorts']['field_document_publish_date_value_1']['id'] = 'field_document_publish_date_value_1';
+  $handler->display->display_options['sorts']['field_document_publish_date_value_1']['table'] = 'field_data_field_document_publish_date';
+  $handler->display->display_options['sorts']['field_document_publish_date_value_1']['field'] = 'field_document_publish_date_value';
+  $handler->display->display_options['sorts']['field_document_publish_date_value_1']['order'] = 'DESC';
+  $handler->display->display_options['defaults']['filter_groups'] = FALSE;
+  $handler->display->display_options['defaults']['filters'] = FALSE;
+  /* Filter criterion: Content: Published */
+  $handler->display->display_options['filters']['status']['id'] = 'status';
+  $handler->display->display_options['filters']['status']['table'] = 'node';
+  $handler->display->display_options['filters']['status']['field'] = 'status';
+  $handler->display->display_options['filters']['status']['value'] = 1;
+  $handler->display->display_options['filters']['status']['group'] = 1;
+  $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+  /* Filter criterion: Content: Type */
+  $handler->display->display_options['filters']['type']['id'] = 'type';
+  $handler->display->display_options['filters']['type']['table'] = 'node';
+  $handler->display->display_options['filters']['type']['field'] = 'type';
+  $handler->display->display_options['filters']['type']['value'] = array(
+    'document' => 'document',
+  );
+  /* Filter criterion: Content: Type (field_document_type) */
+  $handler->display->display_options['filters']['field_document_type_tid']['id'] = 'field_document_type_tid';
+  $handler->display->display_options['filters']['field_document_type_tid']['table'] = 'field_data_field_document_type';
+  $handler->display->display_options['filters']['field_document_type_tid']['field'] = 'field_document_type_tid';
+  $handler->display->display_options['filters']['field_document_type_tid']['value'] = array(
+    0 => '1332',
+  );
+  $handler->display->display_options['filters']['field_document_type_tid']['reduce_duplicates'] = TRUE;
+  $handler->display->display_options['filters']['field_document_type_tid']['vocabulary'] = 'document_type';
+  /* Filter criterion: Content: Meetings (field_document_meeting) */
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['id'] = 'field_document_meeting_target_id';
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['table'] = 'field_data_field_document_meeting';
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['field'] = 'field_document_meeting_target_id';
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['expose']['operator_id'] = 'field_document_meeting_target_id_op';
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['expose']['label'] = 'Meetings (field_document_meeting)';
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['expose']['operator'] = 'field_document_meeting_target_id_op';
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['expose']['identifier'] = 'field_document_meeting_target_id';
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['expose']['multiple'] = TRUE;
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['is_grouped'] = TRUE;
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['group_info']['label'] = 'Meetings';
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['group_info']['identifier'] = 'field_document_meeting_target_id';
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['group_info']['group_items'] = array(
+    1 => array(
+      'title' => 'MOP6',
+      'operator' => '=',
+      'value' => array(
+        'value' => '2763',
+        'min' => '',
+        'max' => '',
+      ),
+    ),
+    2 => array(
+      'title' => 'MOP5',
+      'operator' => '=',
+      'value' => array(
+        'value' => '1871',
+        'min' => '',
+        'max' => '',
+      ),
+    ),
+    3 => array(
+      'title' => 'MOP4',
+      'operator' => '=',
+      'value' => array(
+        'value' => '1870',
+        'min' => '',
+        'max' => '',
+      ),
+    ),
+    4 => array(
+      'title' => 'MOP3',
+      'operator' => '=',
+      'value' => array(
+        'value' => '1869',
+        'min' => '',
+        'max' => '',
+      ),
+    ),
+    5 => array(
+      'title' => 'MOP2',
+      'operator' => '=',
+      'value' => array(
+        'value' => '1868',
+        'min' => '',
+        'max' => '',
+      ),
+    ),
+    6 => array(
+      'title' => 'MOP1',
+      'operator' => '=',
+      'value' => array(
+        'value' => '1867',
+        'min' => '',
+        'max' => '',
+      ),
+    ),
+  );
+  $handler->display->display_options['path'] = 'documents/mop-resolutions';
+  $handler->display->display_options['menu']['title'] = 'Action Plans';
+  $handler->display->display_options['menu']['weight'] = '0';
+  $handler->display->display_options['menu']['name'] = 'menu-frontend-main-menu';
+  $handler->display->display_options['menu']['context'] = 0;
+  $handler->display->display_options['menu']['context_only_inline'] = 0;
+
+  /* Display: Meeting Reports */
+  $handler = $view->new_display('page', 'Meeting Reports', 'meeting_report');
+  $handler->display->display_options['defaults']['title'] = FALSE;
+  $handler->display->display_options['title'] = 'Reports of the Meetings';
+  $handler->display->display_options['defaults']['pager'] = FALSE;
+  $handler->display->display_options['pager']['type'] = 'full';
+  $handler->display->display_options['pager']['options']['items_per_page'] = '0';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['pager']['options']['id'] = '0';
+  $handler->display->display_options['pager']['options']['quantity'] = '3';
+  $handler->display->display_options['defaults']['style_plugin'] = FALSE;
+  $handler->display->display_options['style_plugin'] = 'datatables';
+  $handler->display->display_options['style_options']['columns'] = array(
+    'title_field' => 'title_field',
+    'field_document_number' => 'field_document_number',
+    'field_document_meeting' => 'field_document_meeting',
+    'field_document_publish_date' => 'field_document_publish_date',
+  );
+  $handler->display->display_options['style_options']['default'] = 'field_document_publish_date';
+  $handler->display->display_options['style_options']['info'] = array(
+    'title_field' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_document_number' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'desc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_document_meeting' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_document_publish_date' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'desc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+  );
+  $handler->display->display_options['style_options']['elements'] = array(
+    'search_box' => 1,
+    'table_info' => 1,
+    'save_state' => 0,
+    'enable_tabletools' => 0,
+  );
+  $handler->display->display_options['style_options']['layout'] = array(
+    'autowidth' => 0,
+    'themeroller' => 0,
+    'sdom' => '',
+  );
+  $handler->display->display_options['style_options']['pages'] = array(
+    'pagination_style' => 'full_numbers',
+    'length_change' => 1,
+    'display_length' => '50',
+    'processing' => 1,
+    'server_side' => 1,
+    'items_per_page_options' => '10, 25, 50, All',
+  );
+  $handler->display->display_options['defaults']['style_options'] = FALSE;
+  $handler->display->display_options['defaults']['row_plugin'] = FALSE;
+  $handler->display->display_options['defaults']['row_options'] = FALSE;
+  $handler->display->display_options['defaults']['relationships'] = FALSE;
+  $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Content: Title */
+  $handler->display->display_options['fields']['title_field']['id'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
+  $handler->display->display_options['fields']['title_field']['field'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['link_to_entity'] = 1;
+  /* Field: Content: Number */
+  $handler->display->display_options['fields']['field_document_number']['id'] = 'field_document_number';
+  $handler->display->display_options['fields']['field_document_number']['table'] = 'field_data_field_document_number';
+  $handler->display->display_options['fields']['field_document_number']['field'] = 'field_document_number';
+  $handler->display->display_options['fields']['field_document_number']['label'] = 'Document Number';
+  /* Field: Content: Publish date */
+  $handler->display->display_options['fields']['field_document_publish_date']['id'] = 'field_document_publish_date';
+  $handler->display->display_options['fields']['field_document_publish_date']['table'] = 'field_data_field_document_publish_date';
+  $handler->display->display_options['fields']['field_document_publish_date']['field'] = 'field_document_publish_date';
+  $handler->display->display_options['fields']['field_document_publish_date']['label'] = 'Published';
+  $handler->display->display_options['fields']['field_document_publish_date']['settings'] = array(
+    'format_type' => 'month_year_date_type',
+    'fromto' => 'both',
+    'multiple_number' => '',
+    'multiple_from' => '',
+    'multiple_to' => '',
+  );
+  /* Field: Content: Meetings */
+  $handler->display->display_options['fields']['field_document_meeting']['id'] = 'field_document_meeting';
+  $handler->display->display_options['fields']['field_document_meeting']['table'] = 'field_data_field_document_meeting';
+  $handler->display->display_options['fields']['field_document_meeting']['field'] = 'field_document_meeting';
+  $handler->display->display_options['fields']['field_document_meeting']['settings'] = array(
+    'link' => 1,
+  );
+  $handler->display->display_options['fields']['field_document_meeting']['delta_offset'] = '0';
+  $handler->display->display_options['defaults']['sorts'] = FALSE;
+  /* Sort criterion: Content: Publish date (field_document_publish_date) */
+  $handler->display->display_options['sorts']['field_document_publish_date_value_1']['id'] = 'field_document_publish_date_value_1';
+  $handler->display->display_options['sorts']['field_document_publish_date_value_1']['table'] = 'field_data_field_document_publish_date';
+  $handler->display->display_options['sorts']['field_document_publish_date_value_1']['field'] = 'field_document_publish_date_value';
+  $handler->display->display_options['sorts']['field_document_publish_date_value_1']['order'] = 'DESC';
+  $handler->display->display_options['defaults']['arguments'] = FALSE;
+  $handler->display->display_options['defaults']['filter_groups'] = FALSE;
+  $handler->display->display_options['defaults']['filters'] = FALSE;
+  /* Filter criterion: Content: Published */
+  $handler->display->display_options['filters']['status']['id'] = 'status';
+  $handler->display->display_options['filters']['status']['table'] = 'node';
+  $handler->display->display_options['filters']['status']['field'] = 'status';
+  $handler->display->display_options['filters']['status']['value'] = 1;
+  $handler->display->display_options['filters']['status']['group'] = 1;
+  $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+  /* Filter criterion: Content: Type */
+  $handler->display->display_options['filters']['type']['id'] = 'type';
+  $handler->display->display_options['filters']['type']['table'] = 'node';
+  $handler->display->display_options['filters']['type']['field'] = 'type';
+  $handler->display->display_options['filters']['type']['value'] = array(
+    'document' => 'document',
+  );
+  /* Filter criterion: Content: Type (field_document_type) */
+  $handler->display->display_options['filters']['field_document_type_tid']['id'] = 'field_document_type_tid';
+  $handler->display->display_options['filters']['field_document_type_tid']['table'] = 'field_data_field_document_type';
+  $handler->display->display_options['filters']['field_document_type_tid']['field'] = 'field_document_type_tid';
+  $handler->display->display_options['filters']['field_document_type_tid']['value'] = array(
+    0 => '1328',
+  );
+  $handler->display->display_options['filters']['field_document_type_tid']['reduce_duplicates'] = TRUE;
+  $handler->display->display_options['filters']['field_document_type_tid']['vocabulary'] = 'document_type';
+  /* Filter criterion: Content: Title */
+  $handler->display->display_options['filters']['title']['id'] = 'title';
+  $handler->display->display_options['filters']['title']['table'] = 'node';
+  $handler->display->display_options['filters']['title']['field'] = 'title';
+  $handler->display->display_options['filters']['title']['operator'] = 'word';
+  $handler->display->display_options['filters']['title']['value'] = 'report minutes';
+  /* Filter criterion: Content: Title */
+  $handler->display->display_options['filters']['title_1']['id'] = 'title_1';
+  $handler->display->display_options['filters']['title_1']['table'] = 'node';
+  $handler->display->display_options['filters']['title_1']['field'] = 'title';
+  $handler->display->display_options['filters']['title_1']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['title_1']['expose']['operator_id'] = 'title_1_op';
+  $handler->display->display_options['filters']['title_1']['expose']['label'] = 'Title';
+  $handler->display->display_options['filters']['title_1']['expose']['operator'] = 'title_1_op';
+  $handler->display->display_options['filters']['title_1']['expose']['identifier'] = 'title_1';
+  $handler->display->display_options['filters']['title_1']['is_grouped'] = TRUE;
+  $handler->display->display_options['filters']['title_1']['group_info']['label'] = 'Meetings';
+  $handler->display->display_options['filters']['title_1']['group_info']['description'] = 'Narrow your search down to specific meetings';
+  $handler->display->display_options['filters']['title_1']['group_info']['identifier'] = 'title_1';
+  $handler->display->display_options['filters']['title_1']['group_info']['group_items'] = array(
+    1 => array(
+      'title' => 'MOP',
+      'operator' => 'allwords',
+      'value' => 'MOP',
+    ),
+    2 => array(
+      'title' => 'Standing Committee',
+      'operator' => 'allwords',
+      'value' => 'Standing Committee',
+    ),
+    3 => array(
+      'title' => 'Technical Committee',
+      'operator' => 'allwords',
+      'value' => 'Technical Committee',
+    ),
+  );
+  $handler->display->display_options['path'] = 'documents/meeting-reports';
+  $handler->display->display_options['menu']['title'] = 'Action Plans';
+  $handler->display->display_options['menu']['weight'] = '0';
+  $handler->display->display_options['menu']['name'] = 'menu-frontend-main-menu';
+  $handler->display->display_options['menu']['context'] = 0;
+  $handler->display->display_options['menu']['context_only_inline'] = 0;
   $translatables['front_end_documents'] = array(
     t('Master'),
     t('Action Plans'),
@@ -6906,6 +7282,14 @@ return "";';
     t('Content entity referenced from field_document_species'),
     t('Species\' Nat Rep'),
     t('Species\' Other Documents'),
+    t('MOP Resolutions'),
+    t('Resolutions of the AEWA Meetings of the Parties (MOP)'),
+    t('Meetings'),
+    t('Meetings (field_document_meeting)'),
+    t('Meeting Reports'),
+    t('Reports of the Meetings'),
+    t('Published'),
+    t('Narrow your search down to specific meetings'),
   );
   $export['front_end_documents'] = $view;
 
@@ -8655,7 +9039,7 @@ return "";';
   /* Display: Projects */
   $handler = $view->new_display('page', 'Projects', 'projects');
   $handler->display->display_options['defaults']['access'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Content: Published */
@@ -10585,7 +10969,7 @@ return "";';
   $handler = $view->new_display('default', 'Master', 'default');
   $handler->display->display_options['title'] = 'Species';
   $handler->display->display_options['use_more_always'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['exposed_form']['type'] = 'basic';
@@ -10858,8 +11242,6 @@ return "";';
 
   /* Display: List */
   $handler = $view->new_display('page', 'List', 'species_list');
-  $handler->display->display_options['defaults']['access'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
   $handler->display->display_options['defaults']['header'] = FALSE;
   $handler->display->display_options['defaults']['fields'] = FALSE;
   /* Field: Content: Title */
@@ -11796,7 +12178,7 @@ return "";';
   /* Display: Random species */
   $handler = $view->new_display('page', 'Random species', 'random_species');
   $handler->display->display_options['defaults']['access'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['defaults']['pager'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'none';
   $handler->display->display_options['pager']['options']['offset'] = '0';
@@ -11863,7 +12245,7 @@ return "";';
   /* Display: Random Species With Images */
   $handler = $view->new_display('page', 'Random Species With Images', 'random_species_with_images');
   $handler->display->display_options['defaults']['access'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['defaults']['pager'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'none';
   $handler->display->display_options['pager']['options']['offset'] = '0';
@@ -14989,7 +15371,7 @@ return "";';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['exposed_form']['type'] = 'basic';
   $handler->display->display_options['pager']['type'] = 'some';
-  $handler->display->display_options['pager']['options']['items_per_page'] = '4';
+  $handler->display->display_options['pager']['options']['items_per_page'] = '3';
   $handler->display->display_options['pager']['options']['offset'] = '0';
   $handler->display->display_options['style_plugin'] = 'default';
   $handler->display->display_options['row_plugin'] = 'fields';
@@ -16555,7 +16937,7 @@ return "";';
   /* Display: Front-end List */
   $handler = $view->new_display('page', 'Front-end List', 'fe_list');
   $handler->display->display_options['defaults']['access'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['access']['type'] = 'domain';
   $handler->display->display_options['defaults']['pager'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'full';
   $handler->display->display_options['pager']['options']['items_per_page'] = '15';
@@ -16731,13 +17113,12 @@ return "";';
     ),
   );
   $handler->display->display_options['style_options']['summary'] = 'Members';
-  /* Field: Field collection item: Field collection item ID */
+  /* Field: Broken/missing handler */
   $handler->display->display_options['fields']['item_id']['id'] = 'item_id';
   $handler->display->display_options['fields']['item_id']['table'] = 'field_collection_item';
   $handler->display->display_options['fields']['item_id']['field'] = 'item_id';
   $handler->display->display_options['fields']['item_id']['exclude'] = TRUE;
   $handler->display->display_options['fields']['item_id']['hide_alter_empty'] = FALSE;
-  $handler->display->display_options['fields']['item_id']['separator'] = '';
   /* Field: Field collection item: Field path */
   $handler->display->display_options['fields']['field_path']['id'] = 'field_path';
   $handler->display->display_options['fields']['field_path']['table'] = 'field_collection_item';
@@ -16796,7 +17177,7 @@ return "";';
   $handler->display->display_options['fields']['field_wg_member_role']['id'] = 'field_wg_member_role';
   $handler->display->display_options['fields']['field_wg_member_role']['table'] = 'field_data_field_wg_member_role';
   $handler->display->display_options['fields']['field_wg_member_role']['field'] = 'field_wg_member_role';
-  /* Contextual filter: Field collection item: Field collection item ID */
+  /* Contextual filter: Broken/missing handler */
   $handler->display->display_options['arguments']['item_id']['id'] = 'item_id';
   $handler->display->display_options['arguments']['item_id']['table'] = 'field_collection_item';
   $handler->display->display_options['arguments']['item_id']['field'] = 'item_id';
@@ -16805,7 +17186,6 @@ return "";';
   $handler->display->display_options['arguments']['item_id']['summary']['number_of_records'] = '0';
   $handler->display->display_options['arguments']['item_id']['summary']['format'] = 'default_summary';
   $handler->display->display_options['arguments']['item_id']['summary_options']['items_per_page'] = '25';
-  $handler->display->display_options['arguments']['item_id']['break_phrase'] = TRUE;
   $translatables['working_group_members'] = array(
     t('Master'),
     t('more'),
@@ -16821,8 +17201,7 @@ return "";';
     t('‹ previous'),
     t('next ›'),
     t('last »'),
-    t('Field collection item ID'),
-    t('.'),
+    t('Broken handler field_collection_item.item_id'),
     t('Region'),
     t('Country'),
     t('Name'),
