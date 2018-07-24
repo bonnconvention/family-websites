@@ -1,0 +1,45 @@
+<?php
+/**
+ * @file
+ * Code for the cms_varnish feature.
+ */
+
+include_once 'cms_varnish.features.inc';
+
+/**
+ * Implements hook_node_presave().
+ */
+
+function cms_varnish_node_presave($node) {
+  if($node->is_new) {
+      return TRUE;
+  }
+  $output_urls = [];
+  $urls = array('node/' . $node->nid);
+  $paths = explode('/', drupal_get_path_alias($urls[0]));
+  if ($paths) {
+    foreach($paths as $key => $path){
+      // Format the path to be compatible with Varnish.
+      $paths[$key] = urlencode($path);
+    }
+    $urls[] = implode('/', $paths);
+  }
+  $languages = language_list();
+  $host = _varnish_get_host();
+  if ($languages) {
+    foreach ($languages as $language => $l) {
+      foreach ($urls as $url) {
+        // Build urls for all languages.
+        $purge_url = "/$language/$url";
+        varnish_purge($host, $purge_url);
+        // Build log details.
+        $output_urls[] = t('URL: @url', array('@url' => check_url($purge_url)));
+      }
+    }
+  }
+  if ($output_urls) {
+    // Log debug message in watchdog.
+    $message = t('Expiration was executed for the next URLs: !urls', array('!urls' => theme('item_list', array('items' => $output_urls))));
+    watchdog('cms_varnish_purger', $message, array(), WATCHDOG_DEBUG);
+  }
+}
