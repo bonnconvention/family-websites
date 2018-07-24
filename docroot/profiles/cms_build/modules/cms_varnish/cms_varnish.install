@@ -1,0 +1,15 @@
+<?php
+
+
+/**
+ * refs #5177 - Install and configure Varnish and Expire modules.
+ */
+function cms_varnish_update_7001() {
+  module_enable(
+    array(
+      'varnish',
+      'expire',
+    )
+  );
+  features_revert_module('cms_varnish');
+}
