@@ -237,21 +237,16 @@ function cms_varnish_strongarm() {
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
   $strongarm->name = 'expire_node_custom_pages';
-  $strongarm->value = '/meeting|wildcard
-/en/meeting|wildcard
-/fr/meeting|wildcard
-/es/meeting|wildcard
-/cop12docs
-/en/cop12docs
-/fr/cop12docs
-/es/cop12docs';
+  $strongarm->value = '/en
+/fr
+/es';
   $export['expire_node_custom_pages'] = $strongarm;
 
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
   $strongarm->name = 'expire_node_front_page';
-  $strongarm->value = 0;
+  $strongarm->value = 1;
   $export['expire_node_front_page'] = $strongarm;
 
   $strongarm = new stdClass();

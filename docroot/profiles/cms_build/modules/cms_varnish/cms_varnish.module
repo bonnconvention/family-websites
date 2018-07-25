@@ -16,14 +16,66 @@ function cms_varnish_node_presave($node) {
   }
   $output_urls = [];
   $urls = array('node/' . $node->nid);
-  $paths = explode('/', drupal_get_path_alias($urls[0]));
-  if ($paths) {
-    foreach($paths as $key => $path){
-      // Format the path to be compatible with Varnish.
-      $paths[$key] = urlencode($path);
+
+  // For documents, we need to invalidate all meetings they are linked to.
+  if ($node->type == 'document') {
+    $document_meetings = cms_varnish_get_document_meetings($node);
+    if (!empty($document_meetings)) {
+      foreach ($document_meetings as $document_meeting) {
+        $urls[] = 'node/' . $document_meeting->nid;
+      }
     }
-    $urls[] = implode('/', $paths);
   }
+
+  $views = array(
+    'meeting' => 'front_end_meetings',
+    'party' => 'front_end_countries',
+    'document' => 'front_end_documents',
+    'projects' => 'front_end_projects',
+  );
+
+  if (!empty($views[$node->type])) {
+    $urls = array_merge($urls, cms_varnish_get_display_urls($views[$node->type]));
+  }
+
+  // Get url aliases.
+  $urls = array_merge($urls, cms_varnish_get_url_aliases($urls));
+  cms_varnish_purge_urls($urls);
+  var_dump($urls);
+}
+
+function cms_varnish_get_document_meetings($node) {
+  $nid = $node->nid;
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', 'meeting')
+    ->propertyCondition('status', NODE_PUBLISHED)
+    ->fieldCondition('field_meeting_document', 'target_id', $nid);
+
+  $result = $query->execute();
+  if (!empty($result['node'])) {
+    return $result['node'];
+  }
+  return NULL;
+}
+
+function cms_varnish_get_url_aliases($urls) {
+  $url_aliases = array();
+  foreach ($urls as $url) {
+    $paths = explode('/', drupal_get_path_alias($url));
+    if ($paths) {
+      foreach ($paths as $key => $path) {
+        // Format the path to be compatible with Varnish.
+        $paths[$key] = urlencode($path);
+      }
+      $url_aliases[] = implode('/', $paths);
+    }
+  }
+
+  return $url_aliases;
+}
+
+function cms_varnish_purge_urls($urls) {
   $languages = language_list();
   $host = _varnish_get_host();
   if ($languages) {
@@ -37,9 +89,22 @@ function cms_varnish_node_presave($node) {
       }
     }
   }
+
   if ($output_urls) {
     // Log debug message in watchdog.
     $message = t('Expiration was executed for the next URLs: !urls', array('!urls' => theme('item_list', array('items' => $output_urls))));
     watchdog('cms_varnish_purger', $message, array(), WATCHDOG_DEBUG);
   }
+}
+
+function cms_varnish_get_display_urls($view_id) {
+  $urls = array();
+  $view = views_get_view($view_id);
+  $displays = $view->display;
+  foreach ($displays as $display) {
+    if (!empty($display->display_options['path'])) {
+      $urls[] = $display->display_options['path'];
+    }
+  }
+  return $urls;
 }

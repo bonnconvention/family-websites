@@ -13,3 +13,7 @@ function cms_varnish_update_7001() {
   );
   features_revert_module('cms_varnish');
 }
+
+function cms_varnish_update_7002() {
+  features_revert_module('cms_varnish');
+}
