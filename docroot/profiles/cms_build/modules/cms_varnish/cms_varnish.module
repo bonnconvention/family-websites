@@ -25,7 +25,7 @@ function cms_varnish_node_presave($node) {
 
   $views = array(
     'meeting' => 'front_end_meetings',
-    'party' => 'front_end_countries',
+    'country' => 'front_end_countries',
     'document' => 'front_end_documents',
     'project' => 'front_end_projects',
     'award' => 'front_end_awards',
