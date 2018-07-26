@@ -37,6 +37,10 @@ function cms_varnish_node_presave($node) {
     'working_group' => 'front_end_working_groups',
   );
 
+  if (CMSUtils::get_current_profile() == 'aewa') {
+    $views['legal_instrument'] = 'legal_instrument_listing';
+  }
+
   if (!empty($views[$node->type])) {
     $urls = array_merge($urls, cms_varnish_get_display_urls($views[$node->type]));
   }
