@@ -83,7 +83,7 @@ function cms_odata_cron() {
         $entity->save();
       }
 
-      if (!module_exists('cms_varnish')) {
+      if (module_exists('cms_varnish')) {
         $urls = array('national-focal-points');
         cms_varnish_purge_urls($urls);
       }
