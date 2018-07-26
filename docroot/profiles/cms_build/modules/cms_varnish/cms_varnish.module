@@ -87,8 +87,11 @@ function cms_varnish_purge_urls($urls) {
   $languages = language_list();
   $host = _varnish_get_host();
   if ($languages) {
-    foreach ($languages as $language => $l) {
-      foreach ($urls as $url) {
+    foreach ($urls as $url) {
+      $purge_url = "/$url";
+      varnish_purge($host, $purge_url);
+      $output_urls[] = t('URL: @url', array('@url' => check_url($purge_url)));
+      foreach ($languages as $language => $l) {
         // Build urls for all languages.
         $purge_url = "/$language/$url";
         varnish_purge($host, $purge_url);
