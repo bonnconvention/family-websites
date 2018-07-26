@@ -11,10 +11,6 @@ include_once 'cms_varnish.features.inc';
  */
 
 function cms_varnish_node_presave($node) {
-  if($node->is_new) {
-      return TRUE;
-  }
-  $output_urls = [];
   $urls = array('node/' . $node->nid);
 
   // For documents, we need to invalidate all meetings they are linked to.
@@ -31,7 +27,14 @@ function cms_varnish_node_presave($node) {
     'meeting' => 'front_end_meetings',
     'party' => 'front_end_countries',
     'document' => 'front_end_documents',
-    'projects' => 'front_end_projects',
+    'project' => 'front_end_projects',
+    'award' => 'front_end_awards',
+    'campaign' => 'front_end_campaigns',
+    'legal_instrument' => 'front_end_instruments',
+    'news' => 'front_end_news',
+    'publication' => 'front_end_publications',
+    'species' => 'front_end_species',
+    'working_group' => 'front_end_working_groups',
   );
 
   if (!empty($views[$node->type])) {
@@ -76,6 +79,7 @@ function cms_varnish_get_url_aliases($urls) {
 }
 
 function cms_varnish_purge_urls($urls) {
+  $output_urls = array();
   $languages = language_list();
   $host = _varnish_get_host();
   if ($languages) {
