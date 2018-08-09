@@ -1467,7 +1467,7 @@ final class CMSUtils {
         $species_title_slug = self::slug($node_title);
 
         $api_key = variable_get('arkive_api_key');
-        $url = 'http://www.arkive.org/api/' . $api_key . '/portlet/latin/' . $species_title_slug . '/10';
+        $url = 'https://www.arkive.org/api/' . $api_key . '/portlet/latin/' . $species_title_slug . '/10';
         $curl_handler = curl_init();
 
         curl_setopt($curl_handler, CURLOPT_URL, $url);
