@@ -7,7 +7,7 @@
 
 define('CLIMATE_TAGGER_API_URL', 'http://api.climatetagger.net');
 define('CLIMATE_TAGGER_PROJECT_KEY', 'select_all_climate_tagger_thesaurus_');
-define('CLIMATE_TAGGER_LEO_VOCAB', 'LEO Pilot');
+define('CLIMATE_TAGGER_LEO_VOCAB', 'LEO Pure');
 
 
 include_once dirname(__FILE__) . '/includes/climate_tagger.poolparty.inc';
