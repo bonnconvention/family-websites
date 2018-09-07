@@ -956,6 +956,8 @@ function _sliderfield_sliderfield_widget_field_widget_form_alter(&$element, &$fo
   }
 }
 
+
+if (!function_exists('_sliderfield_sliderfield_widget_adjust_process')) {
 /**
  * Helper function to add css class to adjustment elements.
  */
@@ -964,4 +966,5 @@ function _sliderfield_sliderfield_widget_adjust_process($element, &$form_state, 
   $widget_settings = $instance['widget']['settings'];
   $element['#attributes']['class'][] = 'sliderfield-field-adjust-'.drupal_clean_css_identifier($element['#field_name']);
   return $element;
+}
 }
