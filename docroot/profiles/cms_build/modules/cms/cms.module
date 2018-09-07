@@ -2090,7 +2090,7 @@ function cms_search_entity_load($entities, $type) {
   global $conf;
   if ($type == 'search_api_server') {
     foreach ($entities as &$entity) {
-      if (!empty($conf['search_api_server_host'])) {
+      if (!empty($conf['search_api_server_core'])) {
         $entity->options['core'] = $conf['search_api_server_core'];
       }
     }
