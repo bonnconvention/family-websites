@@ -2085,3 +2085,26 @@ function cms_update_7003() {
         }
     }
 }
+
+function cms_search_entity_load($entities, $type) {
+  global $conf;
+  if ($type == 'search_api_server') {
+    foreach ($entities as &$entity) {
+      if (!empty($conf['search_api_server_host'])) {
+        $entity->options['host'] = $conf['search_api_server_host'];
+      }
+      if (!empty($conf['search_api_server_port'])) {
+        $entity->options['port'] = $conf['search_api_server_port'];
+      }
+      if (!empty($conf['search_api_server_pass'])) {
+        $entity->options['http_pass'] = $conf['search_api_server_pass'];
+      }
+      if (!empty($conf['search_api_server_user'])) {
+        $entity->options['http_user'] = $conf['search_api_server_user'];
+      }
+      if (!empty($conf['search_api_server_path'])) {
+        $entity->options['path'] = $conf['search_api_server_path'];
+      }
+    }
+  }
+}
