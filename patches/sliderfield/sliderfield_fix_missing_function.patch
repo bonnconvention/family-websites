@@ -1,0 +1,45 @@
+diff --git a/sliderfield.module b/sliderfield.module
+index 4f1a7aa..d9babd0 100644
+--- a/sliderfield.module
++++ b/sliderfield.module
+@@ -415,4 +415,17 @@ function ___slider_webform_validator_alter(&$validators) {
+   $validators['unique']['component_types'][] = 'slider';
+   $validators['oneoftwo']['component_types'][] = 'slider';
+   $validators['oneofseveral']['component_types'][] = 'slider';
+-}
+\ No newline at end of file
++}
++
++
++if (!function_exists('_sliderfield_sliderfield_widget_adjust_process')) {
++/**
++ * Helper function to add css class to adjustment elements.
++ */
++function _sliderfield_sliderfield_widget_adjust_process($element, &$form_state, $form) {
++  $instance = field_widget_instance($element, $form_state);
++  $widget_settings = $instance['widget']['settings'];
++  $element['#attributes']['class'][] = 'sliderfield-field-adjust-'.drupal_clean_css_identifier($element['#field_name']);
++  return $element;
++}
++}
+diff --git a/sliderfield_element_sliderfield.inc b/sliderfield_element_sliderfield.inc
+index fc9c813..57c8e99 100644
+--- a/sliderfield_element_sliderfield.inc
++++ b/sliderfield_element_sliderfield.inc
+@@ -956,6 +956,8 @@ function _sliderfield_sliderfield_widget_field_widget_form_alter(&$element, &$fo
+   }
+ }
+
++
++if (!function_exists('_sliderfield_sliderfield_widget_adjust_process')) {
+ /**
+  * Helper function to add css class to adjustment elements.
+  */
+@@ -964,4 +966,5 @@ function _sliderfield_sliderfield_widget_adjust_process($element, &$form_state,
+   $widget_settings = $instance['widget']['settings'];
+   $element['#attributes']['class'][] = 'sliderfield-field-adjust-'.drupal_clean_css_identifier($element['#field_name']);
+   return $element;
+-}
+\ No newline at end of file
++}
++}
