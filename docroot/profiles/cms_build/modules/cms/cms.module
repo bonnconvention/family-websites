@@ -2085,3 +2085,14 @@ function cms_update_7003() {
         }
     }
 }
+
+function cms_search_entity_load($entities, $type) {
+  global $conf;
+  if ($type == 'search_api_server') {
+    foreach ($entities as &$entity) {
+      if (!empty($conf['search_api_server_host'])) {
+        $entity->options['core'] = $conf['search_api_server_core'];
+      }
+    }
+  }
+}
