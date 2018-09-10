@@ -120,6 +120,9 @@ function cms_varnish_get_display_urls($view_id) {
 
 function cms_varnish_purge($url) {
   $host = _varnish_get_host();
-  cache_clear_all($url, 'cache_page');
+  // Clear drupal cache.
+  cache_clear_all("https://$host/$url", 'cache_page');
+  cache_clear_all("http://$host/$url", 'cache_page');
+  // Clear varnish cache.
   varnish_purge($host, "/$url");
 }
