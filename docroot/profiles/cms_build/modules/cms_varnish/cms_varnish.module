@@ -48,7 +48,6 @@ function cms_varnish_node_presave($node) {
   // Get url aliases.
   $urls = array_merge($urls, cms_varnish_get_url_aliases($urls));
   cms_varnish_purge_urls($urls);
-  var_dump($urls);
 }
 
 function cms_varnish_get_document_meetings($node) {
