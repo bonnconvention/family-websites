@@ -126,3 +126,18 @@ function cms_varnish_purge($url) {
   // Clear varnish cache.
   varnish_purge($host, "/$url");
 }
+
+/**
+ * Implements hook_flush_caches().
+ *
+ * Called from update.php (among others) to flush the caches.
+ */
+function cms_varnish_flush_caches() {
+  if (function_exists('memcache_storage_flush_all_cache')) {
+    memcache_storage_flush_all_cache();
+  }
+  if (function_exists('varnish_purge_all_pages')) {
+    varnish_purge_all_pages();
+  }
+  return array();
+}
