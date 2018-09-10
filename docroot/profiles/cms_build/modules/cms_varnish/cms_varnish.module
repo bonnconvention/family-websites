@@ -48,7 +48,6 @@ function cms_varnish_node_presave($node) {
   // Get url aliases.
   $urls = array_merge($urls, cms_varnish_get_url_aliases($urls));
   cms_varnish_purge_urls($urls);
-  var_dump($urls);
 }
 
 function cms_varnish_get_document_meetings($node) {
@@ -88,13 +87,12 @@ function cms_varnish_purge_urls($urls) {
   $host = _varnish_get_host();
   if ($languages) {
     foreach ($urls as $url) {
-      $purge_url = "/$url";
-      varnish_purge($host, $purge_url);
-      $output_urls[] = t('URL: @url', array('@url' => check_url($purge_url)));
+      cms_varnish_purge($url);
+      $output_urls[] = t('URL: @url', array('@url' => check_url($url)));
       foreach ($languages as $language => $l) {
         // Build urls for all languages.
-        $purge_url = "/$language/$url";
-        varnish_purge($host, $purge_url);
+        $purge_url = "$language/$url";
+        cms_varnish_purge($purge_url);
         // Build log details.
         $output_urls[] = t('URL: @url', array('@url' => check_url($purge_url)));
       }
@@ -118,4 +116,10 @@ function cms_varnish_get_display_urls($view_id) {
     }
   }
   return $urls;
+}
+
+function cms_varnish_purge($url) {
+  $host = _varnish_get_host();
+  cache_clear_all($url, 'cache_page');
+  varnish_purge($host, "/$url");
 }
