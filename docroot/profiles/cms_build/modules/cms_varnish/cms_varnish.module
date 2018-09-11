@@ -147,5 +147,7 @@ function cms_varnish_flush_caches() {
   if (function_exists('varnish_purge_all_pages')) {
     varnish_purge_all_pages();
   }
+  $db = new DrupalDatabaseCache('cache_page');
+  $db->clear();
   return array();
 }
