@@ -53,14 +53,19 @@
                 </td>
                 <td>
                 <?php
-                    if (isset($field_lang) && isset($document->field_document_number) && (!empty($document->field_document_number)) && !empty($document->field_document_number[$fields_lang['field_document_number']][0]['value'])) {
-                      echo $document->field_document_number[$fields_lang['field_document_number']][0]['value'];
+                    if (!empty($document->field_document_number)
+                      && !empty($fields_lang['field_document_number'])
+                      && !empty($document->field_document_number[$fields_lang['field_document_number']][0]['value'])) {
+                        echo $document->field_document_number[$fields_lang['field_document_number']][0]['value'];
                     }
                 ?>
                 </td>
                 <td>
                     <?php
-                    if (isset($field_lang) && isset($document->field_document_publish_date) && (!empty($document->field_document_publish_date)) && !empty($document->field_document_publish_date[$fields_lang['field_document_publish_date']])) {
+                    if (!empty($document->field_document_publish_date)
+                      && !empty($fields_lang['field_document_publish_date'])
+                      && !empty($document->field_document_publish_date[$fields_lang['field_document_publish_date']][0]['value'])
+                    ) {
                         $publish_date = strtotime($document->field_document_publish_date[$fields_lang['field_document_publish_date']][0]['value']);
                         echo date("d.m.Y", $publish_date);
                     }
@@ -159,17 +164,22 @@
 
                     <td>
                         <?php
-                        if (isset($field_lang) && isset($document->field_document_number) && (!empty($document->field_document_number)) && !empty($document->field_document_number[$fields_lang['field_document_number']][0]['value'])) {
-                            echo $document->field_document_number[$fields_lang['field_document_number']][0]['value'];
+                        if (!empty($document->field_document_number)
+                          && !empty($fields_lang['field_document_number'])
+                          && !empty($document->field_document_number[$fields_lang['field_document_number']][0]['value'])) {
+                          echo $document->field_document_number[$fields_lang['field_document_number']][0]['value'];
                         }
                         ?>
                     </td>
 
                     <td>
                         <?php
-                        if (isset($document->field_document_publish_date) && (!empty($document->field_document_publish_date))) {
-                            $publish_date = strtotime($document->field_document_publish_date[$fields_lang['field_document_publish_date']][0]['value']);
-                            echo date("d/m/Y", $publish_date);
+                        if (!empty($document->field_document_publish_date)
+                          && !empty($fields_lang['field_document_publish_date'])
+                          && !empty($document->field_document_publish_date[$fields_lang['field_document_publish_date']][0]['value'])
+                        ) {
+                          $publish_date = strtotime($document->field_document_publish_date[$fields_lang['field_document_publish_date']][0]['value']);
+                          echo date("d/m/Y", $publish_date);
                         }
 
                         ?>
