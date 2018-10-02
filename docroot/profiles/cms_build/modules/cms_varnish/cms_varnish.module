@@ -8,6 +8,9 @@ include_once 'cms_varnish.features.inc';
 
 
 function cms_varnish_node_delete($node) {
+  if ($node->type == 'document') {
+    cms_varnish_purge_related_meetings($node);
+  }
   cms_varnish_purge_related_views($node);
 }
 
@@ -19,6 +22,22 @@ function cms_varnish_node_presave($node) {
 
   // For documents, we need to invalidate all meetings they are linked to.
   if ($node->type == 'document') {
+    cms_varnish_purge_related_meetings($node);
+  }
+
+  // Get url aliases.
+  $urls = array_merge($urls, cms_varnish_get_url_aliases($urls));
+  cms_varnish_purge_urls($urls);
+
+  cms_varnish_purge_related_views($node);
+}
+
+function cms_varnish_purge_related_meetings($node) {
+  if ($node->type != 'document') {
+    return;
+  }
+  $urls = [];
+  if ($node->type == 'document') {
     $document_meetings = cms_varnish_get_document_meetings($node);
     if (!empty($document_meetings)) {
       foreach ($document_meetings as $document_meeting) {
@@ -27,11 +46,7 @@ function cms_varnish_node_presave($node) {
     }
   }
 
-  // Get url aliases.
-  $urls = array_merge($urls, cms_varnish_get_url_aliases($urls));
   cms_varnish_purge_urls($urls);
-
-  cms_varnish_purge_related_views($node);
 }
 
 function cms_varnish_purge_related_views($node) {
