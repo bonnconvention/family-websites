@@ -970,10 +970,12 @@ class CMSMeeting extends CMSBase {
 function cms_meeting_draggableviews_views_submit_alter(&$arguments, $view, &$form_values) {
   if (module_exists('cms_varnish')) {
     $urls = [];
-    foreach ($arguments as $nid) {
-      $urls[] = "node/$nid";
+    if (!empty($arguments)) {
+      foreach ($arguments as $nid) {
+        $urls[] = "node/$nid";
+      }
+      $urls = array_merge($urls, cms_varnish_get_url_aliases($urls));
+      cms_varnish_purge_urls($urls);
     }
-    $urls = array_merge($urls, cms_varnish_get_url_aliases($urls));
-    cms_varnish_purge_urls($urls);
   }
 }
