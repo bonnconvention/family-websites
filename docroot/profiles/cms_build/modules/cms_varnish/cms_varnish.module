@@ -6,10 +6,14 @@
 
 include_once 'cms_varnish.features.inc';
 
+
+function cms_varnish_node_delete($node) {
+  cms_varnish_purge_related_views($node);
+}
+
 /**
  * Implements hook_node_presave().
  */
-
 function cms_varnish_node_presave($node) {
   $urls = array('node/' . $node->nid);
 
@@ -23,6 +27,14 @@ function cms_varnish_node_presave($node) {
     }
   }
 
+  // Get url aliases.
+  $urls = array_merge($urls, cms_varnish_get_url_aliases($urls));
+  cms_varnish_purge_urls($urls);
+
+  cms_varnish_purge_related_views($node);
+}
+
+function cms_varnish_purge_related_views($node) {
   $views = array(
     'meeting' => ['front_end_meetings', 'event_and_meetings_lists'],
     'country' => 'front_end_countries',
@@ -42,11 +54,9 @@ function cms_varnish_node_presave($node) {
   }
 
   if (!empty($views[$node->type])) {
-    $urls = array_merge($urls, cms_varnish_get_display_urls($views[$node->type]));
+    $urls = cms_varnish_get_display_urls($views[$node->type]);
   }
 
-  // Get url aliases.
-  $urls = array_merge($urls, cms_varnish_get_url_aliases($urls));
   cms_varnish_purge_urls($urls);
 }
 
