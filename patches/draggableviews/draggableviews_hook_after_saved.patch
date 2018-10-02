@@ -1,0 +1,41 @@
+diff --git a/draggableviews.api.php b/draggableviews.api.php
+index 25b52d4..52366c1 100644
+--- a/draggableviews.api.php
++++ b/draggableviews.api.php
+@@ -22,3 +22,17 @@
+  *   Views object.
+  */
+ function hook_draggableviews_handler_native_arguments_alter(&$arguments, $view, &$form_values) {}
++
++/**
++ * After weights are saved you can run custom callback running this hook.
++ *
++ * All #submit callbacks added through form_alter are not run by design.
++ *
++ * @param array $arguments
++ *   Array of arguments before saving.
++ * @param array $form_values
++ *   Array of submitted entity ids and weights.
++ * @param object $view
++ *   Views object.
++ */
++function hook_draggableviews_views_submit_alter(&$arguments, $view, &$form_values){}
++
+
+diff --git a/draggableviews.module b/draggableviews.module
+index bd8d1e6..60fbf00 100644
+--- a/draggableviews.module
++++ b/draggableviews.module
+@@ -148,6 +148,13 @@
+   if (module_exists('rules')) {
+     rules_invoke_event('draggableviews_rules_event_sorted', $view->name, $view->current_display);
+   }
++
++  $arguments = $view->args;
++  if (isset($view->exposed_raw_input)) {
++    $arguments += $view->exposed_raw_input;
++    ksort($arguments);
++  }
++  drupal_alter('draggableviews_views_submit', $arguments, $view, $form_state['values']['draggableviews']);
+ }
+ 
