@@ -93,7 +93,7 @@ function draggableviews_views_submit($form, &$form_state) {
     ksort($arguments);
   }
   drupal_alter('draggableviews_views_submit', $arguments, $view, $form_state['values']['draggableviews']);
-}echo $document->field_document_number[$fields_lang['field_document_number']][0]['value'];
+}
 
 
 /**
