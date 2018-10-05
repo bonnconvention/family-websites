@@ -37,7 +37,7 @@
         </thead>
         <tbody>
     <?php
-        $meeting_documents = CMSMeeting::get_documents($node);
+        $meeting_documents = [];
         foreach ($meeting_documents as $document_id => $document) {
             $fields_lang = field_language('node', $document);
             ?>
@@ -146,7 +146,7 @@
 
         <tbody>
         <?php
-        $documents = node_load_multiple(array(), array('type' => 'document'));
+//        $documents = node_load_multiple(array(), array('type' => 'document'));
         foreach ($documents as $document_id => $document) {
             if (!in_array($document_id, array_keys($meeting_documents))) {
                 ?>
@@ -158,27 +158,22 @@
                     <td>
                         <?php
                         $path = drupal_get_path_alias('node/' . $document_id);
-                        echo l($document->title, $path);
+                        echo l($document->title_field_value, $path);
                         ?>
                     </td>
 
                     <td>
                         <?php
-                        if (!empty($document->field_document_number)
-                          && !empty($fields_lang['field_document_number'])
-                          && !empty($document->field_document_number[$fields_lang['field_document_number']][0]['value'])) {
-                          echo $document->field_document_number[$fields_lang['field_document_number']][0]['value'];
+                        if (!empty($document->field_document_number_value)) {
+                          echo $document->field_document_number_value;
                         }
                         ?>
                     </td>
 
                     <td>
                         <?php
-                        if (!empty($document->field_document_publish_date)
-                          && !empty($fields_lang['field_document_publish_date'])
-                          && !empty($document->field_document_publish_date[$fields_lang['field_document_publish_date']][0]['value'])
-                        ) {
-                          $publish_date = strtotime($document->field_document_publish_date[$fields_lang['field_document_publish_date']][0]['value']);
+                        if (!empty($document->field_document_publish_date_value)) {
+                          $publish_date = strtotime($document->field_document_publish_date_value);
                           echo date("d/m/Y", $publish_date);
                         }
 
