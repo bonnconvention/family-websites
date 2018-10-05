@@ -262,7 +262,6 @@ function cms_meeting_manage_documents($node) {
 
     drupal_set_breadcrumb($breadcrumb);
     $documents = _cms_meeting_get_all_documents_data();
-    $meeting_documents = _cms_meeting_get_meeting_documents_data($node);
 
     return theme('meeting_manage_documents_template', array('node' => $node, 'documents' => $documents));
 }
@@ -994,8 +993,4 @@ function _cms_meeting_get_all_documents_data() {
 
   $result = db_query($query);
   return $result->fetchAllAssoc('nid');
-}
-
-function cms_meeting_get_meeting_documents_data($node) {
-
 }
