@@ -37,7 +37,7 @@
         </thead>
         <tbody>
     <?php
-        $meeting_documents = [];
+        $meeting_documents = CMSMeeting::get_documents($node);
         foreach ($meeting_documents as $document_id => $document) {
             $fields_lang = field_language('node', $document);
             ?>
@@ -146,7 +146,6 @@
 
         <tbody>
         <?php
-//        $documents = node_load_multiple(array(), array('type' => 'document'));
         foreach ($documents as $document_id => $document) {
             if (!in_array($document_id, array_keys($meeting_documents))) {
                 ?>
