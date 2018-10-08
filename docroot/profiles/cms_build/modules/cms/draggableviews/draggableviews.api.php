@@ -22,3 +22,17 @@
  *   Views object.
  */
 function hook_draggableviews_handler_native_arguments_alter(&$arguments, $view, &$form_values) {}
+
+/**
+ * After weights are saved you can run custom callback running this hook.
+ *
+ * All #submit callbacks added through form_alter are not run by design.
+ *
+ * @param array $arguments
+ *   Array of arguments before saving.
+ * @param array $form_values
+ *   Array of submitted entity ids and weights.
+ * @param object $view
+ *   Views object.
+ */
+function hook_draggableviews_views_submit_alter(&$arguments, $view, &$form_values){}

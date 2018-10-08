@@ -1,0 +1,183 @@
+<?php
+/**
+ * @file
+ * Code for the cms_varnish feature.
+ */
+
+include_once 'cms_varnish.features.inc';
+
+
+function cms_varnish_node_delete($node) {
+  if ($node->type == 'document') {
+    cms_varnish_purge_related_meetings($node);
+  }
+  cms_varnish_purge_related_views($node);
+}
+
+/**
+ * Implements hook_node_presave().
+ */
+function cms_varnish_node_presave($node) {
+  $urls = array('node/' . $node->nid);
+
+  // For documents, we need to invalidate all meetings they are linked to.
+  if ($node->type == 'document') {
+    cms_varnish_purge_related_meetings($node);
+  }
+
+  // Get url aliases.
+  $urls = array_merge($urls, cms_varnish_get_url_aliases($urls));
+  cms_varnish_purge_urls($urls);
+
+  cms_varnish_purge_related_views($node);
+}
+
+function cms_varnish_purge_related_meetings($node) {
+  if ($node->type != 'document') {
+    return;
+  }
+  $urls = [];
+  if ($node->type == 'document') {
+    $document_meetings = cms_varnish_get_document_meetings($node);
+    if (!empty($document_meetings)) {
+      foreach ($document_meetings as $document_meeting) {
+        $urls[] = 'node/' . $document_meeting->nid;
+      }
+    }
+  }
+
+  cms_varnish_purge_urls($urls);
+}
+
+function cms_varnish_purge_related_views($node) {
+  $views = array(
+    'meeting' => ['front_end_meetings', 'event_and_meetings_lists'],
+    'country' => 'front_end_countries',
+    'document' => 'front_end_documents',
+    'project' => 'front_end_projects',
+    'award' => 'front_end_awards',
+    'campaign' => 'front_end_campaigns',
+    'legal_instrument' => 'front_end_instruments',
+    'news' => 'front_end_news',
+    'publication' => 'front_end_publications',
+    'species' => 'front_end_species',
+    'working_group' => 'front_end_working_groups',
+  );
+
+  if (CMSUtils::get_current_profile() == 'aewa') {
+    $views['legal_instrument'] = 'legal_instrument_listing';
+  }
+
+  if (!empty($views[$node->type])) {
+    $urls = cms_varnish_get_display_urls($views[$node->type]);
+  }
+
+  cms_varnish_purge_urls($urls);
+}
+
+function cms_varnish_get_document_meetings($node) {
+  $nid = $node->nid;
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', 'meeting')
+    ->propertyCondition('status', NODE_PUBLISHED)
+    ->fieldCondition('field_meeting_document', 'target_id', $nid);
+
+  $result = $query->execute();
+  if (!empty($result['node'])) {
+    return $result['node'];
+  }
+  return NULL;
+}
+
+function cms_varnish_get_url_aliases($urls) {
+  $url_aliases = array();
+  foreach ($urls as $url) {
+    $paths = explode('/', drupal_get_path_alias($url));
+    if ($paths) {
+      foreach ($paths as $key => $path) {
+        // Format the path to be compatible with Varnish.
+        $paths[$key] = urlencode($path);
+      }
+      $url_aliases[] = implode('/', $paths);
+    }
+  }
+
+  return $url_aliases;
+}
+
+function cms_varnish_purge_urls($urls) {
+  $output_urls = array();
+  $languages = language_list();
+  $host = _varnish_get_host();
+  if ($languages) {
+    foreach ($urls as $url) {
+      cms_varnish_purge($url);
+      $output_urls[] = t('URL: @url', array('@url' => check_url($url)));
+      foreach ($languages as $language => $l) {
+        // Build urls for all languages.
+        $purge_url = "$language/$url";
+        cms_varnish_purge($purge_url);
+        // Build log details.
+        $output_urls[] = t('URL: @url', array('@url' => check_url($purge_url)));
+      }
+    }
+  }
+
+  if ($output_urls) {
+    // Log debug message in watchdog.
+    $message = t('Expiration was executed for the next URLs: !urls', array('!urls' => theme('item_list', array('items' => $output_urls))));
+    watchdog('cms_varnish_purger', $message, array(), WATCHDOG_DEBUG);
+  }
+}
+
+function cms_varnish_get_display_urls($view_ids) {
+  if (!is_array($view_ids)) {
+    $view_ids = [$view_ids];
+  }
+  $urls = array();
+  foreach ($view_ids as $view_id) {
+    $view = views_get_view($view_id);
+    $displays = $view->display;
+    foreach ($displays as $display) {
+      if (!empty($display->display_options['path'])) {
+        $urls[] = $display->display_options['path'];
+      }
+    }
+  }
+  return $urls;
+}
+
+function cms_varnish_purge($url) {
+  $host = _varnish_get_host();
+  // Clear drupal cache.
+  $full_urls = [
+    "https://$host/$url",
+    "http://$host/$url",
+  ];
+  foreach ($full_urls as $full_url) {
+    db_delete('cache_page')
+      ->condition('cid', $full_url)
+      ->execute();
+    cache_clear_all($full_url, 'cache_page');
+  }
+  // Clear varnish cache.
+  varnish_purge($host, "/$url");
+}
+
+/**
+ * Implements hook_flush_caches().
+ *
+ * Called from update.php (among others) to flush the caches.
+ */
+function cms_varnish_flush_caches() {
+  if (function_exists('memcache_storage_flush_all_cache')) {
+    memcache_storage_flush_all_cache();
+  }
+  if (function_exists('varnish_purge_all_pages')) {
+    varnish_purge_all_pages();
+  }
+  $db = new DrupalDatabaseCache('cache_page');
+  $db->clear();
+  return array();
+}

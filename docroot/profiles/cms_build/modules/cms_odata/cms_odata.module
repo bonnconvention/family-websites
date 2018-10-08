@@ -82,6 +82,12 @@ function cms_odata_cron() {
         $entity->title = $fp->title;
         $entity->save();
       }
+
+      if (module_exists('cms_varnish')) {
+        $urls = array('national-focal-points');
+        cms_varnish_purge_urls($urls);
+      }
+
       watchdog('info', 'Successfully updated ldap users for odata on '.$instance_name.'.');
     } else {
       watchdog('warning', 'No ldap users retreived for odata '.$instance_name.'.');

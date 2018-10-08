@@ -86,7 +86,15 @@ function draggableviews_views_submit($form, &$form_state) {
   if (module_exists('rules')) {
     rules_invoke_event('draggableviews_rules_event_sorted', $view->name, $view->current_display);
   }
+
+  $arguments = $view->args;
+  if (isset($view->exposed_raw_input)) {
+    $arguments += $view->exposed_raw_input;
+    ksort($arguments);
+  }
+  drupal_alter('draggableviews_views_submit', $arguments, $view, $form_state['values']['draggableviews']);
 }
+
 
 /**
  * Implementes hook_preprocess_views_view_table().

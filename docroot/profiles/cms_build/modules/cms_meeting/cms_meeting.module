@@ -127,7 +127,6 @@ function cms_meeting_theme($existing, $type, $theme, $path) {
     return array(
         'meeting_manage_documents_template' => array(
             'template' => 'manage-documents',
-            'arguments' => array(),
             'path' => drupal_get_path('module', 'cms_meeting') . '/templates',
         ),
         'table__meetings_template_country' => $base + array(
@@ -262,8 +261,9 @@ function cms_meeting_manage_documents($node) {
     $breadcrumb[] = l($page_title, 'node/' . $node->nid);
 
     drupal_set_breadcrumb($breadcrumb);
+    $documents = _cms_meeting_get_all_documents_data();
 
-    return theme('meeting_manage_documents_template', array('node' => $node));
+    return theme('meeting_manage_documents_template', array('node' => $node, 'documents' => $documents));
 }
 
 function cms_meeting_views_default_views_alter(&$views) {
@@ -965,4 +965,32 @@ class CMSMeeting extends CMSBase {
 
         return $meeting;
     }
+}
+
+function cms_meeting_draggableviews_views_submit_alter(&$arguments, $view, &$form_values) {
+  if (module_exists('cms_varnish')) {
+    $urls = [];
+    if (!empty($arguments)) {
+      foreach ($arguments as $nid) {
+        $urls[] = "node/$nid";
+      }
+      $urls = array_merge($urls, cms_varnish_get_url_aliases($urls));
+      cms_varnish_purge_urls($urls);
+    }
+  }
+}
+
+function _cms_meeting_get_all_documents_data() {
+  $query = "
+    SELECT n.nid, n.created, n.status, t.title_field_value, a.field_document_number_value, b.field_document_publish_date_value
+    FROM node n
+    LEFT JOIN field_data_title_field t ON n.nid = t.entity_id
+    LEFT JOIN field_data_field_document_number a ON n.nid = a.entity_id
+    LEFT JOIN field_data_field_document_publish_date b ON n.nid = b.entity_id
+    WHERE n.type = 'document'
+    ;
+  ";
+
+  $result = db_query($query);
+  return $result->fetchAllAssoc('nid');
 }
