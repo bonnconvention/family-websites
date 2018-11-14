@@ -1,0 +1,16 @@
+diff --git a/simplenews/simplenews.module b/simplenews/simplenews.module
+index f2c2e11..8ceceac 100644
+--- a/simplenews/simplenews.module
++++ b/simplenews/simplenews.module
+@@ -810,6 +810,11 @@ function simplenews_entity_info_alter(&$info) {
+  */
+ function simplenews_cron() {
+   module_load_include('inc', 'simplenews', 'includes/simplenews.mail');
++  global $base_url;
++  $base_email_url = variable_get('base_email_url');
++  if (!empty($base_email_url)) {
++    $base_url = $base_email_url;
++  }
+   simplenews_mail_spool(variable_get('simplenews_throttle', 20));
+   simplenews_clear_spool();
+   // Update sent status for newsletter admin panel.
