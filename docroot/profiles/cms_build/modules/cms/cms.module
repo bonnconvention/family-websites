@@ -677,6 +677,14 @@ class CMSBase {
           'alias' => 'cami',
           'instrument' => 28,
         ),
+        '24' => array(
+          'alias' => 'aci',
+          'instrument' => 14630,
+        ),
+        '25' => array(
+          'alias' => 'lions',
+          'instrument' => 16243,
+        ),
     );
     /**
      * Create a new Drupal node node instance

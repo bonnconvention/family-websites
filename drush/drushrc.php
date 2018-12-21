@@ -341,6 +341,8 @@ $command_specific['archive-dump'] = array(
     . ' --exclude=west-african-elephants'
     . ' --exclude=iosea-turtles'
     . ' --exclude=cami'
+    . ' --exclude=aci'
+    . ' --exclude=lions'
     . ' --exclude=sites/default/files'
 );
 
@@ -384,4 +386,3 @@ $command_specific['devify_solr'] = array(
 if (file_exists(dirname(__FILE__) . '/drushrc.local.php')) {
   include_once dirname(__FILE__) . '/drushrc.local.php';
 }
-
