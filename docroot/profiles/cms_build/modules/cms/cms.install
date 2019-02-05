@@ -194,3 +194,10 @@ function cms_update_7005() {
       ->condition('type', 'module')
       ->execute();
 }
+
+/**
+ * Persist views changes from production.
+ */
+function cms_update_7006() {
+  features_revert(array('cms_views'));
+}

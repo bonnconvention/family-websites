@@ -26,9 +26,9 @@ function cms_views_views_default_views() {
   $handler->display->display_options['use_more_always'] = FALSE;
   $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['cache']['type'] = 'time';
-  $handler->display->display_options['cache']['results_lifespan'] = '60';
+  $handler->display->display_options['cache']['results_lifespan'] = '-1';
   $handler->display->display_options['cache']['results_lifespan_custom'] = '0';
-  $handler->display->display_options['cache']['output_lifespan'] = '60';
+  $handler->display->display_options['cache']['output_lifespan'] = '-1';
   $handler->display->display_options['cache']['output_lifespan_custom'] = '0';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['query']['options']['distinct'] = TRUE;
@@ -2023,6 +2023,8 @@ return "";';
   $handler->display->display_options['defaults']['title'] = FALSE;
   $handler->display->display_options['title'] = 'Latest News';
   $handler->display->display_options['display_description'] = 'Latest news from CMS';
+  $handler->display->display_options['defaults']['cache'] = FALSE;
+  $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['defaults']['pager'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'none';
   $handler->display->display_options['pager']['options']['offset'] = '0';
@@ -2136,8 +2138,10 @@ return "";';
   $handler->display->display_options['filters']['created']['id'] = 'created';
   $handler->display->display_options['filters']['created']['table'] = 'node';
   $handler->display->display_options['filters']['created']['field'] = 'created';
-  $handler->display->display_options['filters']['created']['operator'] = '>';
-  $handler->display->display_options['filters']['created']['value']['value'] = '2016-10-01 00:00:00';
+  $handler->display->display_options['filters']['created']['operator'] = 'between';
+  $handler->display->display_options['filters']['created']['value']['min'] = '2017-10-01 00:00:00';
+  $handler->display->display_options['filters']['created']['value']['max'] = '2017-11-02 00:00:00';
+  $handler->display->display_options['filters']['created']['value']['value'] = '2017-10-01 00:00:00';
   $handler->display->display_options['path'] = 'news-cms';
   $translatables['api_species'] = array(
     t('Master'),
@@ -4783,11 +4787,7 @@ return "";';
   $handler->display->display_options['use_more_always'] = FALSE;
   $handler->display->display_options['defaults']['use_more_text'] = FALSE;
   $handler->display->display_options['defaults']['cache'] = FALSE;
-  $handler->display->display_options['cache']['type'] = 'time';
-  $handler->display->display_options['cache']['results_lifespan'] = '300';
-  $handler->display->display_options['cache']['results_lifespan_custom'] = '0';
-  $handler->display->display_options['cache']['output_lifespan'] = '1800';
-  $handler->display->display_options['cache']['output_lifespan_custom'] = '0';
+  $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['defaults']['pager'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'some';
   $handler->display->display_options['pager']['options']['items_per_page'] = '5';
@@ -5441,7 +5441,7 @@ return "";';
   $handler->display->display_options['fields']['title_field']['id'] = 'title_field';
   $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
   $handler->display->display_options['fields']['title_field']['field'] = 'title_field';
-  $handler->display->display_options['fields']['title_field']['link_to_entity'] = 1;
+  $handler->display->display_options['fields']['title_field']['link_to_entity'] = 0;
   /* Field: Content: Instrument name */
   $handler->display->display_options['fields']['field_instrument_name']['id'] = 'field_instrument_name';
   $handler->display->display_options['fields']['field_instrument_name']['table'] = 'field_data_field_instrument_name';
@@ -5487,6 +5487,22 @@ return "";';
   $handler = $view->new_display('page', 'Initiatives', 'initiatives');
   $handler->display->display_options['defaults']['title'] = FALSE;
   $handler->display->display_options['title'] = 'Special Species Initiatives';
+  $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Content: Title */
+  $handler->display->display_options['fields']['title_field']['id'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
+  $handler->display->display_options['fields']['title_field']['field'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['link_to_entity'] = 0;
+  /* Field: Content: Website URL */
+  $handler->display->display_options['fields']['field_instrument_website']['id'] = 'field_instrument_website';
+  $handler->display->display_options['fields']['field_instrument_website']['table'] = 'field_data_field_instrument_website';
+  $handler->display->display_options['fields']['field_instrument_website']['field'] = 'field_instrument_website';
+  $handler->display->display_options['fields']['field_instrument_website']['label'] = 'Website';
+  $handler->display->display_options['fields']['field_instrument_website']['click_sort_column'] = 'url';
+  $handler->display->display_options['fields']['field_instrument_website']['type'] = 'link_url';
+  $handler->display->display_options['fields']['field_instrument_website']['settings'] = array(
+    'strip_www' => 1,
+  );
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Content: Published */
@@ -5512,6 +5528,12 @@ return "";';
   );
   $handler->display->display_options['filters']['field_instrument_status_tid']['reduce_duplicates'] = TRUE;
   $handler->display->display_options['filters']['field_instrument_status_tid']['vocabulary'] = 'instrument_status';
+  /* Filter criterion: Content: Nid */
+  $handler->display->display_options['filters']['nid']['id'] = 'nid';
+  $handler->display->display_options['filters']['nid']['table'] = 'node';
+  $handler->display->display_options['filters']['nid']['field'] = 'nid';
+  $handler->display->display_options['filters']['nid']['operator'] = '!=';
+  $handler->display->display_options['filters']['nid']['value']['value'] = '16243';
   $handler->display->display_options['path'] = 'cms-intruments/special-initiatives';
   $translatables['front_end_cms_instruments'] = array(
     t('Master'),
@@ -6308,6 +6330,8 @@ return "";';
     21 => '21',
     22 => '22',
     23 => '23',
+    24 => '24',
+    25 => '25',
     19 => 0,
     20 => 0,
   );
@@ -7952,35 +7976,48 @@ return "";';
   /* Display: COP Resolutions */
   $handler = $view->new_display('page', 'COP Resolutions', 'documents_cop_resolutions');
   $handler->display->display_options['defaults']['title'] = FALSE;
-  $handler->display->display_options['title'] = 'Resolutions of the CMS Conferences of the Parties (COP)';
+  $handler->display->display_options['title'] = 'Resolutions of the CMS Conferences of the Parties (COP) in effect';
   $handler->display->display_options['defaults']['use_ajax'] = FALSE;
+  $handler->display->display_options['defaults']['pager'] = FALSE;
+  $handler->display->display_options['pager']['type'] = 'full';
+  $handler->display->display_options['pager']['options']['items_per_page'] = '150';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['pager']['options']['id'] = '0';
+  $handler->display->display_options['pager']['options']['quantity'] = '3';
   $handler->display->display_options['defaults']['style_plugin'] = FALSE;
-  $handler->display->display_options['style_plugin'] = 'datatables';
+  $handler->display->display_options['style_plugin'] = 'table';
+  $handler->display->display_options['style_options']['grouping'] = array(
+    0 => array(
+      'field' => 'field_document_meeting',
+      'rendered' => 1,
+      'rendered_strip' => 0,
+    ),
+  );
   $handler->display->display_options['style_options']['columns'] = array(
     'title_field' => 'title_field',
     'field_document_number' => 'field_document_number',
     'field_document_publish_date' => 'field_document_publish_date',
     'field_document_meeting' => 'field_document_meeting',
   );
-  $handler->display->display_options['style_options']['default'] = 'field_document_number';
+  $handler->display->display_options['style_options']['default'] = '-1';
   $handler->display->display_options['style_options']['info'] = array(
     'title_field' => array(
-      'sortable' => 1,
+      'sortable' => 0,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
     ),
     'field_document_number' => array(
-      'sortable' => 1,
-      'default_sort_order' => 'desc',
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
     ),
     'field_document_publish_date' => array(
-      'sortable' => 1,
-      'default_sort_order' => 'desc',
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
@@ -7991,60 +8028,42 @@ return "";';
       'empty_column' => 0,
     ),
   );
-  $handler->display->display_options['style_options']['elements'] = array(
-    'search_box' => 1,
-    'table_info' => 1,
-    'save_state' => 0,
-    'enable_tabletools' => 0,
-  );
-  $handler->display->display_options['style_options']['layout'] = array(
-    'autowidth' => 0,
-    'themeroller' => 0,
-    'sdom' => '',
-  );
-  $handler->display->display_options['style_options']['pages'] = array(
-    'pagination_style' => 'full_numbers',
-    'length_change' => 1,
-    'display_length' => '50',
-    'processing' => 1,
-    'server_side' => 1,
-    'items_per_page_options' => '10, 25, 50, 100',
-  );
   $handler->display->display_options['defaults']['style_options'] = FALSE;
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
   $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['defaults']['relationships'] = FALSE;
   $handler->display->display_options['defaults']['fields'] = FALSE;
-  /* Field: Content: Title */
-  $handler->display->display_options['fields']['title_field']['id'] = 'title_field';
-  $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
-  $handler->display->display_options['fields']['title_field']['field'] = 'title_field';
-  $handler->display->display_options['fields']['title_field']['link_to_entity'] = 1;
   /* Field: Content: Number */
   $handler->display->display_options['fields']['field_document_number']['id'] = 'field_document_number';
   $handler->display->display_options['fields']['field_document_number']['table'] = 'field_data_field_document_number';
   $handler->display->display_options['fields']['field_document_number']['field'] = 'field_document_number';
   $handler->display->display_options['fields']['field_document_number']['label'] = 'Document Number';
-  /* Field: Content: Publish date */
-  $handler->display->display_options['fields']['field_document_publish_date']['id'] = 'field_document_publish_date';
-  $handler->display->display_options['fields']['field_document_publish_date']['table'] = 'field_data_field_document_publish_date';
-  $handler->display->display_options['fields']['field_document_publish_date']['field'] = 'field_document_publish_date';
-  $handler->display->display_options['fields']['field_document_publish_date']['settings'] = array(
-    'format_type' => 'convention_date',
-    'fromto' => 'both',
-    'multiple_number' => '',
-    'multiple_from' => '',
-    'multiple_to' => '',
-  );
+  /* Field: Content: Title */
+  $handler->display->display_options['fields']['title_field']['id'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
+  $handler->display->display_options['fields']['title_field']['field'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['link_to_entity'] = 1;
   /* Field: Content: Meetings */
   $handler->display->display_options['fields']['field_document_meeting']['id'] = 'field_document_meeting';
   $handler->display->display_options['fields']['field_document_meeting']['table'] = 'field_data_field_document_meeting';
   $handler->display->display_options['fields']['field_document_meeting']['field'] = 'field_document_meeting';
+  $handler->display->display_options['fields']['field_document_meeting']['label'] = '';
+  $handler->display->display_options['fields']['field_document_meeting']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['field_document_meeting']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['field_document_meeting']['settings'] = array(
+    'bypass_access' => 0,
     'link' => 1,
   );
+  $handler->display->display_options['fields']['field_document_meeting']['delta_limit'] = '1';
   $handler->display->display_options['fields']['field_document_meeting']['delta_offset'] = '0';
+  $handler->display->display_options['fields']['field_document_meeting']['delta_reversed'] = TRUE;
   $handler->display->display_options['defaults']['sorts'] = FALSE;
+  /* Sort criterion: Draggableviews: Weight */
+  $handler->display->display_options['sorts']['weight']['id'] = 'weight';
+  $handler->display->display_options['sorts']['weight']['table'] = 'draggableviews_structure';
+  $handler->display->display_options['sorts']['weight']['field'] = 'weight';
+  $handler->display->display_options['sorts']['weight']['draggableviews_setting_view'] = 'front_end_documents:documents_cop_resolutions_sorting';
+  $handler->display->display_options['sorts']['weight']['draggableviews_setting_new_items_bottom_list'] = 1;
   $handler->display->display_options['defaults']['arguments'] = FALSE;
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
@@ -8106,6 +8125,15 @@ return "";';
   $handler->display->display_options['filters']['field_document_meeting_target_id']['group_info']['identifier'] = 'field_document_meeting_target_id';
   $handler->display->display_options['filters']['field_document_meeting_target_id']['group_info']['group_items'] = array(
     1 => array(
+      'title' => 'COP12',
+      'operator' => '=',
+      'value' => array(
+        'value' => '9295',
+        'min' => '',
+        'max' => '',
+      ),
+    ),
+    2 => array(
       'title' => 'COP11',
       'operator' => '=',
       'value' => array(
@@ -8114,7 +8142,7 @@ return "";';
         'max' => '',
       ),
     ),
-    2 => array(
+    3 => array(
       'title' => 'COP10',
       'operator' => '=',
       'value' => array(
@@ -8123,7 +8151,7 @@ return "";';
         'max' => '',
       ),
     ),
-    3 => array(
+    4 => array(
       'title' => 'COP9',
       'operator' => '=',
       'value' => array(
@@ -8132,7 +8160,7 @@ return "";';
         'max' => '',
       ),
     ),
-    4 => array(
+    5 => array(
       'title' => 'COP8',
       'operator' => '=',
       'value' => array(
@@ -8141,7 +8169,7 @@ return "";';
         'max' => '',
       ),
     ),
-    5 => array(
+    6 => array(
       'title' => 'COP7',
       'operator' => '=',
       'value' => array(
@@ -8150,7 +8178,7 @@ return "";';
         'max' => '',
       ),
     ),
-    6 => array(
+    7 => array(
       'title' => 'COP6',
       'operator' => '=',
       'value' => array(
@@ -8159,7 +8187,7 @@ return "";';
         'max' => '',
       ),
     ),
-    7 => array(
+    8 => array(
       'title' => 'COP5',
       'operator' => '=',
       'value' => array(
@@ -8168,7 +8196,7 @@ return "";';
         'max' => '',
       ),
     ),
-    8 => array(
+    9 => array(
       'title' => 'COP4',
       'operator' => '=',
       'value' => array(
@@ -8177,7 +8205,7 @@ return "";';
         'max' => '',
       ),
     ),
-    9 => array(
+    10 => array(
       'title' => 'COP3',
       'operator' => '=',
       'value' => array(
@@ -8186,7 +8214,7 @@ return "";';
         'max' => '',
       ),
     ),
-    10 => array(
+    11 => array(
       'title' => 'COP2',
       'operator' => '=',
       'value' => array(
@@ -8195,7 +8223,7 @@ return "";';
         'max' => '',
       ),
     ),
-    11 => array(
+    12 => array(
       'title' => 'COP1',
       'operator' => '=',
       'value' => array(
@@ -8205,7 +8233,684 @@ return "";';
       ),
     ),
   );
+  /* Filter criterion: Content: Status (field_document_status) */
+  $handler->display->display_options['filters']['field_document_status_tid']['id'] = 'field_document_status_tid';
+  $handler->display->display_options['filters']['field_document_status_tid']['table'] = 'field_data_field_document_status';
+  $handler->display->display_options['filters']['field_document_status_tid']['field'] = 'field_document_status_tid';
+  $handler->display->display_options['filters']['field_document_status_tid']['value'] = array(
+    3074 => '3074',
+  );
+  $handler->display->display_options['filters']['field_document_status_tid']['type'] = 'select';
+  $handler->display->display_options['filters']['field_document_status_tid']['vocabulary'] = 'document_status';
   $handler->display->display_options['path'] = 'documents/cop-resolutions';
+  $handler->display->display_options['menu']['title'] = 'National Reports';
+  $handler->display->display_options['menu']['weight'] = '0';
+  $handler->display->display_options['menu']['name'] = '810f12118bc3b060d5e1bf8c18c7725f';
+  $handler->display->display_options['menu']['context'] = 0;
+  $handler->display->display_options['menu']['context_only_inline'] = 0;
+
+  /* Display: COP Resolutions sorting */
+  $handler = $view->new_display('page', 'COP Resolutions sorting', 'documents_cop_resolutions_sorting');
+  $handler->display->display_options['defaults']['title'] = FALSE;
+  $handler->display->display_options['title'] = 'Resolutions of the CMS Conferences of the Parties (COP) in effect';
+  $handler->display->display_options['defaults']['use_ajax'] = FALSE;
+  $handler->display->display_options['defaults']['pager'] = FALSE;
+  $handler->display->display_options['pager']['type'] = 'full';
+  $handler->display->display_options['pager']['options']['items_per_page'] = '150';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['pager']['options']['id'] = '0';
+  $handler->display->display_options['pager']['options']['quantity'] = '3';
+  $handler->display->display_options['defaults']['style_plugin'] = FALSE;
+  $handler->display->display_options['style_plugin'] = 'table';
+  $handler->display->display_options['style_options']['columns'] = array(
+    'field_document_number' => 'field_document_number',
+    'title_field' => 'title_field',
+    'field_document_meeting' => 'field_document_meeting',
+    'draggableviews' => 'draggableviews',
+  );
+  $handler->display->display_options['style_options']['default'] = '-1';
+  $handler->display->display_options['style_options']['info'] = array(
+    'field_document_number' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'title_field' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_document_meeting' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'draggableviews' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+  );
+  $handler->display->display_options['defaults']['style_options'] = FALSE;
+  $handler->display->display_options['defaults']['row_plugin'] = FALSE;
+  $handler->display->display_options['defaults']['row_options'] = FALSE;
+  $handler->display->display_options['defaults']['relationships'] = FALSE;
+  $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Content: Number */
+  $handler->display->display_options['fields']['field_document_number']['id'] = 'field_document_number';
+  $handler->display->display_options['fields']['field_document_number']['table'] = 'field_data_field_document_number';
+  $handler->display->display_options['fields']['field_document_number']['field'] = 'field_document_number';
+  $handler->display->display_options['fields']['field_document_number']['label'] = 'Document Number';
+  /* Field: Content: Title */
+  $handler->display->display_options['fields']['title_field']['id'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
+  $handler->display->display_options['fields']['title_field']['field'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['link_to_entity'] = 1;
+  /* Field: Content: Meetings */
+  $handler->display->display_options['fields']['field_document_meeting']['id'] = 'field_document_meeting';
+  $handler->display->display_options['fields']['field_document_meeting']['table'] = 'field_data_field_document_meeting';
+  $handler->display->display_options['fields']['field_document_meeting']['field'] = 'field_document_meeting';
+  $handler->display->display_options['fields']['field_document_meeting']['label'] = '';
+  $handler->display->display_options['fields']['field_document_meeting']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['field_document_meeting']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_document_meeting']['settings'] = array(
+    'bypass_access' => 0,
+    'link' => 1,
+  );
+  $handler->display->display_options['fields']['field_document_meeting']['delta_limit'] = '1';
+  $handler->display->display_options['fields']['field_document_meeting']['delta_offset'] = '0';
+  $handler->display->display_options['fields']['field_document_meeting']['delta_reversed'] = TRUE;
+  /* Field: Draggableviews: Content */
+  $handler->display->display_options['fields']['draggableviews']['id'] = 'draggableviews';
+  $handler->display->display_options['fields']['draggableviews']['table'] = 'node';
+  $handler->display->display_options['fields']['draggableviews']['field'] = 'draggableviews';
+  $handler->display->display_options['fields']['draggableviews']['element_default_classes'] = FALSE;
+  $handler->display->display_options['fields']['draggableviews']['hide_alter_empty'] = FALSE;
+  $handler->display->display_options['fields']['draggableviews']['draggableviews']['ajax'] = 0;
+  $handler->display->display_options['defaults']['sorts'] = FALSE;
+  /* Sort criterion: Draggableviews: Weight */
+  $handler->display->display_options['sorts']['weight']['id'] = 'weight';
+  $handler->display->display_options['sorts']['weight']['table'] = 'draggableviews_structure';
+  $handler->display->display_options['sorts']['weight']['field'] = 'weight';
+  $handler->display->display_options['sorts']['weight']['draggableviews_setting_view'] = 'front_end_documents:documents_cop_resolutions_sorting';
+  $handler->display->display_options['sorts']['weight']['draggableviews_setting_new_items_bottom_list'] = 1;
+  $handler->display->display_options['defaults']['arguments'] = FALSE;
+  $handler->display->display_options['defaults']['filter_groups'] = FALSE;
+  $handler->display->display_options['defaults']['filters'] = FALSE;
+  /* Filter criterion: Content: Published */
+  $handler->display->display_options['filters']['status']['id'] = 'status';
+  $handler->display->display_options['filters']['status']['table'] = 'node';
+  $handler->display->display_options['filters']['status']['field'] = 'status';
+  $handler->display->display_options['filters']['status']['value'] = 1;
+  $handler->display->display_options['filters']['status']['group'] = 1;
+  $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+  /* Filter criterion: Content: Type */
+  $handler->display->display_options['filters']['type']['id'] = 'type';
+  $handler->display->display_options['filters']['type']['table'] = 'node';
+  $handler->display->display_options['filters']['type']['field'] = 'type';
+  $handler->display->display_options['filters']['type']['value'] = array(
+    'document' => 'document',
+  );
+  /* Filter criterion: Content: Type (field_document_type) */
+  $handler->display->display_options['filters']['field_document_type_tid']['id'] = 'field_document_type_tid';
+  $handler->display->display_options['filters']['field_document_type_tid']['table'] = 'field_data_field_document_type';
+  $handler->display->display_options['filters']['field_document_type_tid']['field'] = 'field_document_type_tid';
+  $handler->display->display_options['filters']['field_document_type_tid']['value'] = array(
+    1633 => '1633',
+  );
+  $handler->display->display_options['filters']['field_document_type_tid']['reduce_duplicates'] = TRUE;
+  $handler->display->display_options['filters']['field_document_type_tid']['type'] = 'select';
+  $handler->display->display_options['filters']['field_document_type_tid']['vocabulary'] = 'document_type';
+  /* Filter criterion: Field: CMS Instrument (field_instrument) */
+  $handler->display->display_options['filters']['field_instrument_target_id']['id'] = 'field_instrument_target_id';
+  $handler->display->display_options['filters']['field_instrument_target_id']['table'] = 'field_data_field_instrument';
+  $handler->display->display_options['filters']['field_instrument_target_id']['field'] = 'field_instrument_target_id';
+  $handler->display->display_options['filters']['field_instrument_target_id']['value']['value'] = '1';
+  /* Filter criterion: Content: Meetings (field_document_meeting) */
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['id'] = 'field_document_meeting_target_id';
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['table'] = 'field_data_field_document_meeting';
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['field'] = 'field_document_meeting_target_id';
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['expose']['operator_id'] = 'field_document_meeting_target_id_op';
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['expose']['label'] = 'Meetings';
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['expose']['operator'] = 'field_document_meeting_target_id_op';
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['expose']['identifier'] = 'field_document_meeting_target_id';
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['expose']['multiple'] = TRUE;
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    3 => 0,
+    4 => 0,
+    5 => 0,
+    6 => 0,
+    7 => 0,
+    8 => 0,
+    9 => 0,
+    10 => 0,
+    11 => 0,
+    12 => 0,
+  );
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['is_grouped'] = TRUE;
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['group_info']['label'] = 'Meetings';
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['group_info']['identifier'] = 'field_document_meeting_target_id';
+  $handler->display->display_options['filters']['field_document_meeting_target_id']['group_info']['group_items'] = array(
+    1 => array(
+      'title' => 'COP12',
+      'operator' => '=',
+      'value' => array(
+        'value' => '9295',
+        'min' => '',
+        'max' => '',
+      ),
+    ),
+    2 => array(
+      'title' => 'COP11',
+      'operator' => '=',
+      'value' => array(
+        'value' => '4498',
+        'min' => '',
+        'max' => '',
+      ),
+    ),
+    3 => array(
+      'title' => 'COP10',
+      'operator' => '=',
+      'value' => array(
+        'value' => '3752',
+        'min' => '',
+        'max' => '',
+      ),
+    ),
+    4 => array(
+      'title' => 'COP9',
+      'operator' => '=',
+      'value' => array(
+        'value' => '3760',
+        'min' => '',
+        'max' => '',
+      ),
+    ),
+    5 => array(
+      'title' => 'COP8',
+      'operator' => '=',
+      'value' => array(
+        'value' => '3759',
+        'min' => '',
+        'max' => '',
+      ),
+    ),
+    6 => array(
+      'title' => 'COP7',
+      'operator' => '=',
+      'value' => array(
+        'value' => '3758',
+        'min' => '',
+        'max' => '',
+      ),
+    ),
+    7 => array(
+      'title' => 'COP6',
+      'operator' => '=',
+      'value' => array(
+        'value' => '3757',
+        'min' => '',
+        'max' => '',
+      ),
+    ),
+    8 => array(
+      'title' => 'COP5',
+      'operator' => '=',
+      'value' => array(
+        'value' => '3756',
+        'min' => '',
+        'max' => '',
+      ),
+    ),
+    9 => array(
+      'title' => 'COP4',
+      'operator' => '=',
+      'value' => array(
+        'value' => '3755',
+        'min' => '',
+        'max' => '',
+      ),
+    ),
+    10 => array(
+      'title' => 'COP3',
+      'operator' => '=',
+      'value' => array(
+        'value' => '3754',
+        'min' => '',
+        'max' => '',
+      ),
+    ),
+    11 => array(
+      'title' => 'COP2',
+      'operator' => '=',
+      'value' => array(
+        'value' => '3753',
+        'min' => '',
+        'max' => '',
+      ),
+    ),
+    12 => array(
+      'title' => 'COP1',
+      'operator' => '=',
+      'value' => array(
+        'value' => '3751',
+        'min' => '',
+        'max' => '',
+      ),
+    ),
+  );
+  /* Filter criterion: Content: Status (field_document_status) */
+  $handler->display->display_options['filters']['field_document_status_tid']['id'] = 'field_document_status_tid';
+  $handler->display->display_options['filters']['field_document_status_tid']['table'] = 'field_data_field_document_status';
+  $handler->display->display_options['filters']['field_document_status_tid']['field'] = 'field_document_status_tid';
+  $handler->display->display_options['filters']['field_document_status_tid']['value'] = array(
+    3074 => '3074',
+  );
+  $handler->display->display_options['filters']['field_document_status_tid']['type'] = 'select';
+  $handler->display->display_options['filters']['field_document_status_tid']['vocabulary'] = 'document_status';
+  $handler->display->display_options['path'] = 'admin/sorting/cop-resolutions-in-effect';
+  $handler->display->display_options['menu']['title'] = 'National Reports';
+  $handler->display->display_options['menu']['weight'] = '0';
+  $handler->display->display_options['menu']['name'] = '810f12118bc3b060d5e1bf8c18c7725f';
+  $handler->display->display_options['menu']['context'] = 0;
+  $handler->display->display_options['menu']['context_only_inline'] = 0;
+
+  /* Display: Concerted Actions */
+  $handler = $view->new_display('page', 'Concerted Actions', 'documents_concerted_actions');
+  $handler->display->display_options['defaults']['title'] = FALSE;
+  $handler->display->display_options['title'] = 'Concerted Actions';
+  $handler->display->display_options['defaults']['use_ajax'] = FALSE;
+  $handler->display->display_options['defaults']['pager'] = FALSE;
+  $handler->display->display_options['pager']['type'] = 'full';
+  $handler->display->display_options['pager']['options']['items_per_page'] = '150';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['pager']['options']['id'] = '0';
+  $handler->display->display_options['pager']['options']['quantity'] = '3';
+  $handler->display->display_options['defaults']['style_plugin'] = FALSE;
+  $handler->display->display_options['style_plugin'] = 'table';
+  $handler->display->display_options['style_options']['grouping'] = array(
+    0 => array(
+      'field' => 'field_document_meeting',
+      'rendered' => 1,
+      'rendered_strip' => 0,
+    ),
+  );
+  $handler->display->display_options['style_options']['columns'] = array(
+    'field_document_number' => 'field_document_number',
+    'title_field' => 'title_field',
+    'field_document_meeting' => 'field_document_meeting',
+  );
+  $handler->display->display_options['style_options']['default'] = 'field_document_number';
+  $handler->display->display_options['style_options']['info'] = array(
+    'field_document_number' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'desc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'title_field' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_document_meeting' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+  );
+  $handler->display->display_options['defaults']['style_options'] = FALSE;
+  $handler->display->display_options['defaults']['row_plugin'] = FALSE;
+  $handler->display->display_options['defaults']['row_options'] = FALSE;
+  $handler->display->display_options['defaults']['relationships'] = FALSE;
+  $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Content: Number */
+  $handler->display->display_options['fields']['field_document_number']['id'] = 'field_document_number';
+  $handler->display->display_options['fields']['field_document_number']['table'] = 'field_data_field_document_number';
+  $handler->display->display_options['fields']['field_document_number']['field'] = 'field_document_number';
+  $handler->display->display_options['fields']['field_document_number']['label'] = 'Document Number';
+  /* Field: Content: Title */
+  $handler->display->display_options['fields']['title_field']['id'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
+  $handler->display->display_options['fields']['title_field']['field'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['link_to_entity'] = 1;
+  /* Field: Content: Meetings */
+  $handler->display->display_options['fields']['field_document_meeting']['id'] = 'field_document_meeting';
+  $handler->display->display_options['fields']['field_document_meeting']['table'] = 'field_data_field_document_meeting';
+  $handler->display->display_options['fields']['field_document_meeting']['field'] = 'field_document_meeting';
+  $handler->display->display_options['fields']['field_document_meeting']['label'] = '';
+  $handler->display->display_options['fields']['field_document_meeting']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['field_document_meeting']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_document_meeting']['settings'] = array(
+    'bypass_access' => 0,
+    'link' => 1,
+  );
+  $handler->display->display_options['fields']['field_document_meeting']['delta_limit'] = '1';
+  $handler->display->display_options['fields']['field_document_meeting']['delta_offset'] = '0';
+  $handler->display->display_options['fields']['field_document_meeting']['delta_reversed'] = TRUE;
+  $handler->display->display_options['defaults']['sorts'] = FALSE;
+  $handler->display->display_options['defaults']['arguments'] = FALSE;
+  $handler->display->display_options['defaults']['filter_groups'] = FALSE;
+  $handler->display->display_options['defaults']['filters'] = FALSE;
+  /* Filter criterion: Content: Published */
+  $handler->display->display_options['filters']['status']['id'] = 'status';
+  $handler->display->display_options['filters']['status']['table'] = 'node';
+  $handler->display->display_options['filters']['status']['field'] = 'status';
+  $handler->display->display_options['filters']['status']['value'] = 1;
+  $handler->display->display_options['filters']['status']['group'] = 1;
+  $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+  /* Filter criterion: Content: Type */
+  $handler->display->display_options['filters']['type']['id'] = 'type';
+  $handler->display->display_options['filters']['type']['table'] = 'node';
+  $handler->display->display_options['filters']['type']['field'] = 'type';
+  $handler->display->display_options['filters']['type']['value'] = array(
+    'document' => 'document',
+  );
+  /* Filter criterion: Content: Type (field_document_type) */
+  $handler->display->display_options['filters']['field_document_type_tid']['id'] = 'field_document_type_tid';
+  $handler->display->display_options['filters']['field_document_type_tid']['table'] = 'field_data_field_document_type';
+  $handler->display->display_options['filters']['field_document_type_tid']['field'] = 'field_document_type_tid';
+  $handler->display->display_options['filters']['field_document_type_tid']['value'] = array(
+    3033 => '3033',
+  );
+  $handler->display->display_options['filters']['field_document_type_tid']['reduce_duplicates'] = TRUE;
+  $handler->display->display_options['filters']['field_document_type_tid']['type'] = 'select';
+  $handler->display->display_options['filters']['field_document_type_tid']['vocabulary'] = 'document_type';
+  /* Filter criterion: Field: CMS Instrument (field_instrument) */
+  $handler->display->display_options['filters']['field_instrument_target_id']['id'] = 'field_instrument_target_id';
+  $handler->display->display_options['filters']['field_instrument_target_id']['table'] = 'field_data_field_instrument';
+  $handler->display->display_options['filters']['field_instrument_target_id']['field'] = 'field_instrument_target_id';
+  $handler->display->display_options['filters']['field_instrument_target_id']['value']['value'] = '1';
+  $handler->display->display_options['path'] = 'documents/concerted-actions';
+  $handler->display->display_options['menu']['title'] = 'National Reports';
+  $handler->display->display_options['menu']['weight'] = '0';
+  $handler->display->display_options['menu']['name'] = '810f12118bc3b060d5e1bf8c18c7725f';
+  $handler->display->display_options['menu']['context'] = 0;
+  $handler->display->display_options['menu']['context_only_inline'] = 0;
+
+  /* Display: Block - National Legislation Inventories */
+  $handler = $view->new_display('block', 'Block - National Legislation Inventories', 'block_doc_nat_legis_prog_invent');
+  $handler->display->display_options['defaults']['title'] = FALSE;
+  $handler->display->display_options['title'] = 'National Legislation Programme Inventories';
+  $handler->display->display_options['defaults']['css_class'] = FALSE;
+  $handler->display->display_options['defaults']['style_plugin'] = FALSE;
+  $handler->display->display_options['style_plugin'] = 'table';
+  $handler->display->display_options['style_options']['columns'] = array(
+    'field_document_number' => 'field_document_number',
+    'title_field' => 'title_field',
+    'field_instrument' => 'field_instrument',
+    'field_document_files' => 'field_document_files',
+    'field_country' => 'field_country',
+  );
+  $handler->display->display_options['style_options']['default'] = '-1';
+  $handler->display->display_options['style_options']['info'] = array(
+    'field_document_number' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'title_field' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_instrument' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_document_files' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_country' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+  );
+  $handler->display->display_options['defaults']['style_options'] = FALSE;
+  $handler->display->display_options['defaults']['row_plugin'] = FALSE;
+  $handler->display->display_options['defaults']['row_options'] = FALSE;
+  $handler->display->display_options['defaults']['header'] = FALSE;
+  /* Header: Global: Text area */
+  $handler->display->display_options['header']['area']['id'] = 'area';
+  $handler->display->display_options['header']['area']['table'] = 'views';
+  $handler->display->display_options['header']['area']['field'] = 'area';
+  $handler->display->display_options['header']['area']['content'] = '<br>
+<!-- <a class="btn btn-primary">Questionnaire</a> <a class="btn btn-primary">Best Practice Guidance.</a><br> -->
+<hr>
+<h3>National Legislation Inventories</h3>
+
+Disclaimer: 
+“The contents of the inventories are solely based on information submitted by Parties in their National Reports and official Accession documents and they do not necessarily reflect the views of UNEP/CMS.  The designations employed in the documents do not imply the expression of any opinion whatsoever on the part of the CMS Secretariat or UNEP concerning the legal status of any country, territory, or area, or concerting the delimitation of its frontiers or boundaries.”
+
+';
+  $handler->display->display_options['header']['area']['format'] = 'full_html';
+  $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Content: Number */
+  $handler->display->display_options['fields']['field_document_number']['id'] = 'field_document_number';
+  $handler->display->display_options['fields']['field_document_number']['table'] = 'field_data_field_document_number';
+  $handler->display->display_options['fields']['field_document_number']['field'] = 'field_document_number';
+  $handler->display->display_options['fields']['field_document_number']['label'] = '';
+  $handler->display->display_options['fields']['field_document_number']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['field_document_number']['element_label_colon'] = FALSE;
+  /* Field: Content: Title */
+  $handler->display->display_options['fields']['title_field']['id'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
+  $handler->display->display_options['fields']['title_field']['field'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['label'] = '';
+  $handler->display->display_options['fields']['title_field']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['title_field']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['title_field']['link_to_entity'] = 1;
+  /* Field: Field: CMS Instrument */
+  $handler->display->display_options['fields']['field_instrument']['id'] = 'field_instrument';
+  $handler->display->display_options['fields']['field_instrument']['table'] = 'field_data_field_instrument';
+  $handler->display->display_options['fields']['field_instrument']['field'] = 'field_instrument';
+  $handler->display->display_options['fields']['field_instrument']['label'] = '';
+  $handler->display->display_options['fields']['field_instrument']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['field_instrument']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_instrument']['settings'] = array(
+    'bypass_access' => 0,
+    'link' => 0,
+  );
+  $handler->display->display_options['fields']['field_instrument']['delta_offset'] = '0';
+  /* Field: Field: Country */
+  $handler->display->display_options['fields']['field_country']['id'] = 'field_country';
+  $handler->display->display_options['fields']['field_country']['table'] = 'field_data_field_country';
+  $handler->display->display_options['fields']['field_country']['field'] = 'field_country';
+  $handler->display->display_options['fields']['field_country']['settings'] = array(
+    'bypass_access' => 0,
+    'link' => 1,
+  );
+  $handler->display->display_options['fields']['field_country']['delta_offset'] = '0';
+  /* Field: Content: Files */
+  $handler->display->display_options['fields']['field_document_files']['id'] = 'field_document_files';
+  $handler->display->display_options['fields']['field_document_files']['table'] = 'field_data_field_document_files';
+  $handler->display->display_options['fields']['field_document_files']['field'] = 'field_document_files';
+  $handler->display->display_options['fields']['field_document_files']['type'] = 'cms_document_files_formatter';
+  $handler->display->display_options['fields']['field_document_files']['settings'] = array(
+    'view_mode' => 'full',
+  );
+  $handler->display->display_options['fields']['field_document_files']['delta_offset'] = '0';
+  $handler->display->display_options['defaults']['sorts'] = FALSE;
+  /* Sort criterion: Field: Country (field_country) */
+  $handler->display->display_options['sorts']['field_country_target_id']['id'] = 'field_country_target_id';
+  $handler->display->display_options['sorts']['field_country_target_id']['table'] = 'field_data_field_country';
+  $handler->display->display_options['sorts']['field_country_target_id']['field'] = 'field_country_target_id';
+  $handler->display->display_options['defaults']['filter_groups'] = FALSE;
+  $handler->display->display_options['defaults']['filters'] = FALSE;
+  /* Filter criterion: Content: Published */
+  $handler->display->display_options['filters']['status']['id'] = 'status';
+  $handler->display->display_options['filters']['status']['table'] = 'node';
+  $handler->display->display_options['filters']['status']['field'] = 'status';
+  $handler->display->display_options['filters']['status']['value'] = 1;
+  $handler->display->display_options['filters']['status']['group'] = 1;
+  $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+  /* Filter criterion: Content: Type */
+  $handler->display->display_options['filters']['type']['id'] = 'type';
+  $handler->display->display_options['filters']['type']['table'] = 'node';
+  $handler->display->display_options['filters']['type']['field'] = 'type';
+  $handler->display->display_options['filters']['type']['value'] = array(
+    'document' => 'document',
+  );
+  /* Filter criterion: Content: Type (field_document_type) */
+  $handler->display->display_options['filters']['field_document_type_tid']['id'] = 'field_document_type_tid';
+  $handler->display->display_options['filters']['field_document_type_tid']['table'] = 'field_data_field_document_type';
+  $handler->display->display_options['filters']['field_document_type_tid']['field'] = 'field_document_type_tid';
+  $handler->display->display_options['filters']['field_document_type_tid']['value'] = array(
+    14447 => '14447',
+  );
+  $handler->display->display_options['filters']['field_document_type_tid']['type'] = 'select';
+  $handler->display->display_options['filters']['field_document_type_tid']['vocabulary'] = 'document_type';
+
+  /* Display: MOS Outcomes */
+  $handler = $view->new_display('page', 'MOS Outcomes', 'mos_outcome_ineffect');
+  $handler->display->display_options['defaults']['title'] = FALSE;
+  $handler->display->display_options['title'] = 'Outcomes of the Meeting of the Signatories (MOS) in effect';
+  $handler->display->display_options['defaults']['use_ajax'] = FALSE;
+  $handler->display->display_options['defaults']['pager'] = FALSE;
+  $handler->display->display_options['pager']['type'] = 'full';
+  $handler->display->display_options['pager']['options']['items_per_page'] = '50';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['pager']['options']['id'] = '0';
+  $handler->display->display_options['pager']['options']['quantity'] = '3';
+  $handler->display->display_options['defaults']['style_plugin'] = FALSE;
+  $handler->display->display_options['style_plugin'] = 'table';
+  $handler->display->display_options['style_options']['grouping'] = array(
+    0 => array(
+      'field' => 'field_document_meeting',
+      'rendered' => 1,
+      'rendered_strip' => 0,
+    ),
+  );
+  $handler->display->display_options['style_options']['columns'] = array(
+    'title_field' => 'title_field',
+    'field_document_number' => 'field_document_number',
+    'field_document_publish_date' => 'field_document_publish_date',
+    'field_document_meeting' => 'field_document_meeting',
+  );
+  $handler->display->display_options['style_options']['default'] = '-1';
+  $handler->display->display_options['style_options']['info'] = array(
+    'title_field' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_document_number' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_document_publish_date' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_document_meeting' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+  );
+  $handler->display->display_options['defaults']['style_options'] = FALSE;
+  $handler->display->display_options['defaults']['row_plugin'] = FALSE;
+  $handler->display->display_options['defaults']['row_options'] = FALSE;
+  $handler->display->display_options['defaults']['relationships'] = FALSE;
+  $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Content: Number */
+  $handler->display->display_options['fields']['field_document_number']['id'] = 'field_document_number';
+  $handler->display->display_options['fields']['field_document_number']['table'] = 'field_data_field_document_number';
+  $handler->display->display_options['fields']['field_document_number']['field'] = 'field_document_number';
+  $handler->display->display_options['fields']['field_document_number']['label'] = 'Document Number';
+  /* Field: Content: Title */
+  $handler->display->display_options['fields']['title_field']['id'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
+  $handler->display->display_options['fields']['title_field']['field'] = 'title_field';
+  $handler->display->display_options['fields']['title_field']['link_to_entity'] = 1;
+  /* Field: Content: Meetings */
+  $handler->display->display_options['fields']['field_document_meeting']['id'] = 'field_document_meeting';
+  $handler->display->display_options['fields']['field_document_meeting']['table'] = 'field_data_field_document_meeting';
+  $handler->display->display_options['fields']['field_document_meeting']['field'] = 'field_document_meeting';
+  $handler->display->display_options['fields']['field_document_meeting']['label'] = '';
+  $handler->display->display_options['fields']['field_document_meeting']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['field_document_meeting']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_document_meeting']['settings'] = array(
+    'bypass_access' => 0,
+    'link' => 1,
+  );
+  $handler->display->display_options['fields']['field_document_meeting']['delta_limit'] = '1';
+  $handler->display->display_options['fields']['field_document_meeting']['delta_offset'] = '0';
+  $handler->display->display_options['fields']['field_document_meeting']['delta_reversed'] = TRUE;
+  $handler->display->display_options['defaults']['sorts'] = FALSE;
+  $handler->display->display_options['defaults']['arguments'] = FALSE;
+  /* Contextual filter: Domain Access: Domain ID */
+  $handler->display->display_options['arguments']['gid']['id'] = 'gid';
+  $handler->display->display_options['arguments']['gid']['table'] = 'domain_access';
+  $handler->display->display_options['arguments']['gid']['field'] = 'gid';
+  $handler->display->display_options['arguments']['gid']['default_action'] = 'default';
+  $handler->display->display_options['arguments']['gid']['default_argument_type'] = 'current_domain';
+  $handler->display->display_options['arguments']['gid']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['gid']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['gid']['summary_options']['items_per_page'] = '25';
+  $handler->display->display_options['defaults']['filter_groups'] = FALSE;
+  $handler->display->display_options['defaults']['filters'] = FALSE;
+  /* Filter criterion: Content: Published */
+  $handler->display->display_options['filters']['status']['id'] = 'status';
+  $handler->display->display_options['filters']['status']['table'] = 'node';
+  $handler->display->display_options['filters']['status']['field'] = 'status';
+  $handler->display->display_options['filters']['status']['value'] = 1;
+  $handler->display->display_options['filters']['status']['group'] = 1;
+  $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+  /* Filter criterion: Content: Type */
+  $handler->display->display_options['filters']['type']['id'] = 'type';
+  $handler->display->display_options['filters']['type']['table'] = 'node';
+  $handler->display->display_options['filters']['type']['field'] = 'type';
+  $handler->display->display_options['filters']['type']['value'] = array(
+    'document' => 'document',
+  );
+  /* Filter criterion: Content: Type (field_document_type) */
+  $handler->display->display_options['filters']['field_document_type_tid']['id'] = 'field_document_type_tid';
+  $handler->display->display_options['filters']['field_document_type_tid']['table'] = 'field_data_field_document_type';
+  $handler->display->display_options['filters']['field_document_type_tid']['field'] = 'field_document_type_tid';
+  $handler->display->display_options['filters']['field_document_type_tid']['value'] = array(
+    1514 => '1514',
+  );
+  $handler->display->display_options['filters']['field_document_type_tid']['reduce_duplicates'] = TRUE;
+  $handler->display->display_options['filters']['field_document_type_tid']['type'] = 'select';
+  $handler->display->display_options['filters']['field_document_type_tid']['vocabulary'] = 'document_type';
+  /* Filter criterion: Content: Status (field_document_status) */
+  $handler->display->display_options['filters']['field_document_status_tid']['id'] = 'field_document_status_tid';
+  $handler->display->display_options['filters']['field_document_status_tid']['table'] = 'field_data_field_document_status';
+  $handler->display->display_options['filters']['field_document_status_tid']['field'] = 'field_document_status_tid';
+  $handler->display->display_options['filters']['field_document_status_tid']['value'] = array(
+    3074 => '3074',
+  );
+  $handler->display->display_options['filters']['field_document_status_tid']['type'] = 'select';
+  $handler->display->display_options['filters']['field_document_status_tid']['vocabulary'] = 'document_status';
+  $handler->display->display_options['path'] = 'documents/mos-outcomes';
   $handler->display->display_options['menu']['title'] = 'National Reports';
   $handler->display->display_options['menu']['weight'] = '0';
   $handler->display->display_options['menu']['name'] = '810f12118bc3b060d5e1bf8c18c7725f';
@@ -8264,8 +8969,25 @@ return "";';
     t('Species\' Nat Rep'),
     t('Species\' Other Documents'),
     t('COP Resolutions'),
-    t('Resolutions of the CMS Conferences of the Parties (COP)'),
+    t('Resolutions of the CMS Conferences of the Parties (COP) in effect'),
     t('Meetings'),
+    t('COP Resolutions sorting'),
+    t('Content'),
+    t('Concerted Actions'),
+    t('Block - National Legislation Inventories'),
+    t('National Legislation Programme Inventories'),
+    t('<br>
+<!-- <a class="btn btn-primary">Questionnaire</a> <a class="btn btn-primary">Best Practice Guidance.</a><br> -->
+<hr>
+<h3>National Legislation Inventories</h3>
+
+Disclaimer: 
+“The contents of the inventories are solely based on information submitted by Parties in their National Reports and official Accession documents and they do not necessarily reflect the views of UNEP/CMS.  The designations employed in the documents do not imply the expression of any opinion whatsoever on the part of the CMS Secretariat or UNEP concerning the legal status of any country, territory, or area, or concerting the delimitation of its frontiers or boundaries.”
+
+'),
+    t('Files'),
+    t('MOS Outcomes'),
+    t('Outcomes of the Meeting of the Signatories (MOS) in effect'),
   );
   $export['front_end_documents'] = $view;
 
@@ -8997,7 +9719,6 @@ return "";';
   $handler->display->display_options['filters']['type']['table'] = 'node';
   $handler->display->display_options['filters']['type']['field'] = 'type';
   $handler->display->display_options['filters']['type']['value'] = array(
-    'event_calendar' => 'event_calendar',
     'meeting' => 'meeting',
   );
   /* Filter criterion: Content: Type (field_meeting_type) */
@@ -9011,7 +9732,7 @@ return "";';
   );
   $handler->display->display_options['filters']['field_meeting_type_tid']['reduce_duplicates'] = TRUE;
   $handler->display->display_options['filters']['field_meeting_type_tid']['vocabulary'] = 'meeting_type';
-  $handler->display->display_options['path'] = 'meetings/standing-committee';
+  $handler->display->display_options['path'] = 'meetings/other-meetings';
 
   /* Display: MoUs Advisory Committee */
   $handler = $view->new_display('page', 'MoUs Advisory Committee', 'mous_advis_comm');
@@ -15785,6 +16506,7 @@ return "";';
     'title_field' => 'title_field',
     'nid' => 'nid',
     'body' => 'body',
+    'field_document_status' => 'field_document_status',
     'field_document_files' => 'field_document_files',
     'field_document_private_files' => 'field_document_private_files',
     'title' => 'title',
@@ -15813,6 +16535,13 @@ return "";';
       'empty_column' => 0,
     ),
     'body' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 1,
+    ),
+    'field_document_status' => array(
       'sortable' => 0,
       'default_sort_order' => 'asc',
       'align' => '',
@@ -15870,6 +16599,10 @@ return "";';
   $handler->display->display_options['fields']['body']['field'] = 'body';
   $handler->display->display_options['fields']['body']['label'] = '';
   $handler->display->display_options['fields']['body']['element_label_colon'] = FALSE;
+  /* Field: Content: Status */
+  $handler->display->display_options['fields']['field_document_status']['id'] = 'field_document_status';
+  $handler->display->display_options['fields']['field_document_status']['table'] = 'field_data_field_document_status';
+  $handler->display->display_options['fields']['field_document_status']['field'] = 'field_document_status';
   /* Field: Content: Files */
   $handler->display->display_options['fields']['field_document_files']['id'] = 'field_document_files';
   $handler->display->display_options['fields']['field_document_files']['table'] = 'field_data_field_document_files';
@@ -16003,6 +16736,7 @@ return "";';
     t('List'),
     t('List Front-end'),
     t('<a href="#collapse!2">Back to top</a>'),
+    t('Status'),
     t('Files'),
     t('Private Files'),
     t('[field_document_files]
@@ -16922,6 +17656,211 @@ return "";';
 
   /* Display: News Ascobans */
   $handler = $view->new_display('services', 'News Ascobans', 'services_2');
+  $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Content: Updated date */
+  $handler->display->display_options['fields']['changed']['id'] = 'changed';
+  $handler->display->display_options['fields']['changed']['table'] = 'node';
+  $handler->display->display_options['fields']['changed']['field'] = 'changed';
+  $handler->display->display_options['fields']['changed']['label'] = 'changed';
+  $handler->display->display_options['fields']['changed']['alter']['alter_text'] = TRUE;
+  $handler->display->display_options['fields']['changed']['date_format'] = 'cms_date';
+  /* Field: Content: Node UUID */
+  $handler->display->display_options['fields']['uuid']['id'] = 'uuid';
+  $handler->display->display_options['fields']['uuid']['table'] = 'node';
+  $handler->display->display_options['fields']['uuid']['field'] = 'uuid';
+  $handler->display->display_options['fields']['uuid']['label'] = 'uuid';
+  /* Field: Content: Nid */
+  $handler->display->display_options['fields']['nid']['id'] = 'nid';
+  $handler->display->display_options['fields']['nid']['table'] = 'node';
+  $handler->display->display_options['fields']['nid']['field'] = 'nid';
+  $handler->display->display_options['fields']['nid']['label'] = 'nid';
+  /* Field: Content: Title */
+  $handler->display->display_options['fields']['title']['id'] = 'title';
+  $handler->display->display_options['fields']['title']['table'] = 'node';
+  $handler->display->display_options['fields']['title']['field'] = 'title';
+  $handler->display->display_options['fields']['title']['label'] = 'title';
+  $handler->display->display_options['fields']['title']['link_to_node'] = FALSE;
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php_2']['id'] = 'php_2';
+  $handler->display->display_options['fields']['php_2']['table'] = 'views';
+  $handler->display->display_options['fields']['php_2']['field'] = 'php';
+  $handler->display->display_options['fields']['php_2']['label'] = 'title_field';
+  $handler->display->display_options['fields']['php_2']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php_2']['php_value'] = 'return cms_api_get_field($row->nid, \'news\', \'title_field\');';
+  $handler->display->display_options['fields']['php_2']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php_2']['php_click_sortable'] = '';
+  /* Field: Content: Language */
+  $handler->display->display_options['fields']['language']['id'] = 'language';
+  $handler->display->display_options['fields']['language']['table'] = 'node';
+  $handler->display->display_options['fields']['language']['field'] = 'language';
+  $handler->display->display_options['fields']['language']['label'] = 'language';
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php_1']['id'] = 'php_1';
+  $handler->display->display_options['fields']['php_1']['table'] = 'views';
+  $handler->display->display_options['fields']['php_1']['field'] = 'php';
+  $handler->display->display_options['fields']['php_1']['label'] = 'body';
+  $handler->display->display_options['fields']['php_1']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php_1']['php_value'] = 'return cms_api_get_field($row->nid, \'news\', \'body\');';
+  $handler->display->display_options['fields']['php_1']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php_1']['php_click_sortable'] = '';
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php_3']['id'] = 'php_3';
+  $handler->display->display_options['fields']['php_3']['table'] = 'views';
+  $handler->display->display_options['fields']['php_3']['field'] = 'php';
+  $handler->display->display_options['fields']['php_3']['label'] = 'field_instrument';
+  $handler->display->display_options['fields']['php_3']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php_3']['php_value'] = 'return cms_api_get_field_eref($row->nid, \'news\', \'field_instrument\'); ';
+  $handler->display->display_options['fields']['php_3']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php_3']['php_click_sortable'] = '';
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php_8']['id'] = 'php_8';
+  $handler->display->display_options['fields']['php_8']['table'] = 'views';
+  $handler->display->display_options['fields']['php_8']['field'] = 'php';
+  $handler->display->display_options['fields']['php_8']['label'] = 'field_country';
+  $handler->display->display_options['fields']['php_8']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php_8']['php_value'] = 'return cms_api_get_field_eref($row->nid, \'news\', \'field_country\');';
+  $handler->display->display_options['fields']['php_8']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php_8']['php_click_sortable'] = '';
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php_9']['id'] = 'php_9';
+  $handler->display->display_options['fields']['php_9']['table'] = 'views';
+  $handler->display->display_options['fields']['php_9']['field'] = 'php';
+  $handler->display->display_options['fields']['php_9']['label'] = 'field_species';
+  $handler->display->display_options['fields']['php_9']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php_9']['php_value'] = 'return cms_api_get_field_eref($row->nid, \'news\', \'field_species\'); ';
+  $handler->display->display_options['fields']['php_9']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php_9']['php_click_sortable'] = '';
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php_5']['id'] = 'php_5';
+  $handler->display->display_options['fields']['php_5']['table'] = 'views';
+  $handler->display->display_options['fields']['php_5']['field'] = 'php';
+  $handler->display->display_options['fields']['php_5']['label'] = 'field_region';
+  $handler->display->display_options['fields']['php_5']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php_5']['php_value'] = 'return cms_api_get_field_term_ref($row->nid, \'news\', \'field_region\');';
+  $handler->display->display_options['fields']['php_5']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php_5']['php_click_sortable'] = '';
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php_4']['id'] = 'php_4';
+  $handler->display->display_options['fields']['php_4']['table'] = 'views';
+  $handler->display->display_options['fields']['php_4']['field'] = 'php';
+  $handler->display->display_options['fields']['php_4']['label'] = 'field_news_type';
+  $handler->display->display_options['fields']['php_4']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php_4']['php_value'] = 'return cms_api_get_field_term_ref($row->nid, \'news\', \'field_news_type\');';
+  $handler->display->display_options['fields']['php_4']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php_4']['php_click_sortable'] = '';
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php']['id'] = 'php';
+  $handler->display->display_options['fields']['php']['table'] = 'views';
+  $handler->display->display_options['fields']['php']['field'] = 'php';
+  $handler->display->display_options['fields']['php']['label'] = 'field_featured_image';
+  $handler->display->display_options['fields']['php']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['php']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php']['php_value'] = 'return cms_api_get_field_image($row->nid, \'news\', \'field_featured_image\');
+';
+  $handler->display->display_options['fields']['php']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php']['php_click_sortable'] = '';
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php_14']['id'] = 'php_14';
+  $handler->display->display_options['fields']['php_14']['table'] = 'views';
+  $handler->display->display_options['fields']['php_14']['field'] = 'php';
+  $handler->display->display_options['fields']['php_14']['label'] = 'field_news_attachments';
+  $handler->display->display_options['fields']['php_14']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['php_14']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php_14']['php_value'] = 'return cms_api_get_field_file($row->nid, \'news\', \'field_news_attachments\');
+';
+  $handler->display->display_options['fields']['php_14']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php_14']['php_click_sortable'] = '';
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php_6']['id'] = 'php_6';
+  $handler->display->display_options['fields']['php_6']['table'] = 'views';
+  $handler->display->display_options['fields']['php_6']['field'] = 'php';
+  $handler->display->display_options['fields']['php_6']['label'] = 'field_news_expiration_date';
+  $handler->display->display_options['fields']['php_6']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php_6']['php_value'] = 'return cms_api_get_field($row->nid, \'news\', \'field_news_expiration_date\');';
+  $handler->display->display_options['fields']['php_6']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php_6']['php_click_sortable'] = '';
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php_7']['id'] = 'php_7';
+  $handler->display->display_options['fields']['php_7']['table'] = 'views';
+  $handler->display->display_options['fields']['php_7']['field'] = 'php';
+  $handler->display->display_options['fields']['php_7']['label'] = 'field_source_url';
+  $handler->display->display_options['fields']['php_7']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php_7']['php_value'] = 'return cms_api_get_field($row->nid, \'news\', \'field_source_url\');';
+  $handler->display->display_options['fields']['php_7']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php_7']['php_click_sortable'] = '';
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php_10']['id'] = 'php_10';
+  $handler->display->display_options['fields']['php_10']['table'] = 'views';
+  $handler->display->display_options['fields']['php_10']['field'] = 'php';
+  $handler->display->display_options['fields']['php_10']['label'] = 'field_threats';
+  $handler->display->display_options['fields']['php_10']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['php_10']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php_10']['php_value'] = 'return cms_api_get_field_term_ref($row->nid, \'news\', \'field_threats\');';
+  $handler->display->display_options['fields']['php_10']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php_10']['php_click_sortable'] = '';
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php_11']['id'] = 'php_11';
+  $handler->display->display_options['fields']['php_11']['table'] = 'views';
+  $handler->display->display_options['fields']['php_11']['field'] = 'php';
+  $handler->display->display_options['fields']['php_11']['label'] = 'field_species_group';
+  $handler->display->display_options['fields']['php_11']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php_11']['php_value'] = 'return cms_api_get_field_term_ref($row->nid, \'news\', \'field_species_group\');';
+  $handler->display->display_options['fields']['php_11']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php_11']['php_click_sortable'] = '';
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php_12']['id'] = 'php_12';
+  $handler->display->display_options['fields']['php_12']['table'] = 'views';
+  $handler->display->display_options['fields']['php_12']['field'] = 'php';
+  $handler->display->display_options['fields']['php_12']['label'] = 'field_keywords';
+  $handler->display->display_options['fields']['php_12']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php_12']['php_value'] = 'return cms_api_get_field($row->nid, \'news\', \'field_keywords\');';
+  $handler->display->display_options['fields']['php_12']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php_12']['php_click_sortable'] = '';
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php_13']['id'] = 'php_13';
+  $handler->display->display_options['fields']['php_13']['table'] = 'views';
+  $handler->display->display_options['fields']['php_13']['field'] = 'php';
+  $handler->display->display_options['fields']['php_13']['label'] = 'field_news_further_resources';
+  $handler->display->display_options['fields']['php_13']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['php_13']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php_13']['php_value'] = 'return cms_api_get_field($row->nid, \'news\', \'field_news_further_resources\');';
+  $handler->display->display_options['fields']['php_13']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php_13']['php_click_sortable'] = '';
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php_15']['id'] = 'php_15';
+  $handler->display->display_options['fields']['php_15']['table'] = 'views';
+  $handler->display->display_options['fields']['php_15']['field'] = 'php';
+  $handler->display->display_options['fields']['php_15']['label'] = 'field_in_slideshow';
+  $handler->display->display_options['fields']['php_15']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php_15']['php_value'] = 'return cms_api_get_field($row->nid, \'news\', \'field_in_slideshow\');';
+  $handler->display->display_options['fields']['php_15']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php_15']['php_click_sortable'] = '';
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php_16']['id'] = 'php_16';
+  $handler->display->display_options['fields']['php_16']['table'] = 'views';
+  $handler->display->display_options['fields']['php_16']['field'] = 'php';
+  $handler->display->display_options['fields']['php_16']['label'] = 'field_featured_in_instances';
+  $handler->display->display_options['fields']['php_16']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php_16']['php_value'] = 'return cms_api_get_field($row->nid, \'news\', \'field_featured_in_instances\');';
+  $handler->display->display_options['fields']['php_16']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php_16']['php_click_sortable'] = '';
+  /* Field: Content: Post date */
+  $handler->display->display_options['fields']['created']['id'] = 'created';
+  $handler->display->display_options['fields']['created']['table'] = 'node';
+  $handler->display->display_options['fields']['created']['field'] = 'created';
+  $handler->display->display_options['fields']['created']['label'] = 'created';
+  $handler->display->display_options['fields']['created']['date_format'] = 'long';
+  $handler->display->display_options['fields']['created']['second_date_format'] = 'cms_date';
+  /* Field: Global: PHP */
+  $handler->display->display_options['fields']['php_17']['id'] = 'php_17';
+  $handler->display->display_options['fields']['php_17']['table'] = 'views';
+  $handler->display->display_options['fields']['php_17']['field'] = 'php';
+  $handler->display->display_options['fields']['php_17']['label'] = 'field_gallery';
+  $handler->display->display_options['fields']['php_17']['use_php_setup'] = 0;
+  $handler->display->display_options['fields']['php_17']['php_value'] = 'return cms_api_get_field_image($row->nid, \'news\', \'field_gallery\');
+';
+  $handler->display->display_options['fields']['php_17']['use_php_click_sortable'] = '0';
+  $handler->display->display_options['fields']['php_17']['php_click_sortable'] = '';
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Content: Published */
@@ -17088,6 +18027,8 @@ return "";';
     21 => '21',
     22 => '22',
     23 => '23',
+    24 => '24',
+    25 => '25',
     20 => 0,
   );
   $handler->display->display_options['access']['domain_strict'] = 0;
