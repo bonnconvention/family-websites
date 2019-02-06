@@ -196,7 +196,9 @@ function cms_feed_import_execute($url, $bundle) {
                 $standard_fields[$field_name] = $field_name;
         }
     }
-
+    if (empty($result)) {
+      return;
+    }
     //Check trough received data
     foreach ($result as $node_data) {
       $query = new EntityFieldQuery();
