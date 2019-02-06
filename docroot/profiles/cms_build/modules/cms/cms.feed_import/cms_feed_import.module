@@ -129,6 +129,34 @@ function cms_feed_import_set_interval() {
 }
 
 /**
+ * Validates the date aginst specific date format.
+ */
+function cms_validate_date_time($dateStr, $format) {
+  date_default_timezone_set('UTC');
+  $date = DateTime::createFromFormat($format, $dateStr);
+  return $date && ($date->format($format) === $dateStr);
+}
+/**
+ * Format the fields for node_save.
+ */
+function cms_normalize_field (&$node_data, $key_field, $language = LANGUAGE_NONE,  $nested = false) {
+  if (!isset($node_data[$key_field]) || empty($node_data[$key_field])) {
+    return true;
+  }
+  if ($nested) {
+    $node_data[$key_field] = [
+      $language => [
+        $node_data[$key_field],
+      ],
+    ];
+    return true;
+  }
+  $node_data[$key_field] = [
+    $language => $node_data[$key_field],
+  ];
+}
+
+/**
  * Executes import from an url.
  */
 function cms_feed_import_execute($url, $bundle) {
@@ -180,7 +208,7 @@ function cms_feed_import_execute($url, $bundle) {
       //get languages that has data
       $languages = language_list();
       $node_languages = array();
-      foreach ($node_data as $field) {
+      foreach ($node_data as $key_field => $field) {
           if(is_array($field)) {
               foreach($field as $key => $value){
                   if(array_key_exists($key, $languages)) {
@@ -188,7 +216,69 @@ function cms_feed_import_execute($url, $bundle) {
                   }
               }
           }
-      }
+
+          // Make sure the title is decoded.
+          $node_data['title'] =  htmlspecialchars_decode($node_data['title'], ENT_QUOTES);
+
+          // Normalize $standard_fields.
+          if (in_array($key_field, $standard_fields)) {
+
+            switch ($key_field) {
+              case 'body':
+                cms_normalize_field ($node_data, $key_field, $node_data['language'],  true);
+                break;
+
+              case 'field_news_expiration_date':
+              case 'field_source_url':
+              case 'field_in_slideshow':
+              case 'field_featured_in_instances':
+                cms_normalize_field ($node_data, $key_field, LANGUAGE_NONE,  true);
+                break;
+
+              case 'field_news_further_resources':
+                cms_normalize_field ($node_data, $key_field, LANGUAGE_NONE,  false);
+                break;
+
+              case 'field_keywords':
+                cms_normalize_field ($node_data, $key_field, $node_data['language'],  false);
+                break;
+
+              default:
+                break;
+            }
+          }
+
+          // Normalize $fields_term_ref && $fields_entity_ref.
+          if (in_array($key_field, $fields_term_ref) || in_array($key_field, $fields_entity_ref)) {
+            cms_normalize_field ($node_data, $key_field, LANGUAGE_NONE, !is_array($field));
+          }
+
+          // Normalize $fields_file && $fields_image.
+          if (in_array($key_field, $fields_file) || in_array($key_field, $fields_image)) {
+            if (empty($field)) {
+              $node_data[$key_field] = array();
+            }
+            else {
+              if (is_array($field)) {
+                if ($fields_generic_info[$key_field]['cardinality'] == 1) {
+                  $node_data[$key_field]['url'] = str_replace('public://', $base_path . '/sites/default/files/', $field['uri']);
+                  cms_normalize_field ($node_data, $key_field, $node_data['language'], true);
+
+                }
+                else {
+                  foreach ($field as $kf => $f) {
+                    $node_data[$key_field][$kf]['url'] = str_replace('public://', $base_path . '/sites/default/files/', $f['uri']);
+                  }
+                  cms_normalize_field ($node_data, $key_field, $node_data['language'], false);
+                }
+              }
+              else {
+                $node_data[$key_field]['url'] = str_replace('public://', $base_path . '/sites/default/files/', $field['uri']);
+                cms_normalize_field ($node_data, $key_field, $node_data['language'], true);
+              }
+            }
+          }
+        }
 
       $current_node = array();
       //if new
@@ -215,7 +305,9 @@ function cms_feed_import_execute($url, $bundle) {
                             $image['url'],
                             'public://' . $fields_info[$field_image]['settings']['file_directory']
                           );
-                          $f_img['image_field_caption'] = $image['image_field_caption'];
+                          if (isset($image['image_field_caption'])) {
+                            $f_img['image_field_caption'] = $image['image_field_caption'];
+                          }
                           $node->{$field_image}[$lang][$idx] = $f_img;
                       }
                   }
@@ -278,9 +370,11 @@ function cms_feed_import_execute($url, $bundle) {
           }
           $node->uid = 1;
           $node->field_imported[LANGUAGE_NONE][0]['value'] = 1;
-          if (isset($node->created)) {
-            $node->date = date('Y-m-d H:i', $node->created);
+          // We are waiting the date in this format: Y-m-d H:i
+          if (isset($node->created) && cms_validate_date_time($node->created, 'Y-m-d H:i')) {
+            $node->date = $node->created;
           }
+
           $node = node_submit($node);
 
           //Get properties from existing node
@@ -317,6 +411,7 @@ function cms_feed_import_execute($url, $bundle) {
           $node->body[$lang][0]['value'] = $html;
         }
         $node->path['pathauto'] = TRUE;
+
         node_save($node);
         watchdog('cms_feed_import', $node->title . ' saved!');
         $saves ++;
