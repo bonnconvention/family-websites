@@ -1940,23 +1940,21 @@ return "";';
   $handler->display->display_options['defaults']['pager'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'none';
   $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['defaults']['relationships'] = FALSE;
   $handler->display->display_options['defaults']['fields'] = FALSE;
   /* Field: Content: Nid */
   $handler->display->display_options['fields']['nid']['id'] = 'nid';
   $handler->display->display_options['fields']['nid']['table'] = 'node';
   $handler->display->display_options['fields']['nid']['field'] = 'nid';
   $handler->display->display_options['fields']['nid']['label'] = 'nid';
-  /* Field: Content: Title (title_field:language) */
-  $handler->display->display_options['fields']['language_2']['id'] = 'language_2';
-  $handler->display->display_options['fields']['language_2']['table'] = 'field_data_title_field';
-  $handler->display->display_options['fields']['language_2']['field'] = 'language';
-  $handler->display->display_options['fields']['language_2']['label'] = 'language';
   /* Field: Content: Updated date */
   $handler->display->display_options['fields']['changed']['id'] = 'changed';
   $handler->display->display_options['fields']['changed']['table'] = 'node';
   $handler->display->display_options['fields']['changed']['field'] = 'changed';
   $handler->display->display_options['fields']['changed']['label'] = 'updated';
-  $handler->display->display_options['fields']['changed']['date_format'] = 'convention_date';
+  $handler->display->display_options['fields']['changed']['date_format'] = 'custom';
+  $handler->display->display_options['fields']['changed']['custom_date_format'] = 'U';
+  $handler->display->display_options['fields']['changed']['second_date_format'] = 'cms_date';
   /* Field: Content: Title */
   $handler->display->display_options['fields']['title_field']['id'] = 'title_field';
   $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
@@ -1982,6 +1980,11 @@ return "";';
     'link' => 0,
   );
   $handler->display->display_options['fields']['field_instrument']['delta_offset'] = '0';
+  /* Field: Content: Language */
+  $handler->display->display_options['fields']['language']['id'] = 'language';
+  $handler->display->display_options['fields']['language']['table'] = 'node';
+  $handler->display->display_options['fields']['language']['field'] = 'language';
+  $handler->display->display_options['fields']['language']['label'] = 'language';
   /* Field: Content: Post date */
   $handler->display->display_options['fields']['created']['id'] = 'created';
   $handler->display->display_options['fields']['created']['table'] = 'node';
@@ -2003,6 +2006,7 @@ return "";';
   $handler->display->display_options['fields']['field_featured_image']['click_sort_column'] = 'fid';
   $handler->display->display_options['fields']['field_featured_image']['type'] = 'services';
   $handler->display->display_options['fields']['field_featured_image']['settings'] = array(
+    'data_element_key' => '',
     'skip_safe' => 0,
     'skip_empty_values' => 0,
   );
@@ -6998,6 +7002,15 @@ return "";';
   $handler->display->display_options['filters']['field_document_meeting_target_id']['group_info']['identifier'] = 'field_document_meeting_target_id';
   $handler->display->display_options['filters']['field_document_meeting_target_id']['group_info']['group_items'] = array(
     1 => array(
+      'title' => 'MOP7',
+      'operator' => '=',
+      'value' => array(
+        'value' => '3963',
+        'min' => '',
+        'max' => '',
+      ),
+    ),
+    2 => array(
       'title' => 'MOP6',
       'operator' => '=',
       'value' => array(
@@ -7006,7 +7019,7 @@ return "";';
         'max' => '',
       ),
     ),
-    2 => array(
+    3 => array(
       'title' => 'MOP5',
       'operator' => '=',
       'value' => array(
@@ -7015,7 +7028,7 @@ return "";';
         'max' => '',
       ),
     ),
-    3 => array(
+    4 => array(
       'title' => 'MOP4',
       'operator' => '=',
       'value' => array(
@@ -7024,7 +7037,7 @@ return "";';
         'max' => '',
       ),
     ),
-    4 => array(
+    5 => array(
       'title' => 'MOP3',
       'operator' => '=',
       'value' => array(
@@ -7033,7 +7046,7 @@ return "";';
         'max' => '',
       ),
     ),
-    5 => array(
+    6 => array(
       'title' => 'MOP2',
       'operator' => '=',
       'value' => array(
@@ -7042,7 +7055,7 @@ return "";';
         'max' => '',
       ),
     ),
-    6 => array(
+    7 => array(
       'title' => 'MOP1',
       'operator' => '=',
       'value' => array(
@@ -17113,7 +17126,7 @@ return "";';
     ),
   );
   $handler->display->display_options['style_options']['summary'] = 'Members';
-  /* Field: Broken/missing handler */
+  /* Field: Field collection item: Field collection item ID */
   $handler->display->display_options['fields']['item_id']['id'] = 'item_id';
   $handler->display->display_options['fields']['item_id']['table'] = 'field_collection_item';
   $handler->display->display_options['fields']['item_id']['field'] = 'item_id';
@@ -17177,7 +17190,7 @@ return "";';
   $handler->display->display_options['fields']['field_wg_member_role']['id'] = 'field_wg_member_role';
   $handler->display->display_options['fields']['field_wg_member_role']['table'] = 'field_data_field_wg_member_role';
   $handler->display->display_options['fields']['field_wg_member_role']['field'] = 'field_wg_member_role';
-  /* Contextual filter: Broken/missing handler */
+  /* Contextual filter: Field collection item: Field collection item ID */
   $handler->display->display_options['arguments']['item_id']['id'] = 'item_id';
   $handler->display->display_options['arguments']['item_id']['table'] = 'field_collection_item';
   $handler->display->display_options['arguments']['item_id']['field'] = 'item_id';
@@ -17201,7 +17214,9 @@ return "";';
     t('‹ previous'),
     t('next ›'),
     t('last »'),
-    t('Broken handler field_collection_item.item_id'),
+    t('Field collection item ID'),
+    t('.'),
+    t(','),
     t('Region'),
     t('Country'),
     t('Name'),
