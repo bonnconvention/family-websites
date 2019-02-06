@@ -4954,6 +4954,12 @@ return "";';
   );
   $handler->display->display_options['filters']['field_country_status_tid']['type'] = 'select';
   $handler->display->display_options['filters']['field_country_status_tid']['vocabulary'] = 'party_status';
+  /* Filter criterion: Field: CMS Instrument (field_instrument) */
+  $handler->display->display_options['filters']['field_instrument_target_id']['id'] = 'field_instrument_target_id';
+  $handler->display->display_options['filters']['field_instrument_target_id']['table'] = 'field_data_field_instrument';
+  $handler->display->display_options['filters']['field_instrument_target_id']['field'] = 'field_instrument_target_id';
+  $handler->display->display_options['filters']['field_instrument_target_id']['relationship'] = 'field_country_instrument_status_value';
+  $handler->display->display_options['filters']['field_instrument_target_id']['value']['value'] = '4';
   $handler->display->display_options['path'] = 'instrument-country-list/%';
 
   /* Display: Instrument Map */
@@ -7357,24 +7363,24 @@ return "";';
     'created' => 'created',
     'field_source_url' => 'field_source_url',
   );
-  $handler->display->display_options['style_options']['default'] = '-1';
+  $handler->display->display_options['style_options']['default'] = 'created';
   $handler->display->display_options['style_options']['info'] = array(
     'title' => array(
-      'sortable' => 0,
-      'default_sort_order' => 'asc',
+      'sortable' => 1,
+      'default_sort_order' => 'desc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
     ),
     'created' => array(
       'sortable' => 1,
-      'default_sort_order' => 'asc',
+      'default_sort_order' => 'desc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
     ),
     'field_source_url' => array(
-      'sortable' => 1,
+      'sortable' => 0,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
@@ -7751,7 +7757,7 @@ return "";';
   /* Display: Projects */
   $handler = $view->new_display('page', 'Projects', 'projects');
   $handler->display->display_options['defaults']['access'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Content: Published */
@@ -9358,7 +9364,7 @@ return "";';
   $handler = $view->new_display('default', 'Master', 'default');
   $handler->display->display_options['title'] = 'Species';
   $handler->display->display_options['use_more_always'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['exposed_form']['type'] = 'basic';
@@ -9631,8 +9637,6 @@ return "";';
 
   /* Display: List */
   $handler = $view->new_display('page', 'List', 'species_list');
-  $handler->display->display_options['defaults']['access'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
   $handler->display->display_options['defaults']['header'] = FALSE;
   /* Header: Global: Text area */
   $handler->display->display_options['header']['area']['id'] = 'area';
@@ -10574,7 +10578,7 @@ return "";';
   /* Display: Random species */
   $handler = $view->new_display('page', 'Random species', 'random_species');
   $handler->display->display_options['defaults']['access'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['defaults']['pager'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'none';
   $handler->display->display_options['pager']['options']['offset'] = '0';
@@ -10641,7 +10645,7 @@ return "";';
   /* Display: Random Species With Images */
   $handler = $view->new_display('page', 'Random Species With Images', 'random_species_with_images');
   $handler->display->display_options['defaults']['access'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['defaults']['pager'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'none';
   $handler->display->display_options['pager']['options']['offset'] = '0';
@@ -11250,6 +11254,68 @@ return "";';
   $handler->display->display_options['pager']['options']['offset'] = '0';
   $handler->display->display_options['pager']['options']['id'] = '0';
   $handler->display->display_options['pager']['options']['quantity'] = '9';
+  $handler->display->display_options['defaults']['style_plugin'] = FALSE;
+  $handler->display->display_options['style_plugin'] = 'table';
+  $handler->display->display_options['style_options']['columns'] = array(
+    'field_document_number' => 'field_document_number',
+    'title_field' => 'title_field',
+    'nid' => 'nid',
+    'field_document_files' => 'field_document_files',
+    'field_document_private_files' => 'field_document_private_files',
+    'title' => 'title',
+    'body' => 'body',
+  );
+  $handler->display->display_options['style_options']['default'] = '-1';
+  $handler->display->display_options['style_options']['info'] = array(
+    'field_document_number' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'title_field' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'nid' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_document_files' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_document_private_files' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'title' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'body' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 1,
+    ),
+  );
+  $handler->display->display_options['defaults']['style_options'] = FALSE;
+  $handler->display->display_options['defaults']['row_plugin'] = FALSE;
+  $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['defaults']['footer'] = FALSE;
   /* Footer: Global: Text area */
   $handler->display->display_options['footer']['area']['id'] = 'area';
@@ -11312,6 +11378,10 @@ return "";';
   $handler->display->display_options['fields']['title']['alter']['text'] = '[field_document_files]
 [field_document_private_files]';
   $handler->display->display_options['fields']['title']['link_to_node'] = FALSE;
+  /* Field: Content: Description */
+  $handler->display->display_options['fields']['body']['id'] = 'body';
+  $handler->display->display_options['fields']['body']['table'] = 'field_data_body';
+  $handler->display->display_options['fields']['body']['field'] = 'body';
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Content: Published */
@@ -11411,6 +11481,7 @@ return "";';
     t('Private Files'),
     t('[field_document_files]
 [field_document_private_files]'),
+    t('Description'),
     t('Download Docs'),
   );
   $export['meeting_documents_list_reorder'] = $view;
@@ -13838,6 +13909,24 @@ return "";';
     'publication' => 'publication',
   );
   $handler->display->display_options['filters']['type']['group'] = 1;
+  /* Filter criterion: Content: Nid */
+  $handler->display->display_options['filters']['nid']['id'] = 'nid';
+  $handler->display->display_options['filters']['nid']['table'] = 'node';
+  $handler->display->display_options['filters']['nid']['field'] = 'nid';
+  $handler->display->display_options['filters']['nid']['operator'] = '!=';
+  $handler->display->display_options['filters']['nid']['value']['value'] = '1458';
+  /* Filter criterion: Content: Nid */
+  $handler->display->display_options['filters']['nid_1']['id'] = 'nid_1';
+  $handler->display->display_options['filters']['nid_1']['table'] = 'node';
+  $handler->display->display_options['filters']['nid_1']['field'] = 'nid';
+  $handler->display->display_options['filters']['nid_1']['operator'] = '!=';
+  $handler->display->display_options['filters']['nid_1']['value']['value'] = '1616';
+  /* Filter criterion: Content: Title */
+  $handler->display->display_options['filters']['title']['id'] = 'title';
+  $handler->display->display_options['filters']['title']['table'] = 'node';
+  $handler->display->display_options['filters']['title']['field'] = 'title';
+  $handler->display->display_options['filters']['title']['operator'] = 'not';
+  $handler->display->display_options['filters']['title']['value'] = '2013';
   $handler->display->display_options['path'] = 'publications/%';
   $translatables['quicktab_publications'] = array(
     t('Master'),
@@ -15303,7 +15392,7 @@ return "";';
   /* Display: Front-end List */
   $handler = $view->new_display('page', 'Front-end List', 'fe_list');
   $handler->display->display_options['defaults']['access'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['defaults']['pager'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'full';
   $handler->display->display_options['pager']['options']['items_per_page'] = '15';
@@ -15368,7 +15457,7 @@ return "";';
   /* Display: Master */
   $handler = $view->new_display('default', 'Master', 'default');
   $handler->display->display_options['use_more_always'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['query']['options']['distinct'] = TRUE;
