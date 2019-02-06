@@ -17884,6 +17884,11 @@ Disclaimer:
   );
   $handler->display->display_options['fields']['field_gallery']['delta_offset'] = '0';
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
+  $handler->display->display_options['filter_groups']['operator'] = 'OR';
+  $handler->display->display_options['filter_groups']['groups'] = array(
+    1 => 'AND',
+    2 => 'OR',
+  );
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Content: Published */
   $handler->display->display_options['filters']['status']['id'] = 'status';
@@ -17900,6 +17905,7 @@ Disclaimer:
   $handler->display->display_options['filters']['field_imported_value']['value'] = array(
     1 => '1',
   );
+  $handler->display->display_options['filters']['field_imported_value']['group'] = 1;
   /* Filter criterion: Content: Type */
   $handler->display->display_options['filters']['type']['id'] = 'type';
   $handler->display->display_options['filters']['type']['table'] = 'node';
@@ -17907,6 +17913,7 @@ Disclaimer:
   $handler->display->display_options['filters']['type']['value'] = array(
     'news' => 'news',
   );
+  $handler->display->display_options['filters']['type']['group'] = 1;
   /* Filter criterion: Content: Updated date */
   $handler->display->display_options['filters']['changed']['id'] = 'changed';
   $handler->display->display_options['filters']['changed']['table'] = 'node';
@@ -17914,6 +17921,7 @@ Disclaimer:
   $handler->display->display_options['filters']['changed']['operator'] = '>=';
   $handler->display->display_options['filters']['changed']['value']['value'] = '-30 days';
   $handler->display->display_options['filters']['changed']['value']['type'] = 'offset';
+  $handler->display->display_options['filters']['changed']['group'] = 1;
   /* Filter criterion: Content: Featured in (field_featured_in_instances) */
   $handler->display->display_options['filters']['field_featured_in_instances_value']['id'] = 'field_featured_in_instances_value';
   $handler->display->display_options['filters']['field_featured_in_instances_value']['table'] = 'field_data_field_featured_in_instances';
@@ -17921,7 +17929,260 @@ Disclaimer:
   $handler->display->display_options['filters']['field_featured_in_instances_value']['value'] = array(
     'AEWA' => 'AEWA',
   );
+  $handler->display->display_options['filters']['field_featured_in_instances_value']['group'] = 1;
   $handler->display->display_options['filters']['field_featured_in_instances_value']['reduce_duplicates'] = TRUE;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid']['id'] = 'uuid';
+  $handler->display->display_options['filters']['uuid']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid']['value'] = '1cf9c9e8-aac8-4544-b717-fda9394a44bb';
+  $handler->display->display_options['filters']['uuid']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_1']['id'] = 'uuid_1';
+  $handler->display->display_options['filters']['uuid_1']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_1']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_1']['value'] = '2418b2bf-d8f3-474d-adab-f8f8c22fcf18';
+  $handler->display->display_options['filters']['uuid_1']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_2']['id'] = 'uuid_2';
+  $handler->display->display_options['filters']['uuid_2']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_2']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_2']['value'] = 'fbadcd42-442f-4a5e-8b11-b3b352843661';
+  $handler->display->display_options['filters']['uuid_2']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_3']['id'] = 'uuid_3';
+  $handler->display->display_options['filters']['uuid_3']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_3']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_3']['value'] = 'a5a1746e-3858-41bc-a0ab-3324f3d474d3';
+  $handler->display->display_options['filters']['uuid_3']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_4']['id'] = 'uuid_4';
+  $handler->display->display_options['filters']['uuid_4']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_4']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_4']['value'] = 'e1637acb-b5a4-40f6-9b51-73d695c3acfb';
+  $handler->display->display_options['filters']['uuid_4']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_5']['id'] = 'uuid_5';
+  $handler->display->display_options['filters']['uuid_5']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_5']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_5']['value'] = '72b0fa81-cff8-4110-8d74-d593a62158e3';
+  $handler->display->display_options['filters']['uuid_5']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_6']['id'] = 'uuid_6';
+  $handler->display->display_options['filters']['uuid_6']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_6']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_6']['value'] = 'a7b7056f-e69d-43bb-9ebc-d88200aa8080';
+  $handler->display->display_options['filters']['uuid_6']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_7']['id'] = 'uuid_7';
+  $handler->display->display_options['filters']['uuid_7']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_7']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_7']['value'] = 'c9f79255-12a9-4b74-9445-cdab7eca2b0c';
+  $handler->display->display_options['filters']['uuid_7']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_8']['id'] = 'uuid_8';
+  $handler->display->display_options['filters']['uuid_8']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_8']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_8']['value'] = '7959003a-78a3-49c0-883d-4577bfbfabab';
+  $handler->display->display_options['filters']['uuid_8']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_9']['id'] = 'uuid_9';
+  $handler->display->display_options['filters']['uuid_9']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_9']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_9']['value'] = '2c8466b1-219b-40ac-9c9f-f3ff56c44b7d';
+  $handler->display->display_options['filters']['uuid_9']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_10']['id'] = 'uuid_10';
+  $handler->display->display_options['filters']['uuid_10']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_10']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_10']['value'] = 'b8915b35-b666-47ee-9789-ceb39b2622c0';
+  $handler->display->display_options['filters']['uuid_10']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_11']['id'] = 'uuid_11';
+  $handler->display->display_options['filters']['uuid_11']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_11']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_11']['value'] = '18086306-805c-40c9-8200-26acb0f3c2da';
+  $handler->display->display_options['filters']['uuid_11']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_12']['id'] = 'uuid_12';
+  $handler->display->display_options['filters']['uuid_12']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_12']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_12']['value'] = '32fc8f33-36cb-40bb-b26e-67abc4bb49f1';
+  $handler->display->display_options['filters']['uuid_12']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_13']['id'] = 'uuid_13';
+  $handler->display->display_options['filters']['uuid_13']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_13']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_13']['value'] = 'a53b1564-822e-4ae4-b6dd-d05de059b6cc';
+  $handler->display->display_options['filters']['uuid_13']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_14']['id'] = 'uuid_14';
+  $handler->display->display_options['filters']['uuid_14']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_14']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_14']['value'] = '9e488b9c-8cd8-4875-9c5d-b1d1bbba2fca';
+  $handler->display->display_options['filters']['uuid_14']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_15']['id'] = 'uuid_15';
+  $handler->display->display_options['filters']['uuid_15']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_15']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_15']['value'] = 'f8fd48db-a7ab-4a23-b1be-f51c76319369';
+  $handler->display->display_options['filters']['uuid_15']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_16']['id'] = 'uuid_16';
+  $handler->display->display_options['filters']['uuid_16']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_16']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_16']['value'] = 'bd5c1a86-f867-4fc7-9111-3207ac51179d';
+  $handler->display->display_options['filters']['uuid_16']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_17']['id'] = 'uuid_17';
+  $handler->display->display_options['filters']['uuid_17']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_17']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_17']['value'] = '4b1c441a-4b07-429c-b516-5bc08e96296a';
+  $handler->display->display_options['filters']['uuid_17']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_18']['id'] = 'uuid_18';
+  $handler->display->display_options['filters']['uuid_18']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_18']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_18']['value'] = 'e82d8d9b-fbee-4671-b765-7a0422428d7b';
+  $handler->display->display_options['filters']['uuid_18']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_19']['id'] = 'uuid_19';
+  $handler->display->display_options['filters']['uuid_19']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_19']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_19']['value'] = '1c95c761-2ea1-40ca-8a8e-8aed79a1a6a6';
+  $handler->display->display_options['filters']['uuid_19']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_20']['id'] = 'uuid_20';
+  $handler->display->display_options['filters']['uuid_20']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_20']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_20']['value'] = 'd66fb2a9-fdb0-43f7-976d-6cc318bb741d';
+  $handler->display->display_options['filters']['uuid_20']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_21']['id'] = 'uuid_21';
+  $handler->display->display_options['filters']['uuid_21']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_21']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_21']['value'] = '2f4275d7-48db-4df5-80fd-1f800aed78c0';
+  $handler->display->display_options['filters']['uuid_21']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_22']['id'] = 'uuid_22';
+  $handler->display->display_options['filters']['uuid_22']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_22']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_22']['value'] = '785a74ee-f71b-43b1-bac8-72072656c31a';
+  $handler->display->display_options['filters']['uuid_22']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_23']['id'] = 'uuid_23';
+  $handler->display->display_options['filters']['uuid_23']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_23']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_23']['value'] = 'ace2b36c-ac8d-4815-bf61-0319547cebcb';
+  $handler->display->display_options['filters']['uuid_23']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_24']['id'] = 'uuid_24';
+  $handler->display->display_options['filters']['uuid_24']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_24']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_24']['value'] = '6f7b76a0-ad99-4529-9074-b6d36a545260';
+  $handler->display->display_options['filters']['uuid_24']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_25']['id'] = 'uuid_25';
+  $handler->display->display_options['filters']['uuid_25']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_25']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_25']['value'] = '570d6add-b6d3-4951-9599-38486e27482b';
+  $handler->display->display_options['filters']['uuid_25']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_26']['id'] = 'uuid_26';
+  $handler->display->display_options['filters']['uuid_26']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_26']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_26']['value'] = '34adc556-0009-4675-89ce-ad111097d8a8';
+  $handler->display->display_options['filters']['uuid_26']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_27']['id'] = 'uuid_27';
+  $handler->display->display_options['filters']['uuid_27']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_27']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_27']['value'] = '6d772a63-cf45-4ba7-9674-00dfc866a847';
+  $handler->display->display_options['filters']['uuid_27']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_28']['id'] = 'uuid_28';
+  $handler->display->display_options['filters']['uuid_28']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_28']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_28']['value'] = 'd2b6d3c3-2f91-422b-80b0-83b5075b151a';
+  $handler->display->display_options['filters']['uuid_28']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_29']['id'] = 'uuid_29';
+  $handler->display->display_options['filters']['uuid_29']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_29']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_29']['value'] = '4a0caf0c-007c-4538-8106-63a920ca53df';
+  $handler->display->display_options['filters']['uuid_29']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_30']['id'] = 'uuid_30';
+  $handler->display->display_options['filters']['uuid_30']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_30']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_30']['value'] = 'c7551688-fa1c-4d84-b7bc-5b93ed1215cd';
+  $handler->display->display_options['filters']['uuid_30']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_31']['id'] = 'uuid_31';
+  $handler->display->display_options['filters']['uuid_31']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_31']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_31']['value'] = '36e50891-c033-4fa1-9e09-ef1d9676f122';
+  $handler->display->display_options['filters']['uuid_31']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_32']['id'] = 'uuid_32';
+  $handler->display->display_options['filters']['uuid_32']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_32']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_32']['value'] = '257b8ca5-ba04-4977-8ca5-4f2a8bdd2669';
+  $handler->display->display_options['filters']['uuid_32']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_33']['id'] = 'uuid_33';
+  $handler->display->display_options['filters']['uuid_33']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_33']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_33']['value'] = 'a1c4bdec-879b-4552-9114-4df500796f44';
+  $handler->display->display_options['filters']['uuid_33']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_34']['id'] = 'uuid_34';
+  $handler->display->display_options['filters']['uuid_34']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_34']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_34']['value'] = '3f86d1e8-2238-44da-9373-7c4114b8aaad';
+  $handler->display->display_options['filters']['uuid_34']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_35']['id'] = 'uuid_35';
+  $handler->display->display_options['filters']['uuid_35']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_35']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_35']['value'] = '5ece4e87-94ec-4243-a877-d5635b8e2031';
+  $handler->display->display_options['filters']['uuid_35']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_36']['id'] = 'uuid_36';
+  $handler->display->display_options['filters']['uuid_36']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_36']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_36']['value'] = 'f98c3fc6-8519-4301-a0ee-6d0a4aba7f79';
+  $handler->display->display_options['filters']['uuid_36']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_37']['id'] = 'uuid_37';
+  $handler->display->display_options['filters']['uuid_37']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_37']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_37']['value'] = '118af515-165f-46c2-a3d1-3904b7a6cc1f';
+  $handler->display->display_options['filters']['uuid_37']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_38']['id'] = 'uuid_38';
+  $handler->display->display_options['filters']['uuid_38']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_38']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_38']['value'] = 'f552b579-5b56-4824-a1e5-1d6ee25f27c3';
+  $handler->display->display_options['filters']['uuid_38']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_39']['id'] = 'uuid_39';
+  $handler->display->display_options['filters']['uuid_39']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_39']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_39']['value'] = '79d626e2-e617-4f76-86b2-a7dfc5f91cc7';
+  $handler->display->display_options['filters']['uuid_39']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_40']['id'] = 'uuid_40';
+  $handler->display->display_options['filters']['uuid_40']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_40']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_40']['value'] = '92a98917-28d7-4990-bacd-eac01f07b175';
+  $handler->display->display_options['filters']['uuid_40']['group'] = 2;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_41']['id'] = 'uuid_41';
+  $handler->display->display_options['filters']['uuid_41']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_41']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_41']['value'] = '043e6b50-8f27-40c6-85ac-f14116df6650';
+  $handler->display->display_options['filters']['uuid_41']['group'] = 2;
   $handler->display->display_options['path'] = 'aewa-news';
 
   /* Display: News Ascobans */
