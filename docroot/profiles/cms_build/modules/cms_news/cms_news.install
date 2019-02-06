@@ -82,3 +82,38 @@ function cms_news_update_7001() {
     }
     return t("News are now published.");
 }
+
+/**
+ * refs #5832 - Delete news that were imported with errors.
+ */
+function  cms_news_update_7002() {
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', 'news')
+    ->fieldCondition('field_imported', 'value' ,1 , '=');
+  $result = $query->execute();
+  $news_items_nids = array_keys($result['node']);
+  $news_items = entity_load('node', $news_items_nids);
+  $oldest_nid = null;
+  $uuids = array();
+  foreach($news_items as $n) {
+    if (preg_match("/^\<a(.*)/i", $n->title)) {
+      if (!isset($created)) {
+        $created = $n->created;
+      }
+      if ($n->created <= $created) {
+        $created = $n->created;
+        $oldest_nid = $n->nid;
+      }
+      node_delete($n->nid);
+      $uuids[] = $n->uuid;
+      watchdog('cms_feed_import', 'Deleted news: nid: '. $n->nid .' uuid:' . $n->uuid. ' - it was imported with errors: title: '. $n->title, NULL, WATCHDOG_DEBUG);
+    }
+  }
+  if (isset($created)){
+    watchdog('cms_feed_import', 'The  oldest news article that was imported with errors is : nid:' . ($oldest_nid) . ' date:' . date('Y-m-d' ,$created) , NULL, WATCHDOG_DEBUG);
+  }
+  echo '----' . "\n";
+  echo implode(', ', $uuids) . "\n";
+  echo '----' . "\n";
+}

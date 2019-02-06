@@ -1940,23 +1940,21 @@ return "";';
   $handler->display->display_options['defaults']['pager'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'none';
   $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['defaults']['relationships'] = FALSE;
   $handler->display->display_options['defaults']['fields'] = FALSE;
   /* Field: Content: Nid */
   $handler->display->display_options['fields']['nid']['id'] = 'nid';
   $handler->display->display_options['fields']['nid']['table'] = 'node';
   $handler->display->display_options['fields']['nid']['field'] = 'nid';
   $handler->display->display_options['fields']['nid']['label'] = 'nid';
-  /* Field: Content: Title (title_field:language) */
-  $handler->display->display_options['fields']['language_2']['id'] = 'language_2';
-  $handler->display->display_options['fields']['language_2']['table'] = 'field_data_title_field';
-  $handler->display->display_options['fields']['language_2']['field'] = 'language';
-  $handler->display->display_options['fields']['language_2']['label'] = 'language';
   /* Field: Content: Updated date */
   $handler->display->display_options['fields']['changed']['id'] = 'changed';
   $handler->display->display_options['fields']['changed']['table'] = 'node';
   $handler->display->display_options['fields']['changed']['field'] = 'changed';
   $handler->display->display_options['fields']['changed']['label'] = 'updated';
-  $handler->display->display_options['fields']['changed']['date_format'] = 'convention_date';
+  $handler->display->display_options['fields']['changed']['date_format'] = 'custom';
+  $handler->display->display_options['fields']['changed']['custom_date_format'] = 'U';
+  $handler->display->display_options['fields']['changed']['second_date_format'] = 'cms_date';
   /* Field: Content: Title */
   $handler->display->display_options['fields']['title_field']['id'] = 'title_field';
   $handler->display->display_options['fields']['title_field']['table'] = 'field_data_title_field';
@@ -1982,6 +1980,11 @@ return "";';
     'link' => 0,
   );
   $handler->display->display_options['fields']['field_instrument']['delta_offset'] = '0';
+  /* Field: Content: Language */
+  $handler->display->display_options['fields']['language']['id'] = 'language';
+  $handler->display->display_options['fields']['language']['table'] = 'node';
+  $handler->display->display_options['fields']['language']['field'] = 'language';
+  $handler->display->display_options['fields']['language']['label'] = 'language';
   /* Field: Content: Post date */
   $handler->display->display_options['fields']['created']['id'] = 'created';
   $handler->display->display_options['fields']['created']['table'] = 'node';
@@ -2003,6 +2006,7 @@ return "";';
   $handler->display->display_options['fields']['field_featured_image']['click_sort_column'] = 'fid';
   $handler->display->display_options['fields']['field_featured_image']['type'] = 'services';
   $handler->display->display_options['fields']['field_featured_image']['settings'] = array(
+    'data_element_key' => '',
     'skip_safe' => 0,
     'skip_empty_values' => 0,
   );
@@ -6998,6 +7002,15 @@ return "";';
   $handler->display->display_options['filters']['field_document_meeting_target_id']['group_info']['identifier'] = 'field_document_meeting_target_id';
   $handler->display->display_options['filters']['field_document_meeting_target_id']['group_info']['group_items'] = array(
     1 => array(
+      'title' => 'MOP7',
+      'operator' => '=',
+      'value' => array(
+        'value' => '3963',
+        'min' => '',
+        'max' => '',
+      ),
+    ),
+    2 => array(
       'title' => 'MOP6',
       'operator' => '=',
       'value' => array(
@@ -7006,7 +7019,7 @@ return "";';
         'max' => '',
       ),
     ),
-    2 => array(
+    3 => array(
       'title' => 'MOP5',
       'operator' => '=',
       'value' => array(
@@ -7015,7 +7028,7 @@ return "";';
         'max' => '',
       ),
     ),
-    3 => array(
+    4 => array(
       'title' => 'MOP4',
       'operator' => '=',
       'value' => array(
@@ -7024,7 +7037,7 @@ return "";';
         'max' => '',
       ),
     ),
-    4 => array(
+    5 => array(
       'title' => 'MOP3',
       'operator' => '=',
       'value' => array(
@@ -7033,7 +7046,7 @@ return "";';
         'max' => '',
       ),
     ),
-    5 => array(
+    6 => array(
       'title' => 'MOP2',
       'operator' => '=',
       'value' => array(
@@ -7042,7 +7055,7 @@ return "";';
         'max' => '',
       ),
     ),
-    6 => array(
+    7 => array(
       'title' => 'MOP1',
       'operator' => '=',
       'value' => array(
@@ -13585,6 +13598,7 @@ return "";';
     t('Content entity referenced from field_meeting_document'),
     t('Species meetings'),
     t('Content entity referenced from field_meeting_species'),
+    t('Broken handler .'),
   );
   $export['meetings'] = $view;
 
@@ -13634,6 +13648,7 @@ return "";';
   $handler->display->display_options['fields']['title']['table'] = 'node';
   $handler->display->display_options['fields']['title']['field'] = 'title';
   $handler->display->display_options['fields']['title']['label'] = 'title';
+  $handler->display->display_options['fields']['title']['link_to_node'] = FALSE;
   /* Field: Global: PHP */
   $handler->display->display_options['fields']['php_2']['id'] = 'php_2';
   $handler->display->display_options['fields']['php_2']['table'] = 'views';
@@ -13673,8 +13688,6 @@ return "";';
   $handler->display->display_options['fields']['php_8']['label'] = 'field_country';
   $handler->display->display_options['fields']['php_8']['use_php_setup'] = 0;
   $handler->display->display_options['fields']['php_8']['php_value'] = 'return cms_api_get_field_eref($row->nid, \'news\', \'field_country\');';
-  $handler->display->display_options['fields']['php_8']['use_php_click_sortable'] = '0';
-  $handler->display->display_options['fields']['php_8']['php_click_sortable'] = '';
   /* Field: Global: PHP */
   $handler->display->display_options['fields']['php_9']['id'] = 'php_9';
   $handler->display->display_options['fields']['php_9']['table'] = 'views';
@@ -13810,7 +13823,6 @@ return "";';
   $handler->display->display_options['fields']['php_17']['table'] = 'views';
   $handler->display->display_options['fields']['php_17']['field'] = 'php';
   $handler->display->display_options['fields']['php_17']['label'] = 'field_gallery';
-  $handler->display->display_options['fields']['php_17']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['php_17']['use_php_setup'] = 0;
   $handler->display->display_options['fields']['php_17']['php_value'] = 'return cms_api_get_field_image($row->nid, \'news\', \'field_gallery\');
 ';
@@ -13828,6 +13840,14 @@ return "";';
   $handler->display->display_options['filters']['status']['value'] = 1;
   $handler->display->display_options['filters']['status']['group'] = 1;
   $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+  /* Filter criterion: Content: Imported (field_imported) */
+  $handler->display->display_options['filters']['field_imported_value']['id'] = 'field_imported_value';
+  $handler->display->display_options['filters']['field_imported_value']['table'] = 'field_data_field_imported';
+  $handler->display->display_options['filters']['field_imported_value']['field'] = 'field_imported_value';
+  $handler->display->display_options['filters']['field_imported_value']['operator'] = 'not';
+  $handler->display->display_options['filters']['field_imported_value']['value'] = array(
+    1 => '1',
+  );
   /* Filter criterion: Content: Type */
   $handler->display->display_options['filters']['type']['id'] = 'type';
   $handler->display->display_options['filters']['type']['table'] = 'node';
@@ -13853,6 +13873,236 @@ return "";';
 
   /* Display: News CMS */
   $handler = $view->new_display('services', 'News CMS', 'services_1');
+  $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Content: Updated date */
+  $handler->display->display_options['fields']['changed']['id'] = 'changed';
+  $handler->display->display_options['fields']['changed']['table'] = 'node';
+  $handler->display->display_options['fields']['changed']['field'] = 'changed';
+  $handler->display->display_options['fields']['changed']['label'] = 'changed';
+  $handler->display->display_options['fields']['changed']['alter']['alter_text'] = TRUE;
+  $handler->display->display_options['fields']['changed']['date_format'] = 'cms_date';
+  /* Field: Content: Node UUID */
+  $handler->display->display_options['fields']['uuid']['id'] = 'uuid';
+  $handler->display->display_options['fields']['uuid']['table'] = 'node';
+  $handler->display->display_options['fields']['uuid']['field'] = 'uuid';
+  $handler->display->display_options['fields']['uuid']['label'] = 'uuid';
+  /* Field: Content: Nid */
+  $handler->display->display_options['fields']['nid']['id'] = 'nid';
+  $handler->display->display_options['fields']['nid']['table'] = 'node';
+  $handler->display->display_options['fields']['nid']['field'] = 'nid';
+  $handler->display->display_options['fields']['nid']['label'] = 'nid';
+  /* Field: Content: Title */
+  $handler->display->display_options['fields']['title']['id'] = 'title';
+  $handler->display->display_options['fields']['title']['table'] = 'node';
+  $handler->display->display_options['fields']['title']['field'] = 'title';
+  $handler->display->display_options['fields']['title']['label'] = 'title';
+  $handler->display->display_options['fields']['title']['link_to_node'] = FALSE;
+  /* Field: Content: Language */
+  $handler->display->display_options['fields']['language']['id'] = 'language';
+  $handler->display->display_options['fields']['language']['table'] = 'node';
+  $handler->display->display_options['fields']['language']['field'] = 'language';
+  $handler->display->display_options['fields']['language']['label'] = 'language';
+  /* Field: Content: Description */
+  $handler->display->display_options['fields']['body']['id'] = 'body';
+  $handler->display->display_options['fields']['body']['table'] = 'field_data_body';
+  $handler->display->display_options['fields']['body']['field'] = 'body';
+  $handler->display->display_options['fields']['body']['label'] = 'body';
+  $handler->display->display_options['fields']['body']['type'] = 'services';
+  $handler->display->display_options['fields']['body']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 1,
+    'skip_empty_values' => 1,
+    'skip_text_format' => 1,
+  );
+  /* Field: Field: CMS Instrument */
+  $handler->display->display_options['fields']['field_instrument']['id'] = 'field_instrument';
+  $handler->display->display_options['fields']['field_instrument']['table'] = 'field_data_field_instrument';
+  $handler->display->display_options['fields']['field_instrument']['field'] = 'field_instrument';
+  $handler->display->display_options['fields']['field_instrument']['label'] = 'field_instrument';
+  $handler->display->display_options['fields']['field_instrument']['settings'] = array(
+    'bypass_access' => 0,
+    'link' => 0,
+  );
+  $handler->display->display_options['fields']['field_instrument']['delta_offset'] = '0';
+  /* Field: Field: Country */
+  $handler->display->display_options['fields']['field_country']['id'] = 'field_country';
+  $handler->display->display_options['fields']['field_country']['table'] = 'field_data_field_country';
+  $handler->display->display_options['fields']['field_country']['field'] = 'field_country';
+  $handler->display->display_options['fields']['field_country']['label'] = 'field_country';
+  $handler->display->display_options['fields']['field_country']['settings'] = array(
+    'bypass_access' => 0,
+    'link' => 0,
+  );
+  $handler->display->display_options['fields']['field_country']['delta_offset'] = '0';
+  /* Field: Content: Species */
+  $handler->display->display_options['fields']['field_species']['id'] = 'field_species';
+  $handler->display->display_options['fields']['field_species']['table'] = 'field_data_field_species';
+  $handler->display->display_options['fields']['field_species']['field'] = 'field_species';
+  $handler->display->display_options['fields']['field_species']['label'] = 'field_species';
+  $handler->display->display_options['fields']['field_species']['settings'] = array(
+    'bypass_access' => 0,
+    'link' => 0,
+  );
+  $handler->display->display_options['fields']['field_species']['delta_offset'] = '0';
+  /* Field: Field: Region */
+  $handler->display->display_options['fields']['field_region']['id'] = 'field_region';
+  $handler->display->display_options['fields']['field_region']['table'] = 'field_data_field_region';
+  $handler->display->display_options['fields']['field_region']['field'] = 'field_region';
+  $handler->display->display_options['fields']['field_region']['label'] = 'field_region';
+  $handler->display->display_options['fields']['field_region']['type'] = 'taxonomy_term_reference_plain';
+  $handler->display->display_options['fields']['field_region']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 1,
+    'skip_empty_values' => 1,
+    'term_name' => 1,
+  );
+  $handler->display->display_options['fields']['field_region']['delta_offset'] = '0';
+  /* Field: Content: Type */
+  $handler->display->display_options['fields']['field_news_type']['id'] = 'field_news_type';
+  $handler->display->display_options['fields']['field_news_type']['table'] = 'field_data_field_news_type';
+  $handler->display->display_options['fields']['field_news_type']['field'] = 'field_news_type';
+  $handler->display->display_options['fields']['field_news_type']['label'] = 'field_news_type';
+  $handler->display->display_options['fields']['field_news_type']['type'] = 'taxonomy_term_reference_plain';
+  /* Field: Content: Featured image */
+  $handler->display->display_options['fields']['field_featured_image']['id'] = 'field_featured_image';
+  $handler->display->display_options['fields']['field_featured_image']['table'] = 'field_data_field_featured_image';
+  $handler->display->display_options['fields']['field_featured_image']['field'] = 'field_featured_image';
+  $handler->display->display_options['fields']['field_featured_image']['label'] = 'field_featured_image';
+  $handler->display->display_options['fields']['field_featured_image']['alter']['absolute'] = TRUE;
+  $handler->display->display_options['fields']['field_featured_image']['click_sort_column'] = 'fid';
+  $handler->display->display_options['fields']['field_featured_image']['type'] = 'services';
+  $handler->display->display_options['fields']['field_featured_image']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  /* Field: Content: Expiration date */
+  $handler->display->display_options['fields']['field_news_expiration_date']['id'] = 'field_news_expiration_date';
+  $handler->display->display_options['fields']['field_news_expiration_date']['table'] = 'field_data_field_news_expiration_date';
+  $handler->display->display_options['fields']['field_news_expiration_date']['field'] = 'field_news_expiration_date';
+  $handler->display->display_options['fields']['field_news_expiration_date']['label'] = 'field_news_expiration_date';
+  $handler->display->display_options['fields']['field_news_expiration_date']['type'] = 'services';
+  $handler->display->display_options['fields']['field_news_expiration_date']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  /* Field: Content: Source URL */
+  $handler->display->display_options['fields']['field_source_url']['id'] = 'field_source_url';
+  $handler->display->display_options['fields']['field_source_url']['table'] = 'field_data_field_source_url';
+  $handler->display->display_options['fields']['field_source_url']['field'] = 'field_source_url';
+  $handler->display->display_options['fields']['field_source_url']['label'] = 'field_source_url';
+  $handler->display->display_options['fields']['field_source_url']['click_sort_column'] = 'url';
+  $handler->display->display_options['fields']['field_source_url']['type'] = 'services';
+  $handler->display->display_options['fields']['field_source_url']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 1,
+    'skip_empty_values' => 1,
+  );
+  /* Field: Content: Attachments */
+  $handler->display->display_options['fields']['field_news_attachments']['id'] = 'field_news_attachments';
+  $handler->display->display_options['fields']['field_news_attachments']['table'] = 'field_data_field_news_attachments';
+  $handler->display->display_options['fields']['field_news_attachments']['field'] = 'field_news_attachments';
+  $handler->display->display_options['fields']['field_news_attachments']['label'] = 'field_news_attachments';
+  $handler->display->display_options['fields']['field_news_attachments']['click_sort_column'] = 'fid';
+  $handler->display->display_options['fields']['field_news_attachments']['type'] = 'services';
+  $handler->display->display_options['fields']['field_news_attachments']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  $handler->display->display_options['fields']['field_news_attachments']['delta_offset'] = '0';
+  /* Field: Field: Threats */
+  $handler->display->display_options['fields']['field_threats']['id'] = 'field_threats';
+  $handler->display->display_options['fields']['field_threats']['table'] = 'field_data_field_threats';
+  $handler->display->display_options['fields']['field_threats']['field'] = 'field_threats';
+  $handler->display->display_options['fields']['field_threats']['label'] = 'field_threats';
+  $handler->display->display_options['fields']['field_threats']['alter']['strip_tags'] = TRUE;
+  $handler->display->display_options['fields']['field_threats']['type'] = 'taxonomy_term_reference_plain';
+  $handler->display->display_options['fields']['field_threats']['delta_offset'] = '0';
+  /* Field: Content: Species group */
+  $handler->display->display_options['fields']['field_species_group']['id'] = 'field_species_group';
+  $handler->display->display_options['fields']['field_species_group']['table'] = 'field_data_field_species_group';
+  $handler->display->display_options['fields']['field_species_group']['field'] = 'field_species_group';
+  $handler->display->display_options['fields']['field_species_group']['label'] = 'field_species_group';
+  $handler->display->display_options['fields']['field_species_group']['alter']['strip_tags'] = TRUE;
+  $handler->display->display_options['fields']['field_species_group']['type'] = 'taxonomy_term_reference_plain';
+  $handler->display->display_options['fields']['field_species_group']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 1,
+    'skip_empty_values' => 1,
+    'term_name' => 1,
+  );
+  /* Field: Content: Keywords */
+  $handler->display->display_options['fields']['field_keywords']['id'] = 'field_keywords';
+  $handler->display->display_options['fields']['field_keywords']['table'] = 'field_data_field_keywords';
+  $handler->display->display_options['fields']['field_keywords']['field'] = 'field_keywords';
+  $handler->display->display_options['fields']['field_keywords']['label'] = 'field_keywords';
+  $handler->display->display_options['fields']['field_keywords']['type'] = 'services';
+  $handler->display->display_options['fields']['field_keywords']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+    'skip_text_format' => 0,
+  );
+  $handler->display->display_options['fields']['field_keywords']['delta_offset'] = '0';
+  /* Field: Content: Further Resources */
+  $handler->display->display_options['fields']['field_news_further_resources']['id'] = 'field_news_further_resources';
+  $handler->display->display_options['fields']['field_news_further_resources']['table'] = 'field_data_field_news_further_resources';
+  $handler->display->display_options['fields']['field_news_further_resources']['field'] = 'field_news_further_resources';
+  $handler->display->display_options['fields']['field_news_further_resources']['label'] = 'field_news_further_resources';
+  $handler->display->display_options['fields']['field_news_further_resources']['click_sort_column'] = 'url';
+  $handler->display->display_options['fields']['field_news_further_resources']['type'] = 'services';
+  $handler->display->display_options['fields']['field_news_further_resources']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  $handler->display->display_options['fields']['field_news_further_resources']['delta_offset'] = '0';
+  /* Field: Content: Show in Slideshow */
+  $handler->display->display_options['fields']['field_in_slideshow']['id'] = 'field_in_slideshow';
+  $handler->display->display_options['fields']['field_in_slideshow']['table'] = 'field_data_field_in_slideshow';
+  $handler->display->display_options['fields']['field_in_slideshow']['field'] = 'field_in_slideshow';
+  $handler->display->display_options['fields']['field_in_slideshow']['label'] = 'field_in_slideshow';
+  $handler->display->display_options['fields']['field_in_slideshow']['type'] = 'services';
+  $handler->display->display_options['fields']['field_in_slideshow']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  /* Field: Content: Featured in */
+  $handler->display->display_options['fields']['field_featured_in_instances']['id'] = 'field_featured_in_instances';
+  $handler->display->display_options['fields']['field_featured_in_instances']['table'] = 'field_data_field_featured_in_instances';
+  $handler->display->display_options['fields']['field_featured_in_instances']['field'] = 'field_featured_in_instances';
+  $handler->display->display_options['fields']['field_featured_in_instances']['label'] = 'field_featured_in_instances';
+  $handler->display->display_options['fields']['field_featured_in_instances']['alter']['strip_tags'] = TRUE;
+  $handler->display->display_options['fields']['field_featured_in_instances']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  $handler->display->display_options['fields']['field_featured_in_instances']['delta_offset'] = '0';
+  /* Field: Content: Post date */
+  $handler->display->display_options['fields']['created']['id'] = 'created';
+  $handler->display->display_options['fields']['created']['table'] = 'node';
+  $handler->display->display_options['fields']['created']['field'] = 'created';
+  $handler->display->display_options['fields']['created']['label'] = 'created';
+  $handler->display->display_options['fields']['created']['date_format'] = 'custom';
+  $handler->display->display_options['fields']['created']['custom_date_format'] = 'Y-m-d H:i';
+  $handler->display->display_options['fields']['created']['second_date_format'] = 'cms_date';
+  /* Field: Content: Photo gallery */
+  $handler->display->display_options['fields']['field_gallery']['id'] = 'field_gallery';
+  $handler->display->display_options['fields']['field_gallery']['table'] = 'field_data_field_gallery';
+  $handler->display->display_options['fields']['field_gallery']['field'] = 'field_gallery';
+  $handler->display->display_options['fields']['field_gallery']['label'] = 'field_gallery';
+  $handler->display->display_options['fields']['field_gallery']['click_sort_column'] = 'fid';
+  $handler->display->display_options['fields']['field_gallery']['type'] = 'services';
+  $handler->display->display_options['fields']['field_gallery']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  $handler->display->display_options['fields']['field_gallery']['delta_offset'] = '0';
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Content: Published */
@@ -13862,6 +14112,14 @@ return "";';
   $handler->display->display_options['filters']['status']['value'] = 1;
   $handler->display->display_options['filters']['status']['group'] = 1;
   $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+  /* Filter criterion: Content: Imported (field_imported) */
+  $handler->display->display_options['filters']['field_imported_value']['id'] = 'field_imported_value';
+  $handler->display->display_options['filters']['field_imported_value']['table'] = 'field_data_field_imported';
+  $handler->display->display_options['filters']['field_imported_value']['field'] = 'field_imported_value';
+  $handler->display->display_options['filters']['field_imported_value']['operator'] = 'not';
+  $handler->display->display_options['filters']['field_imported_value']['value'] = array(
+    1 => '1',
+  );
   /* Filter criterion: Content: Type */
   $handler->display->display_options['filters']['type']['id'] = 'type';
   $handler->display->display_options['filters']['type']['table'] = 'node';
@@ -13884,18 +14142,240 @@ return "";';
     'CMS' => 'CMS',
   );
   $handler->display->display_options['filters']['field_featured_in_instances_value']['reduce_duplicates'] = TRUE;
-  /* Filter criterion: Content: Imported (field_imported) */
-  $handler->display->display_options['filters']['field_imported_value']['id'] = 'field_imported_value';
-  $handler->display->display_options['filters']['field_imported_value']['table'] = 'field_data_field_imported';
-  $handler->display->display_options['filters']['field_imported_value']['field'] = 'field_imported_value';
-  $handler->display->display_options['filters']['field_imported_value']['operator'] = 'not';
-  $handler->display->display_options['filters']['field_imported_value']['value'] = array(
-    1 => '1',
-  );
   $handler->display->display_options['path'] = 'cms-news';
 
   /* Display: News Ascobans */
   $handler = $view->new_display('services', 'News Ascobans', 'services_2');
+  $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Content: Updated date */
+  $handler->display->display_options['fields']['changed']['id'] = 'changed';
+  $handler->display->display_options['fields']['changed']['table'] = 'node';
+  $handler->display->display_options['fields']['changed']['field'] = 'changed';
+  $handler->display->display_options['fields']['changed']['label'] = 'changed';
+  $handler->display->display_options['fields']['changed']['alter']['alter_text'] = TRUE;
+  $handler->display->display_options['fields']['changed']['date_format'] = 'cms_date';
+  /* Field: Content: Node UUID */
+  $handler->display->display_options['fields']['uuid']['id'] = 'uuid';
+  $handler->display->display_options['fields']['uuid']['table'] = 'node';
+  $handler->display->display_options['fields']['uuid']['field'] = 'uuid';
+  $handler->display->display_options['fields']['uuid']['label'] = 'uuid';
+  /* Field: Content: Nid */
+  $handler->display->display_options['fields']['nid']['id'] = 'nid';
+  $handler->display->display_options['fields']['nid']['table'] = 'node';
+  $handler->display->display_options['fields']['nid']['field'] = 'nid';
+  $handler->display->display_options['fields']['nid']['label'] = 'nid';
+  /* Field: Content: Title */
+  $handler->display->display_options['fields']['title']['id'] = 'title';
+  $handler->display->display_options['fields']['title']['table'] = 'node';
+  $handler->display->display_options['fields']['title']['field'] = 'title';
+  $handler->display->display_options['fields']['title']['label'] = 'title';
+  $handler->display->display_options['fields']['title']['link_to_node'] = FALSE;
+  /* Field: Content: Language */
+  $handler->display->display_options['fields']['language']['id'] = 'language';
+  $handler->display->display_options['fields']['language']['table'] = 'node';
+  $handler->display->display_options['fields']['language']['field'] = 'language';
+  $handler->display->display_options['fields']['language']['label'] = 'language';
+  /* Field: Content: Description */
+  $handler->display->display_options['fields']['body']['id'] = 'body';
+  $handler->display->display_options['fields']['body']['table'] = 'field_data_body';
+  $handler->display->display_options['fields']['body']['field'] = 'body';
+  $handler->display->display_options['fields']['body']['label'] = 'body';
+  $handler->display->display_options['fields']['body']['type'] = 'services';
+  $handler->display->display_options['fields']['body']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 1,
+    'skip_empty_values' => 1,
+    'skip_text_format' => 1,
+  );
+  /* Field: Field: CMS Instrument */
+  $handler->display->display_options['fields']['field_instrument']['id'] = 'field_instrument';
+  $handler->display->display_options['fields']['field_instrument']['table'] = 'field_data_field_instrument';
+  $handler->display->display_options['fields']['field_instrument']['field'] = 'field_instrument';
+  $handler->display->display_options['fields']['field_instrument']['label'] = 'field_instrument';
+  $handler->display->display_options['fields']['field_instrument']['settings'] = array(
+    'bypass_access' => 0,
+    'link' => 0,
+  );
+  $handler->display->display_options['fields']['field_instrument']['delta_offset'] = '0';
+  /* Field: Field: Country */
+  $handler->display->display_options['fields']['field_country']['id'] = 'field_country';
+  $handler->display->display_options['fields']['field_country']['table'] = 'field_data_field_country';
+  $handler->display->display_options['fields']['field_country']['field'] = 'field_country';
+  $handler->display->display_options['fields']['field_country']['label'] = 'field_country';
+  $handler->display->display_options['fields']['field_country']['settings'] = array(
+    'bypass_access' => 0,
+    'link' => 0,
+  );
+  $handler->display->display_options['fields']['field_country']['delta_offset'] = '0';
+  /* Field: Content: Species */
+  $handler->display->display_options['fields']['field_species']['id'] = 'field_species';
+  $handler->display->display_options['fields']['field_species']['table'] = 'field_data_field_species';
+  $handler->display->display_options['fields']['field_species']['field'] = 'field_species';
+  $handler->display->display_options['fields']['field_species']['label'] = 'field_species';
+  $handler->display->display_options['fields']['field_species']['settings'] = array(
+    'bypass_access' => 0,
+    'link' => 0,
+  );
+  $handler->display->display_options['fields']['field_species']['delta_offset'] = '0';
+  /* Field: Field: Region */
+  $handler->display->display_options['fields']['field_region']['id'] = 'field_region';
+  $handler->display->display_options['fields']['field_region']['table'] = 'field_data_field_region';
+  $handler->display->display_options['fields']['field_region']['field'] = 'field_region';
+  $handler->display->display_options['fields']['field_region']['label'] = 'field_region';
+  $handler->display->display_options['fields']['field_region']['type'] = 'taxonomy_term_reference_plain';
+  $handler->display->display_options['fields']['field_region']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 1,
+    'skip_empty_values' => 1,
+    'term_name' => 1,
+  );
+  $handler->display->display_options['fields']['field_region']['delta_offset'] = '0';
+  /* Field: Content: Type */
+  $handler->display->display_options['fields']['field_news_type']['id'] = 'field_news_type';
+  $handler->display->display_options['fields']['field_news_type']['table'] = 'field_data_field_news_type';
+  $handler->display->display_options['fields']['field_news_type']['field'] = 'field_news_type';
+  $handler->display->display_options['fields']['field_news_type']['label'] = 'field_news_type';
+  $handler->display->display_options['fields']['field_news_type']['type'] = 'taxonomy_term_reference_plain';
+  /* Field: Content: Featured image */
+  $handler->display->display_options['fields']['field_featured_image']['id'] = 'field_featured_image';
+  $handler->display->display_options['fields']['field_featured_image']['table'] = 'field_data_field_featured_image';
+  $handler->display->display_options['fields']['field_featured_image']['field'] = 'field_featured_image';
+  $handler->display->display_options['fields']['field_featured_image']['label'] = 'field_featured_image';
+  $handler->display->display_options['fields']['field_featured_image']['alter']['absolute'] = TRUE;
+  $handler->display->display_options['fields']['field_featured_image']['click_sort_column'] = 'fid';
+  $handler->display->display_options['fields']['field_featured_image']['type'] = 'services';
+  $handler->display->display_options['fields']['field_featured_image']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  /* Field: Content: Expiration date */
+  $handler->display->display_options['fields']['field_news_expiration_date']['id'] = 'field_news_expiration_date';
+  $handler->display->display_options['fields']['field_news_expiration_date']['table'] = 'field_data_field_news_expiration_date';
+  $handler->display->display_options['fields']['field_news_expiration_date']['field'] = 'field_news_expiration_date';
+  $handler->display->display_options['fields']['field_news_expiration_date']['label'] = 'field_news_expiration_date';
+  $handler->display->display_options['fields']['field_news_expiration_date']['type'] = 'services';
+  $handler->display->display_options['fields']['field_news_expiration_date']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  /* Field: Content: Source URL */
+  $handler->display->display_options['fields']['field_source_url']['id'] = 'field_source_url';
+  $handler->display->display_options['fields']['field_source_url']['table'] = 'field_data_field_source_url';
+  $handler->display->display_options['fields']['field_source_url']['field'] = 'field_source_url';
+  $handler->display->display_options['fields']['field_source_url']['label'] = 'field_source_url';
+  $handler->display->display_options['fields']['field_source_url']['click_sort_column'] = 'url';
+  $handler->display->display_options['fields']['field_source_url']['type'] = 'services';
+  $handler->display->display_options['fields']['field_source_url']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 1,
+    'skip_empty_values' => 1,
+  );
+  /* Field: Content: Attachments */
+  $handler->display->display_options['fields']['field_news_attachments']['id'] = 'field_news_attachments';
+  $handler->display->display_options['fields']['field_news_attachments']['table'] = 'field_data_field_news_attachments';
+  $handler->display->display_options['fields']['field_news_attachments']['field'] = 'field_news_attachments';
+  $handler->display->display_options['fields']['field_news_attachments']['label'] = 'field_news_attachments';
+  $handler->display->display_options['fields']['field_news_attachments']['click_sort_column'] = 'fid';
+  $handler->display->display_options['fields']['field_news_attachments']['type'] = 'services';
+  $handler->display->display_options['fields']['field_news_attachments']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  $handler->display->display_options['fields']['field_news_attachments']['delta_offset'] = '0';
+  /* Field: Field: Threats */
+  $handler->display->display_options['fields']['field_threats']['id'] = 'field_threats';
+  $handler->display->display_options['fields']['field_threats']['table'] = 'field_data_field_threats';
+  $handler->display->display_options['fields']['field_threats']['field'] = 'field_threats';
+  $handler->display->display_options['fields']['field_threats']['label'] = 'field_threats';
+  $handler->display->display_options['fields']['field_threats']['alter']['strip_tags'] = TRUE;
+  $handler->display->display_options['fields']['field_threats']['type'] = 'taxonomy_term_reference_plain';
+  $handler->display->display_options['fields']['field_threats']['delta_offset'] = '0';
+  /* Field: Content: Species group */
+  $handler->display->display_options['fields']['field_species_group']['id'] = 'field_species_group';
+  $handler->display->display_options['fields']['field_species_group']['table'] = 'field_data_field_species_group';
+  $handler->display->display_options['fields']['field_species_group']['field'] = 'field_species_group';
+  $handler->display->display_options['fields']['field_species_group']['label'] = 'field_species_group';
+  $handler->display->display_options['fields']['field_species_group']['alter']['strip_tags'] = TRUE;
+  $handler->display->display_options['fields']['field_species_group']['type'] = 'taxonomy_term_reference_plain';
+  $handler->display->display_options['fields']['field_species_group']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 1,
+    'skip_empty_values' => 1,
+    'term_name' => 1,
+  );
+  /* Field: Content: Keywords */
+  $handler->display->display_options['fields']['field_keywords']['id'] = 'field_keywords';
+  $handler->display->display_options['fields']['field_keywords']['table'] = 'field_data_field_keywords';
+  $handler->display->display_options['fields']['field_keywords']['field'] = 'field_keywords';
+  $handler->display->display_options['fields']['field_keywords']['label'] = 'field_keywords';
+  $handler->display->display_options['fields']['field_keywords']['type'] = 'services';
+  $handler->display->display_options['fields']['field_keywords']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+    'skip_text_format' => 0,
+  );
+  $handler->display->display_options['fields']['field_keywords']['delta_offset'] = '0';
+  /* Field: Content: Further Resources */
+  $handler->display->display_options['fields']['field_news_further_resources']['id'] = 'field_news_further_resources';
+  $handler->display->display_options['fields']['field_news_further_resources']['table'] = 'field_data_field_news_further_resources';
+  $handler->display->display_options['fields']['field_news_further_resources']['field'] = 'field_news_further_resources';
+  $handler->display->display_options['fields']['field_news_further_resources']['label'] = 'field_news_further_resources';
+  $handler->display->display_options['fields']['field_news_further_resources']['click_sort_column'] = 'url';
+  $handler->display->display_options['fields']['field_news_further_resources']['type'] = 'services';
+  $handler->display->display_options['fields']['field_news_further_resources']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  $handler->display->display_options['fields']['field_news_further_resources']['delta_offset'] = '0';
+  /* Field: Content: Show in Slideshow */
+  $handler->display->display_options['fields']['field_in_slideshow']['id'] = 'field_in_slideshow';
+  $handler->display->display_options['fields']['field_in_slideshow']['table'] = 'field_data_field_in_slideshow';
+  $handler->display->display_options['fields']['field_in_slideshow']['field'] = 'field_in_slideshow';
+  $handler->display->display_options['fields']['field_in_slideshow']['label'] = 'field_in_slideshow';
+  $handler->display->display_options['fields']['field_in_slideshow']['type'] = 'services';
+  $handler->display->display_options['fields']['field_in_slideshow']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  /* Field: Content: Featured in */
+  $handler->display->display_options['fields']['field_featured_in_instances']['id'] = 'field_featured_in_instances';
+  $handler->display->display_options['fields']['field_featured_in_instances']['table'] = 'field_data_field_featured_in_instances';
+  $handler->display->display_options['fields']['field_featured_in_instances']['field'] = 'field_featured_in_instances';
+  $handler->display->display_options['fields']['field_featured_in_instances']['label'] = 'field_featured_in_instances';
+  $handler->display->display_options['fields']['field_featured_in_instances']['alter']['strip_tags'] = TRUE;
+  $handler->display->display_options['fields']['field_featured_in_instances']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  $handler->display->display_options['fields']['field_featured_in_instances']['delta_offset'] = '0';
+  /* Field: Content: Post date */
+  $handler->display->display_options['fields']['created']['id'] = 'created';
+  $handler->display->display_options['fields']['created']['table'] = 'node';
+  $handler->display->display_options['fields']['created']['field'] = 'created';
+  $handler->display->display_options['fields']['created']['label'] = 'created';
+  $handler->display->display_options['fields']['created']['date_format'] = 'custom';
+  $handler->display->display_options['fields']['created']['custom_date_format'] = 'Y-m-d H:i';
+  $handler->display->display_options['fields']['created']['second_date_format'] = 'cms_date';
+  /* Field: Content: Photo gallery */
+  $handler->display->display_options['fields']['field_gallery']['id'] = 'field_gallery';
+  $handler->display->display_options['fields']['field_gallery']['table'] = 'field_data_field_gallery';
+  $handler->display->display_options['fields']['field_gallery']['field'] = 'field_gallery';
+  $handler->display->display_options['fields']['field_gallery']['label'] = 'field_gallery';
+  $handler->display->display_options['fields']['field_gallery']['click_sort_column'] = 'fid';
+  $handler->display->display_options['fields']['field_gallery']['type'] = 'services';
+  $handler->display->display_options['fields']['field_gallery']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  $handler->display->display_options['fields']['field_gallery']['delta_offset'] = '0';
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Content: Published */
@@ -13905,6 +14385,14 @@ return "";';
   $handler->display->display_options['filters']['status']['value'] = 1;
   $handler->display->display_options['filters']['status']['group'] = 1;
   $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+  /* Filter criterion: Content: Imported (field_imported) */
+  $handler->display->display_options['filters']['field_imported_value']['id'] = 'field_imported_value';
+  $handler->display->display_options['filters']['field_imported_value']['table'] = 'field_data_field_imported';
+  $handler->display->display_options['filters']['field_imported_value']['field'] = 'field_imported_value';
+  $handler->display->display_options['filters']['field_imported_value']['operator'] = 'not';
+  $handler->display->display_options['filters']['field_imported_value']['value'] = array(
+    1 => '1',
+  );
   /* Filter criterion: Content: Type */
   $handler->display->display_options['filters']['type']['id'] = 'type';
   $handler->display->display_options['filters']['type']['table'] = 'node';
@@ -13927,58 +14415,7 @@ return "";';
     'ASCOBANS' => 'ASCOBANS',
   );
   $handler->display->display_options['filters']['field_featured_in_instances_value']['reduce_duplicates'] = TRUE;
-  /* Filter criterion: Content: Imported (field_imported) */
-  $handler->display->display_options['filters']['field_imported_value']['id'] = 'field_imported_value';
-  $handler->display->display_options['filters']['field_imported_value']['table'] = 'field_data_field_imported';
-  $handler->display->display_options['filters']['field_imported_value']['field'] = 'field_imported_value';
-  $handler->display->display_options['filters']['field_imported_value']['operator'] = 'not';
-  $handler->display->display_options['filters']['field_imported_value']['value'] = array(
-    1 => '1',
-  );
   $handler->display->display_options['path'] = 'ascobans-news';
-
-  /* Display: News Eurobats */
-  $handler = $view->new_display('services', 'News Eurobats', 'services_3');
-  $handler->display->display_options['defaults']['filter_groups'] = FALSE;
-  $handler->display->display_options['defaults']['filters'] = FALSE;
-  /* Filter criterion: Content: Published */
-  $handler->display->display_options['filters']['status']['id'] = 'status';
-  $handler->display->display_options['filters']['status']['table'] = 'node';
-  $handler->display->display_options['filters']['status']['field'] = 'status';
-  $handler->display->display_options['filters']['status']['value'] = 1;
-  $handler->display->display_options['filters']['status']['group'] = 1;
-  $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
-  /* Filter criterion: Content: Type */
-  $handler->display->display_options['filters']['type']['id'] = 'type';
-  $handler->display->display_options['filters']['type']['table'] = 'node';
-  $handler->display->display_options['filters']['type']['field'] = 'type';
-  $handler->display->display_options['filters']['type']['value'] = array(
-    'news' => 'news',
-  );
-  /* Filter criterion: Content: Updated date */
-  $handler->display->display_options['filters']['changed']['id'] = 'changed';
-  $handler->display->display_options['filters']['changed']['table'] = 'node';
-  $handler->display->display_options['filters']['changed']['field'] = 'changed';
-  $handler->display->display_options['filters']['changed']['operator'] = '>=';
-  $handler->display->display_options['filters']['changed']['value']['value'] = '-30 days';
-  $handler->display->display_options['filters']['changed']['value']['type'] = 'offset';
-  /* Filter criterion: Content: Featured in (field_featured_in_instances) */
-  $handler->display->display_options['filters']['field_featured_in_instances_value']['id'] = 'field_featured_in_instances_value';
-  $handler->display->display_options['filters']['field_featured_in_instances_value']['table'] = 'field_data_field_featured_in_instances';
-  $handler->display->display_options['filters']['field_featured_in_instances_value']['field'] = 'field_featured_in_instances_value';
-  $handler->display->display_options['filters']['field_featured_in_instances_value']['value'] = array(
-    'EUROBATS' => 'EUROBATS',
-  );
-  $handler->display->display_options['filters']['field_featured_in_instances_value']['reduce_duplicates'] = TRUE;
-  /* Filter criterion: Content: Imported (field_imported) */
-  $handler->display->display_options['filters']['field_imported_value']['id'] = 'field_imported_value';
-  $handler->display->display_options['filters']['field_imported_value']['table'] = 'field_data_field_imported';
-  $handler->display->display_options['filters']['field_imported_value']['field'] = 'field_imported_value';
-  $handler->display->display_options['filters']['field_imported_value']['operator'] = 'not';
-  $handler->display->display_options['filters']['field_imported_value']['value'] = array(
-    1 => '1',
-  );
-  $handler->display->display_options['path'] = 'eurobats-news';
   $translatables['news_feeds_for_other_instances'] = array(
     t('Master'),
     t('News Feeds for other instances'),
@@ -14021,7 +14458,6 @@ return "";';
     t('field_gallery'),
     t('News CMS'),
     t('News Ascobans'),
-    t('News Eurobats'),
   );
   $export['news_feeds_for_other_instances'] = $view;
 
@@ -17113,7 +17549,7 @@ return "";';
     ),
   );
   $handler->display->display_options['style_options']['summary'] = 'Members';
-  /* Field: Broken/missing handler */
+  /* Field: Field collection item: Field collection item ID */
   $handler->display->display_options['fields']['item_id']['id'] = 'item_id';
   $handler->display->display_options['fields']['item_id']['table'] = 'field_collection_item';
   $handler->display->display_options['fields']['item_id']['field'] = 'item_id';
@@ -17177,7 +17613,7 @@ return "";';
   $handler->display->display_options['fields']['field_wg_member_role']['id'] = 'field_wg_member_role';
   $handler->display->display_options['fields']['field_wg_member_role']['table'] = 'field_data_field_wg_member_role';
   $handler->display->display_options['fields']['field_wg_member_role']['field'] = 'field_wg_member_role';
-  /* Contextual filter: Broken/missing handler */
+  /* Contextual filter: Field collection item: Field collection item ID */
   $handler->display->display_options['arguments']['item_id']['id'] = 'item_id';
   $handler->display->display_options['arguments']['item_id']['table'] = 'field_collection_item';
   $handler->display->display_options['arguments']['item_id']['field'] = 'item_id';
@@ -17201,7 +17637,9 @@ return "";';
     t('‹ previous'),
     t('next ›'),
     t('last »'),
-    t('Broken handler field_collection_item.item_id'),
+    t('Field collection item ID'),
+    t('.'),
+    t(','),
     t('Region'),
     t('Country'),
     t('Name'),
