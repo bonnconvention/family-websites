@@ -18196,6 +18196,497 @@ Disclaimer:
   );
   $handler->display->display_options['filters']['field_featured_in_instances_value']['reduce_duplicates'] = TRUE;
   $handler->display->display_options['path'] = 'ascobans-news';
+
+  /* Display: News Aewa-Old */
+  $handler = $view->new_display('services', 'News Aewa-Old', 'services_3');
+  $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Content: Updated date */
+  $handler->display->display_options['fields']['changed']['id'] = 'changed';
+  $handler->display->display_options['fields']['changed']['table'] = 'node';
+  $handler->display->display_options['fields']['changed']['field'] = 'changed';
+  $handler->display->display_options['fields']['changed']['label'] = 'changed';
+  $handler->display->display_options['fields']['changed']['alter']['alter_text'] = TRUE;
+  $handler->display->display_options['fields']['changed']['date_format'] = 'cms_date';
+  /* Field: Content: Node UUID */
+  $handler->display->display_options['fields']['uuid']['id'] = 'uuid';
+  $handler->display->display_options['fields']['uuid']['table'] = 'node';
+  $handler->display->display_options['fields']['uuid']['field'] = 'uuid';
+  $handler->display->display_options['fields']['uuid']['label'] = 'uuid';
+  /* Field: Content: Nid */
+  $handler->display->display_options['fields']['nid']['id'] = 'nid';
+  $handler->display->display_options['fields']['nid']['table'] = 'node';
+  $handler->display->display_options['fields']['nid']['field'] = 'nid';
+  $handler->display->display_options['fields']['nid']['label'] = 'nid';
+  /* Field: Content: Title */
+  $handler->display->display_options['fields']['title']['id'] = 'title';
+  $handler->display->display_options['fields']['title']['table'] = 'node';
+  $handler->display->display_options['fields']['title']['field'] = 'title';
+  $handler->display->display_options['fields']['title']['label'] = 'title';
+  $handler->display->display_options['fields']['title']['link_to_node'] = FALSE;
+  /* Field: Content: Language */
+  $handler->display->display_options['fields']['language']['id'] = 'language';
+  $handler->display->display_options['fields']['language']['table'] = 'node';
+  $handler->display->display_options['fields']['language']['field'] = 'language';
+  $handler->display->display_options['fields']['language']['label'] = 'language';
+  /* Field: Content: Description */
+  $handler->display->display_options['fields']['body']['id'] = 'body';
+  $handler->display->display_options['fields']['body']['table'] = 'field_data_body';
+  $handler->display->display_options['fields']['body']['field'] = 'body';
+  $handler->display->display_options['fields']['body']['label'] = 'body';
+  $handler->display->display_options['fields']['body']['type'] = 'services';
+  $handler->display->display_options['fields']['body']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 1,
+    'skip_empty_values' => 1,
+    'skip_text_format' => 1,
+  );
+  /* Field: Field: CMS Instrument */
+  $handler->display->display_options['fields']['field_instrument']['id'] = 'field_instrument';
+  $handler->display->display_options['fields']['field_instrument']['table'] = 'field_data_field_instrument';
+  $handler->display->display_options['fields']['field_instrument']['field'] = 'field_instrument';
+  $handler->display->display_options['fields']['field_instrument']['label'] = 'field_instrument';
+  $handler->display->display_options['fields']['field_instrument']['settings'] = array(
+    'bypass_access' => 0,
+    'link' => 0,
+  );
+  $handler->display->display_options['fields']['field_instrument']['delta_offset'] = '0';
+  /* Field: Field: Country */
+  $handler->display->display_options['fields']['field_country']['id'] = 'field_country';
+  $handler->display->display_options['fields']['field_country']['table'] = 'field_data_field_country';
+  $handler->display->display_options['fields']['field_country']['field'] = 'field_country';
+  $handler->display->display_options['fields']['field_country']['label'] = 'field_country';
+  $handler->display->display_options['fields']['field_country']['settings'] = array(
+    'bypass_access' => 0,
+    'link' => 0,
+  );
+  $handler->display->display_options['fields']['field_country']['delta_offset'] = '0';
+  /* Field: Content: Species */
+  $handler->display->display_options['fields']['field_species']['id'] = 'field_species';
+  $handler->display->display_options['fields']['field_species']['table'] = 'field_data_field_species';
+  $handler->display->display_options['fields']['field_species']['field'] = 'field_species';
+  $handler->display->display_options['fields']['field_species']['label'] = 'field_species';
+  $handler->display->display_options['fields']['field_species']['settings'] = array(
+    'bypass_access' => 0,
+    'link' => 0,
+  );
+  $handler->display->display_options['fields']['field_species']['delta_offset'] = '0';
+  /* Field: Field: Region */
+  $handler->display->display_options['fields']['field_region']['id'] = 'field_region';
+  $handler->display->display_options['fields']['field_region']['table'] = 'field_data_field_region';
+  $handler->display->display_options['fields']['field_region']['field'] = 'field_region';
+  $handler->display->display_options['fields']['field_region']['label'] = 'field_region';
+  $handler->display->display_options['fields']['field_region']['type'] = 'taxonomy_term_reference_plain';
+  $handler->display->display_options['fields']['field_region']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 1,
+    'skip_empty_values' => 1,
+    'term_name' => 1,
+  );
+  $handler->display->display_options['fields']['field_region']['delta_offset'] = '0';
+  /* Field: Content: Type */
+  $handler->display->display_options['fields']['field_news_type']['id'] = 'field_news_type';
+  $handler->display->display_options['fields']['field_news_type']['table'] = 'field_data_field_news_type';
+  $handler->display->display_options['fields']['field_news_type']['field'] = 'field_news_type';
+  $handler->display->display_options['fields']['field_news_type']['label'] = 'field_news_type';
+  $handler->display->display_options['fields']['field_news_type']['type'] = 'taxonomy_term_reference_plain';
+  /* Field: Content: Featured image */
+  $handler->display->display_options['fields']['field_featured_image']['id'] = 'field_featured_image';
+  $handler->display->display_options['fields']['field_featured_image']['table'] = 'field_data_field_featured_image';
+  $handler->display->display_options['fields']['field_featured_image']['field'] = 'field_featured_image';
+  $handler->display->display_options['fields']['field_featured_image']['label'] = 'field_featured_image';
+  $handler->display->display_options['fields']['field_featured_image']['alter']['absolute'] = TRUE;
+  $handler->display->display_options['fields']['field_featured_image']['click_sort_column'] = 'fid';
+  $handler->display->display_options['fields']['field_featured_image']['type'] = 'services';
+  $handler->display->display_options['fields']['field_featured_image']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  /* Field: Content: Expiration date */
+  $handler->display->display_options['fields']['field_news_expiration_date']['id'] = 'field_news_expiration_date';
+  $handler->display->display_options['fields']['field_news_expiration_date']['table'] = 'field_data_field_news_expiration_date';
+  $handler->display->display_options['fields']['field_news_expiration_date']['field'] = 'field_news_expiration_date';
+  $handler->display->display_options['fields']['field_news_expiration_date']['label'] = 'field_news_expiration_date';
+  $handler->display->display_options['fields']['field_news_expiration_date']['type'] = 'services';
+  $handler->display->display_options['fields']['field_news_expiration_date']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  /* Field: Content: Source URL */
+  $handler->display->display_options['fields']['field_source_url']['id'] = 'field_source_url';
+  $handler->display->display_options['fields']['field_source_url']['table'] = 'field_data_field_source_url';
+  $handler->display->display_options['fields']['field_source_url']['field'] = 'field_source_url';
+  $handler->display->display_options['fields']['field_source_url']['label'] = 'field_source_url';
+  $handler->display->display_options['fields']['field_source_url']['click_sort_column'] = 'url';
+  $handler->display->display_options['fields']['field_source_url']['type'] = 'services';
+  $handler->display->display_options['fields']['field_source_url']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 1,
+    'skip_empty_values' => 1,
+  );
+  /* Field: Content: Attachments */
+  $handler->display->display_options['fields']['field_news_attachments']['id'] = 'field_news_attachments';
+  $handler->display->display_options['fields']['field_news_attachments']['table'] = 'field_data_field_news_attachments';
+  $handler->display->display_options['fields']['field_news_attachments']['field'] = 'field_news_attachments';
+  $handler->display->display_options['fields']['field_news_attachments']['label'] = 'field_news_attachments';
+  $handler->display->display_options['fields']['field_news_attachments']['click_sort_column'] = 'fid';
+  $handler->display->display_options['fields']['field_news_attachments']['type'] = 'services';
+  $handler->display->display_options['fields']['field_news_attachments']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  $handler->display->display_options['fields']['field_news_attachments']['delta_offset'] = '0';
+  /* Field: Field: Threats */
+  $handler->display->display_options['fields']['field_threats']['id'] = 'field_threats';
+  $handler->display->display_options['fields']['field_threats']['table'] = 'field_data_field_threats';
+  $handler->display->display_options['fields']['field_threats']['field'] = 'field_threats';
+  $handler->display->display_options['fields']['field_threats']['label'] = 'field_threats';
+  $handler->display->display_options['fields']['field_threats']['alter']['strip_tags'] = TRUE;
+  $handler->display->display_options['fields']['field_threats']['type'] = 'taxonomy_term_reference_plain';
+  $handler->display->display_options['fields']['field_threats']['delta_offset'] = '0';
+  /* Field: Content: Species group */
+  $handler->display->display_options['fields']['field_species_group']['id'] = 'field_species_group';
+  $handler->display->display_options['fields']['field_species_group']['table'] = 'field_data_field_species_group';
+  $handler->display->display_options['fields']['field_species_group']['field'] = 'field_species_group';
+  $handler->display->display_options['fields']['field_species_group']['label'] = 'field_species_group';
+  $handler->display->display_options['fields']['field_species_group']['alter']['strip_tags'] = TRUE;
+  $handler->display->display_options['fields']['field_species_group']['type'] = 'taxonomy_term_reference_plain';
+  $handler->display->display_options['fields']['field_species_group']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 1,
+    'skip_empty_values' => 1,
+    'term_name' => 1,
+  );
+  /* Field: Content: Keywords */
+  $handler->display->display_options['fields']['field_keywords']['id'] = 'field_keywords';
+  $handler->display->display_options['fields']['field_keywords']['table'] = 'field_data_field_keywords';
+  $handler->display->display_options['fields']['field_keywords']['field'] = 'field_keywords';
+  $handler->display->display_options['fields']['field_keywords']['label'] = 'field_keywords';
+  $handler->display->display_options['fields']['field_keywords']['type'] = 'services';
+  $handler->display->display_options['fields']['field_keywords']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+    'skip_text_format' => 0,
+  );
+  $handler->display->display_options['fields']['field_keywords']['delta_offset'] = '0';
+  /* Field: Content: Further Resources */
+  $handler->display->display_options['fields']['field_news_further_resources']['id'] = 'field_news_further_resources';
+  $handler->display->display_options['fields']['field_news_further_resources']['table'] = 'field_data_field_news_further_resources';
+  $handler->display->display_options['fields']['field_news_further_resources']['field'] = 'field_news_further_resources';
+  $handler->display->display_options['fields']['field_news_further_resources']['label'] = 'field_news_further_resources';
+  $handler->display->display_options['fields']['field_news_further_resources']['click_sort_column'] = 'url';
+  $handler->display->display_options['fields']['field_news_further_resources']['type'] = 'services';
+  $handler->display->display_options['fields']['field_news_further_resources']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  $handler->display->display_options['fields']['field_news_further_resources']['delta_offset'] = '0';
+  /* Field: Content: Show in Slideshow */
+  $handler->display->display_options['fields']['field_in_slideshow']['id'] = 'field_in_slideshow';
+  $handler->display->display_options['fields']['field_in_slideshow']['table'] = 'field_data_field_in_slideshow';
+  $handler->display->display_options['fields']['field_in_slideshow']['field'] = 'field_in_slideshow';
+  $handler->display->display_options['fields']['field_in_slideshow']['label'] = 'field_in_slideshow';
+  $handler->display->display_options['fields']['field_in_slideshow']['type'] = 'services';
+  $handler->display->display_options['fields']['field_in_slideshow']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  /* Field: Content: Featured in */
+  $handler->display->display_options['fields']['field_featured_in_instances']['id'] = 'field_featured_in_instances';
+  $handler->display->display_options['fields']['field_featured_in_instances']['table'] = 'field_data_field_featured_in_instances';
+  $handler->display->display_options['fields']['field_featured_in_instances']['field'] = 'field_featured_in_instances';
+  $handler->display->display_options['fields']['field_featured_in_instances']['label'] = 'field_featured_in_instances';
+  $handler->display->display_options['fields']['field_featured_in_instances']['alter']['strip_tags'] = TRUE;
+  $handler->display->display_options['fields']['field_featured_in_instances']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  $handler->display->display_options['fields']['field_featured_in_instances']['delta_offset'] = '0';
+  /* Field: Content: Post date */
+  $handler->display->display_options['fields']['created']['id'] = 'created';
+  $handler->display->display_options['fields']['created']['table'] = 'node';
+  $handler->display->display_options['fields']['created']['field'] = 'created';
+  $handler->display->display_options['fields']['created']['label'] = 'created';
+  $handler->display->display_options['fields']['created']['date_format'] = 'custom';
+  $handler->display->display_options['fields']['created']['custom_date_format'] = 'Y-m-d H:i';
+  $handler->display->display_options['fields']['created']['second_date_format'] = 'cms_date';
+  /* Field: Content: Photo gallery */
+  $handler->display->display_options['fields']['field_gallery']['id'] = 'field_gallery';
+  $handler->display->display_options['fields']['field_gallery']['table'] = 'field_data_field_gallery';
+  $handler->display->display_options['fields']['field_gallery']['field'] = 'field_gallery';
+  $handler->display->display_options['fields']['field_gallery']['label'] = 'field_gallery';
+  $handler->display->display_options['fields']['field_gallery']['click_sort_column'] = 'fid';
+  $handler->display->display_options['fields']['field_gallery']['type'] = 'services';
+  $handler->display->display_options['fields']['field_gallery']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 0,
+    'skip_empty_values' => 0,
+  );
+  $handler->display->display_options['fields']['field_gallery']['delta_offset'] = '0';
+  $handler->display->display_options['defaults']['filter_groups'] = FALSE;
+  $handler->display->display_options['filter_groups']['groups'] = array(
+    1 => 'OR',
+  );
+  $handler->display->display_options['defaults']['filters'] = FALSE;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid']['id'] = 'uuid';
+  $handler->display->display_options['filters']['uuid']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid']['value'] = '1cf9c9e8-aac8-4544-b717-fda9394a44bb';
+  $handler->display->display_options['filters']['uuid']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_1']['id'] = 'uuid_1';
+  $handler->display->display_options['filters']['uuid_1']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_1']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_1']['value'] = '2418b2bf-d8f3-474d-adab-f8f8c22fcf18';
+  $handler->display->display_options['filters']['uuid_1']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_2']['id'] = 'uuid_2';
+  $handler->display->display_options['filters']['uuid_2']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_2']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_2']['value'] = 'fbadcd42-442f-4a5e-8b11-b3b352843661';
+  $handler->display->display_options['filters']['uuid_2']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_3']['id'] = 'uuid_3';
+  $handler->display->display_options['filters']['uuid_3']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_3']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_3']['value'] = 'a5a1746e-3858-41bc-a0ab-3324f3d474d3';
+  $handler->display->display_options['filters']['uuid_3']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_4']['id'] = 'uuid_4';
+  $handler->display->display_options['filters']['uuid_4']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_4']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_4']['value'] = 'e1637acb-b5a4-40f6-9b51-73d695c3acfb';
+  $handler->display->display_options['filters']['uuid_4']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_5']['id'] = 'uuid_5';
+  $handler->display->display_options['filters']['uuid_5']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_5']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_5']['value'] = '72b0fa81-cff8-4110-8d74-d593a62158e3';
+  $handler->display->display_options['filters']['uuid_5']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_6']['id'] = 'uuid_6';
+  $handler->display->display_options['filters']['uuid_6']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_6']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_6']['value'] = 'a7b7056f-e69d-43bb-9ebc-d88200aa8080';
+  $handler->display->display_options['filters']['uuid_6']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_7']['id'] = 'uuid_7';
+  $handler->display->display_options['filters']['uuid_7']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_7']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_7']['value'] = 'c9f79255-12a9-4b74-9445-cdab7eca2b0c';
+  $handler->display->display_options['filters']['uuid_7']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_8']['id'] = 'uuid_8';
+  $handler->display->display_options['filters']['uuid_8']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_8']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_8']['value'] = '7959003a-78a3-49c0-883d-4577bfbfabab';
+  $handler->display->display_options['filters']['uuid_8']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_9']['id'] = 'uuid_9';
+  $handler->display->display_options['filters']['uuid_9']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_9']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_9']['value'] = '2c8466b1-219b-40ac-9c9f-f3ff56c44b7d';
+  $handler->display->display_options['filters']['uuid_9']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_10']['id'] = 'uuid_10';
+  $handler->display->display_options['filters']['uuid_10']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_10']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_10']['value'] = 'b8915b35-b666-47ee-9789-ceb39b2622c0';
+  $handler->display->display_options['filters']['uuid_10']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_11']['id'] = 'uuid_11';
+  $handler->display->display_options['filters']['uuid_11']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_11']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_11']['value'] = '18086306-805c-40c9-8200-26acb0f3c2da';
+  $handler->display->display_options['filters']['uuid_11']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_12']['id'] = 'uuid_12';
+  $handler->display->display_options['filters']['uuid_12']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_12']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_12']['value'] = '32fc8f33-36cb-40bb-b26e-67abc4bb49f1';
+  $handler->display->display_options['filters']['uuid_12']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_13']['id'] = 'uuid_13';
+  $handler->display->display_options['filters']['uuid_13']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_13']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_13']['value'] = 'a53b1564-822e-4ae4-b6dd-d05de059b6cc';
+  $handler->display->display_options['filters']['uuid_13']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_14']['id'] = 'uuid_14';
+  $handler->display->display_options['filters']['uuid_14']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_14']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_14']['value'] = '9e488b9c-8cd8-4875-9c5d-b1d1bbba2fca';
+  $handler->display->display_options['filters']['uuid_14']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_15']['id'] = 'uuid_15';
+  $handler->display->display_options['filters']['uuid_15']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_15']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_15']['value'] = 'f8fd48db-a7ab-4a23-b1be-f51c76319369';
+  $handler->display->display_options['filters']['uuid_15']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_16']['id'] = 'uuid_16';
+  $handler->display->display_options['filters']['uuid_16']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_16']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_16']['value'] = 'bd5c1a86-f867-4fc7-9111-3207ac51179d';
+  $handler->display->display_options['filters']['uuid_16']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_17']['id'] = 'uuid_17';
+  $handler->display->display_options['filters']['uuid_17']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_17']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_17']['value'] = '4b1c441a-4b07-429c-b516-5bc08e96296a';
+  $handler->display->display_options['filters']['uuid_17']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_18']['id'] = 'uuid_18';
+  $handler->display->display_options['filters']['uuid_18']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_18']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_18']['value'] = 'e82d8d9b-fbee-4671-b765-7a0422428d7b';
+  $handler->display->display_options['filters']['uuid_18']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_19']['id'] = 'uuid_19';
+  $handler->display->display_options['filters']['uuid_19']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_19']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_19']['value'] = '1c95c761-2ea1-40ca-8a8e-8aed79a1a6a6';
+  $handler->display->display_options['filters']['uuid_19']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_20']['id'] = 'uuid_20';
+  $handler->display->display_options['filters']['uuid_20']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_20']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_20']['value'] = 'd66fb2a9-fdb0-43f7-976d-6cc318bb741d';
+  $handler->display->display_options['filters']['uuid_20']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_21']['id'] = 'uuid_21';
+  $handler->display->display_options['filters']['uuid_21']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_21']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_21']['value'] = '2f4275d7-48db-4df5-80fd-1f800aed78c0';
+  $handler->display->display_options['filters']['uuid_21']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_22']['id'] = 'uuid_22';
+  $handler->display->display_options['filters']['uuid_22']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_22']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_22']['value'] = '785a74ee-f71b-43b1-bac8-72072656c31a';
+  $handler->display->display_options['filters']['uuid_22']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_23']['id'] = 'uuid_23';
+  $handler->display->display_options['filters']['uuid_23']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_23']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_23']['value'] = 'ace2b36c-ac8d-4815-bf61-0319547cebcb';
+  $handler->display->display_options['filters']['uuid_23']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_24']['id'] = 'uuid_24';
+  $handler->display->display_options['filters']['uuid_24']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_24']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_24']['value'] = '6f7b76a0-ad99-4529-9074-b6d36a545260';
+  $handler->display->display_options['filters']['uuid_24']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_25']['id'] = 'uuid_25';
+  $handler->display->display_options['filters']['uuid_25']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_25']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_25']['value'] = '570d6add-b6d3-4951-9599-38486e27482b';
+  $handler->display->display_options['filters']['uuid_25']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_26']['id'] = 'uuid_26';
+  $handler->display->display_options['filters']['uuid_26']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_26']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_26']['value'] = '34adc556-0009-4675-89ce-ad111097d8a8';
+  $handler->display->display_options['filters']['uuid_26']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_27']['id'] = 'uuid_27';
+  $handler->display->display_options['filters']['uuid_27']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_27']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_27']['value'] = '6d772a63-cf45-4ba7-9674-00dfc866a847';
+  $handler->display->display_options['filters']['uuid_27']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_28']['id'] = 'uuid_28';
+  $handler->display->display_options['filters']['uuid_28']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_28']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_28']['value'] = 'd2b6d3c3-2f91-422b-80b0-83b5075b151a';
+  $handler->display->display_options['filters']['uuid_28']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_29']['id'] = 'uuid_29';
+  $handler->display->display_options['filters']['uuid_29']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_29']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_29']['value'] = '4a0caf0c-007c-4538-8106-63a920ca53df';
+  $handler->display->display_options['filters']['uuid_29']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_30']['id'] = 'uuid_30';
+  $handler->display->display_options['filters']['uuid_30']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_30']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_30']['value'] = 'c7551688-fa1c-4d84-b7bc-5b93ed1215cd';
+  $handler->display->display_options['filters']['uuid_30']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_31']['id'] = 'uuid_31';
+  $handler->display->display_options['filters']['uuid_31']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_31']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_31']['value'] = '36e50891-c033-4fa1-9e09-ef1d9676f122';
+  $handler->display->display_options['filters']['uuid_31']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_32']['id'] = 'uuid_32';
+  $handler->display->display_options['filters']['uuid_32']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_32']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_32']['value'] = '257b8ca5-ba04-4977-8ca5-4f2a8bdd2669';
+  $handler->display->display_options['filters']['uuid_32']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_33']['id'] = 'uuid_33';
+  $handler->display->display_options['filters']['uuid_33']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_33']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_33']['value'] = 'a1c4bdec-879b-4552-9114-4df500796f44';
+  $handler->display->display_options['filters']['uuid_33']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_34']['id'] = 'uuid_34';
+  $handler->display->display_options['filters']['uuid_34']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_34']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_34']['value'] = '3f86d1e8-2238-44da-9373-7c4114b8aaad';
+  $handler->display->display_options['filters']['uuid_34']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_35']['id'] = 'uuid_35';
+  $handler->display->display_options['filters']['uuid_35']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_35']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_35']['value'] = '5ece4e87-94ec-4243-a877-d5635b8e2031';
+  $handler->display->display_options['filters']['uuid_35']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_36']['id'] = 'uuid_36';
+  $handler->display->display_options['filters']['uuid_36']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_36']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_36']['value'] = 'f98c3fc6-8519-4301-a0ee-6d0a4aba7f79';
+  $handler->display->display_options['filters']['uuid_36']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_37']['id'] = 'uuid_37';
+  $handler->display->display_options['filters']['uuid_37']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_37']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_37']['value'] = '118af515-165f-46c2-a3d1-3904b7a6cc1f';
+  $handler->display->display_options['filters']['uuid_37']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_38']['id'] = 'uuid_38';
+  $handler->display->display_options['filters']['uuid_38']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_38']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_38']['value'] = 'f552b579-5b56-4824-a1e5-1d6ee25f27c3';
+  $handler->display->display_options['filters']['uuid_38']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_39']['id'] = 'uuid_39';
+  $handler->display->display_options['filters']['uuid_39']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_39']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_39']['value'] = '79d626e2-e617-4f76-86b2-a7dfc5f91cc7';
+  $handler->display->display_options['filters']['uuid_39']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_40']['id'] = 'uuid_40';
+  $handler->display->display_options['filters']['uuid_40']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_40']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_40']['value'] = '92a98917-28d7-4990-bacd-eac01f07b175';
+  $handler->display->display_options['filters']['uuid_40']['group'] = 1;
+  /* Filter criterion: Content: Node UUID */
+  $handler->display->display_options['filters']['uuid_41']['id'] = 'uuid_41';
+  $handler->display->display_options['filters']['uuid_41']['table'] = 'node';
+  $handler->display->display_options['filters']['uuid_41']['field'] = 'uuid';
+  $handler->display->display_options['filters']['uuid_41']['value'] = '043e6b50-8f27-40c6-85ac-f14116df6650';
+  $handler->display->display_options['filters']['uuid_41']['group'] = 1;
+  $handler->display->display_options['path'] = 'aewa-news-old';
   $translatables['news_feeds_for_other_instances'] = array(
     t('Master'),
     t('News Feeds for other instances'),
@@ -18238,6 +18729,7 @@ Disclaimer:
     t('field_gallery'),
     t('News Aewa'),
     t('News Ascobans'),
+    t('News Aewa-Old'),
   );
   $export['news_feeds_for_other_instances'] = $view;
 
