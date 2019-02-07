@@ -1,0 +1,10 @@
+<?php
+
+/*
+ * refs #5832 - Fixed news API endpoint.
+ */
+
+function ascobans_views_update_7001() {
+  features_revert_module('ascobans_views');
+}
+
