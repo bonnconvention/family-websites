@@ -14,7 +14,7 @@ function hook_drush_command() {
 }
 
 /**
- * All drush commands are invoked in a specific order, using
+ * All Drush commands are invoked in a specific order, using
  * drush-made hooks, very similar to the Drupal hook system. See drush_invoke()
  * for the actual implementation.
  *
@@ -280,9 +280,10 @@ function drush_hook_pre_pm_enable() {
  * @see sql_drush_sql_sync_sanitize()
  */
 function hook_drush_sql_sync_sanitize($source) {
+  $table = drush_get_option('db-prefix') ? '{users}' : 'users';
   drush_sql_register_post_sync_op('my-sanitize-id',
     dt('Reset passwords and email addresses in user table.'),
-    "UPDATE users SET pass = MD5('password'), mail = concat('user+', uid, '@localhost') WHERE uid > 0;");
+    "UPDATE $table SET pass = MD5('password'), mail = concat('user+', uid, '@localhost') WHERE uid > 0;");
 }
 
 /**

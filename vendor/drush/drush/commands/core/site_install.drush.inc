@@ -63,7 +63,8 @@ function site_install_drush_command() {
       'drush site-install --db-url=sqlite://sites/example.com/files/.ht.sqlite' => 'Install using SQLite (D7+ only).',
       'drush site-install --account-name=joe --account-pass=mom' => 'Re-install with specified uid1 credentials.',
       'drush site-install standard install_configure_form.site_default_country=FR my_profile_form.my_settings.key=value' => 'Pass additional arguments to the profile (D7 example shown here - for D6, omit the form id).',
-      "drush site-install standard install_configure_form.update_status_module='array(FALSE,FALSE)'" => 'Disable email notification during install and later. If your server has no smtp, this gets rid of an error during install.',
+      "drush site-install standard install_configure_form.update_status_module='array(FALSE,FALSE)'" => 'Disable email notification during install and later (D7). If your server has no mail transfer agent, this gets rid of an error during install.',
+      'drush site-install standard install_configure_form.enable_update_status_module=NULL install_configure_form.enable_update_status_emails=NULL' => 'Disable email notification during install and later (D8). If your server has no mail transfer agent, this gets rid of an error during install.',
     ),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT,
     'aliases' => array('si'),
@@ -98,6 +99,7 @@ function drush_core_site_install_validate() {
     }
     // Make sure that we will bootstrap to the 'sites-subdir' site.
     drush_set_context('DRUSH_SELECTED_URI', 'http://' . $sites_subdir);
+    drush_sitealias_create_self_alias();
   }
 
   if ($config = drush_get_option('config-dir')) {
@@ -107,7 +109,12 @@ function drush_core_site_install_validate() {
     if (!is_dir($config)) {
       return drush_set_error('config_import_target', 'The config source is not a directory.');
     }
-  }
+    $configFiles = glob("$config/*.yml");
+    if (empty($configFiles)) {
+      drush_log(dt('Configuration import directory !config does not contain any configuration; will skip import.', array('!config' => $config)), LogLevel::WARNING);
+      drush_set_option('config-dir', '');
+    }
+   }
 }
 
 /**
@@ -169,31 +176,18 @@ function drush_core_pre_site_install($profile = NULL) {
     if (!drush_op('copy', 'sites/default/default.settings.php', $settingsfile) && !drush_get_context('DRUSH_SIMULATE')) {
       return drush_set_error(dt('Failed to copy sites/default/default.settings.php to @settingsfile', array('@settingsfile' => $settingsfile)));
     }
+  }
 
-    if (drush_drupal_major_version() == 6) {
-      // On D6, we have to write $db_url ourselves. In D7+, the installer does it.
-      file_put_contents($settingsfile, "\n" . '$db_url = \'' . drush_get_option('db-url') . "';\n", FILE_APPEND);
-      // Instead of parsing and performing string replacement on the configuration file,
-      // the options are appended and override the defaults.
-      // Database table prefix
-      if (!empty($db_spec['db_prefix'])) {
-        if (is_array($db_spec['db_prefix'])) {
-          // Write db_prefix configuration as an array
-          $db_prefix_config = '$db_prefix = ' . var_export($db_spec['db_prefix'], TRUE) . ';';
-        }
-        else {
-          // Write db_prefix configuration as a string
-          $db_prefix_config = '$db_prefix = \'' . $db_spec['db_prefix'] . '\';';
-        }
-        file_put_contents($settingsfile, "\n" . $db_prefix_config . "\n", FILE_APPEND);
-      }
+  if (drush_drupal_major_version() == 6) {
+    if (!_drush_core_site_install_add_db_url_to_settings($settingsfile, $db_spec)) {
+      return drush_set_error(dt('Failed to write database settings to @settingsfile', array('@settingsfile' => $settingsfile)));
     }
   }
 
   // Write an empty sites.php if we are on D8 and using multi-site.
   if ($sitesfile_write) {
     if (!drush_op('copy', 'sites/example.sites.php', $sitesfile) && !drush_get_context('DRUSH_SIMULATE')) {
-      return drush_set_error(dt('Failed to copy sites/sites.php to @sitesfile', array('@sitesfile' => $sitesfile)));
+      return drush_set_error(dt('Failed to copy sites/example.sites.php to @sitesfile', array('@sitesfile' => $sitesfile)));
     }
   }
 
@@ -207,10 +201,40 @@ function drush_core_pre_site_install($profile = NULL) {
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
   }
 
-  $sql->drop_or_create($db_spec);
+  if (!$sql->drop_or_create($db_spec)) {
+    return drush_set_error(dt('Failed to create database: @error', array('@error' => implode(drush_shell_exec_output()))));
+  }
 
   return TRUE;
 }
+
+function _drush_core_site_install_add_db_url_to_settings($settingsfile, $db_spec) {
+  $settingsContents = file_get_contents($settingsfile);
+  if (preg_match('#^.db_url *=#', $settingsContents)) {
+    return true;
+  }
+  // On D6, we have to write $db_url ourselves. In D7+, the installer does it.
+  if (file_put_contents($settingsfile, "\n" . '$db_url = \'' . drush_convert_db_url(drush_get_option('db-url')) . "';\n", FILE_APPEND) === false) {
+    return false;
+  }
+
+  // Instead of parsing and performing string replacement on the configuration file,
+  // the options are appended and override the defaults.
+  // Database table prefix
+  if (!empty($db_spec['db_prefix'])) {
+    if (is_array($db_spec['db_prefix'])) {
+      // Write db_prefix configuration as an array
+      $db_prefix_config = '$db_prefix = ' . var_export($db_spec['db_prefix'], TRUE) . ';';
+    }
+    else {
+      // Write db_prefix configuration as a string
+      $db_prefix_config = '$db_prefix = \'' . $db_spec['db_prefix'] . '\';';
+    }
+    file_put_contents($settingsfile, "\n" . $db_prefix_config . "\n", FILE_APPEND);
+  }
+  return true;
+}
+
 
 /**
  * Command callback.
@@ -224,7 +248,7 @@ function drush_core_site_install($profile = NULL) {
     $profile = array_shift($args);
     // Subsequent arguments are additional form values.
     foreach ($args as $arg) {
-      list($key, $value) = explode('=', $arg);
+      list($key, $value) = explode('=', $arg, 2);
 
       // Allow for numeric and NULL values to be passed in.
       if (is_numeric($value)) {
@@ -246,12 +270,13 @@ function drush_core_site_install($profile = NULL) {
   drush_include_engine('drupal', 'site_install');
   drush_core_site_install_version($profile, $form_options);
 
-  // Post installation run the configuration import.
+  // Post installation, run the configuration import.
   if ($config = drush_get_option('config-dir')) {
     // Set the destination site UUID to match the source UUID, to bypass a core fail-safe.
     $source_storage = new FileStorage($config);
-    drush_op('drush_config_set', 'system.site', 'uuid', $source_storage->read('system.site')['uuid']);
+    $options = ['yes' => TRUE];
+    drush_invoke_process('@self', 'config-set', array('system.site', 'uuid', $source_storage->read('system.site')['uuid']), $options);
     // Run a full configuration import.
-    drush_invoke_process('@self', 'config-import', array(), array('source' => $config));
+    drush_invoke_process('@self', 'config-import', array(), array('source' => $config) + $options);
   }
 }

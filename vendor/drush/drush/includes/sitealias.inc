@@ -10,6 +10,7 @@
  */
 
 use Drush\Log\LogLevel;
+use Webmozart\PathUtil\Path;
 
 /**
  * Check to see if the user specified an alias
@@ -1259,6 +1260,12 @@ function _drush_sitealias_add_static_defaults(&$alias_record) {
   if (isset($alias_record['db-url']) && !isset($alias_record['databases'])) {
     $alias_record['databases'] = drush_sitealias_convert_db_from_db_url($alias_record['db-url']);
   }
+
+  // Canonicalize paths.
+  if (!empty($alias_record['root'])) {
+    $alias_record['root'] = Path::canonicalize($alias_record['root']);
+  }
+
   // Adjustments for aliases to drupal instances (as opposed to aliases that are site lists)
   if (array_key_exists('uri', $alias_record)) {
     // Make sure that there is always a 'path-aliases' array
@@ -1639,7 +1646,7 @@ function drush_convert_db_from_db_url($db_url) {
       );
       $url = (object)array_map('urldecode', $url);
       $db_spec = array(
-        'driver'   => $url->scheme == 'mysqli' ? 'mysql' : $url->scheme,
+        'driver'   => $url->scheme == 'mysqli' && extension_loaded('mysql') ? 'mysql' : $url->scheme,
         'username' => $url->user,
         'password' => $url->pass,
         'host' => $url->host,
@@ -1650,6 +1657,13 @@ function drush_convert_db_from_db_url($db_url) {
   }
 
   return $db_spec;
+}
+
+function drush_convert_db_url($db_url) {
+  if (extension_loaded('mysql') && !extension_loaded('mysqli')) {
+    return preg_replace('#^mysqli://#', 'mysql://', $db_url);;
+  }
+  return preg_replace('#^mysql://#', 'mysqli://', $db_url);
 }
 
 /**
@@ -2107,7 +2121,7 @@ function drush_sitealias_evaluate_path($path, &$additional_options, $local_only 
  * Option keys used for site selection.
  */
 function drush_sitealias_site_selection_keys() {
-  return array('remote-host', 'remote-user', 'winrs-password', 'ssh-options', '#name', 'os');
+  return array('remote-host', 'remote-user', 'ssh-options', '#name', 'os');
 }
 
 

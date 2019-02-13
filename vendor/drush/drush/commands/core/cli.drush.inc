@@ -5,6 +5,7 @@ use Drupal\Component\Assertion\Handle;
 use Drush\Psysh\DrushHelpCommand;
 use Drush\Psysh\DrushCommand;
 use Drush\Psysh\Shell;
+use Psy\VersionUpdater\Checker;
 
 /**
  * Implements hook_drush_command().
@@ -18,6 +19,7 @@ function cli_drush_command() {
     'topics' => array('docs-repl'),
     'options' => array(
       'version-history' => 'Use command history based on Drupal version (Default is per site).',
+       'cwd' => 'Changes the working directory of the shell (Default is the project root directory)',
     ),
   );
   $items['docs-repl'] = array(
@@ -40,6 +42,9 @@ function drush_cli_core_cli() {
 
   // Set the Drush specific history file path.
   $configuration->setHistoryFile(drush_history_path_cli());
+
+  // Disable checking for updates. Our dependencies are managed with Composer.
+  $configuration->setUpdateCheck(Checker::NEVER);
 
   $shell = new Shell($configuration);
 
@@ -89,6 +94,12 @@ function drush_cli_core_cli() {
   // any shutdown functions will still run ok after the shell has exited.
   if ($drupal_major_version == 7) {
     Database::closeConnection();
+  }
+  
+  // if the cwd option is passed, lets change the current working directory to wherever
+  // the user wants to go before we lift psysh.
+  if ($cwd = drush_get_option('cwd',FALSE)) {
+    chdir($cwd);
   }
 
   $shell->run();

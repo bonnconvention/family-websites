@@ -3,11 +3,6 @@
     "type": "project",
     "require": {
         "eaudeweb/heavy-lifter": "^1.1",
-        "composer/installers": "^1.6",
-        "composer/semver": "^1.4",
-        "symfony/debug": "^4.2",
-        "symfony/filesystem": "^4.2",
-        "symfony/yaml": "~2.3",
         "drush/drush": "~8.0"
     }
 }

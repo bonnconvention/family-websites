@@ -25,9 +25,11 @@ class pmUpdateCode extends CommandUnishTestCase {
     $list = $this->getOutputAsList();
     // Line 0 is "Release"
     // Line 1 is "...-dev"
-    // Line 2 is current best release
-    // Line 3 is the previous release
-    return trim($list[3]);
+    // Line 2 is "...-dev"
+    // Line 3 is "...-dev"
+    // Line 4 is current best release
+    // Line 5 is the previous release
+    return trim($list[5]);
   }
 
   /**
@@ -47,9 +49,7 @@ class pmUpdateCode extends CommandUnishTestCase {
       $this->modules = array('menu', 'devel', 'webform');
     }
     else {
-      $core = '6.28';
-      $modules_str = 'devel-6.x-1.26,webform-6.x-3.18';
-      $this->modules = array('menu', 'devel', 'webform');
+      $this->markTestSkipped("pm-update* no longer supported with Drupal 6; drupal.org does not allow stable releases for Drupal 6 contrib modules.");
     }
 
     $sites = $this->setUpDrupal(1, TRUE, $core);
@@ -68,6 +68,9 @@ class pmUpdateCode extends CommandUnishTestCase {
   }
 
   function testUpdateCode() {
+    if (UNISH_DRUPAL_MAJOR_VERSION < 7) {
+      $this->markTestSkipped("pm-update does not work once Drupal core reaches EOL.");
+    }
     $extension = UNISH_DRUPAL_MAJOR_VERSION == 8 ? '.info.yml' : '.info';
     $first = $this->modules[1];
     $second = $this->modules[2];

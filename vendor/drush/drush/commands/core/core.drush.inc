@@ -32,6 +32,7 @@ function core_drush_help($section) {
       $message .= dt("Hint: This may occur when Drush is trying to:\n");
       $message .= dt(" * bootstrap a site that has not been installed or does not have a configured database. In this case you can select another site with a working database setup by specifying the URI to use with the --uri parameter on the command line. See `drush topic docs-aliases` for details.\n");
       $message .= dt(" * connect the database through a socket. The socket file may be wrong or the php-cli may have no access to it in a jailed shell. See http://drupal.org/node/1428638 for details.\n");
+      $message .= dt(" * connect to the database through a cli command using the --defaults-extra-file parameter to pass credentials through a tmp file. This method can break if other credentials are specified in a ~/.my.cnf file in your home directory. You may have to delete or rename the ~/.my.cnf file in your home directory.\n");
       $message .= dt("\nDrush was attempting to connect to: \n!credentials\n", array('!credentials' => _core_site_credentials(12)));
       return $message;
     case 'error:DRUSH_DRUPAL_BOOTSTRAP_ERROR':
@@ -586,10 +587,13 @@ function _core_site_status_table($project = '') {
         $status_table['db-port'] = isset($db_spec['port']) ? $db_spec['port'] : NULL;
         if ($phase > DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION) {
           $status_table['install-profile'] = $boot_object->get_profile();
-          if ($phase > DRUSH_BOOTSTRAP_DRUPAL_FULL) {
-            $status_table['bootstrap'] = dt('Successful');
-            if ($phase == DRUSH_BOOTSTRAP_DRUPAL_LOGIN) {
-              $status_table['user'] = drush_user_get_class()->getCurrentUserAsSingle()->getUsername();
+          if ($phase > DRUSH_BOOTSTRAP_DRUPAL_DATABASE) {
+            $status_table['db-status'] = dt('Connected');
+            if ($phase > DRUSH_BOOTSTRAP_DRUPAL_FULL) {
+              $status_table['bootstrap'] = dt('Successful');
+              if ($phase == DRUSH_BOOTSTRAP_DRUPAL_LOGIN) {
+                $status_table['user'] = drush_user_get_class()->getCurrentUserAsSingle()->getUsername();
+              }
             }
           }
         }
@@ -827,6 +831,9 @@ function drush_core_requirements() {
     if ($severity < $min_severity) {
       unset($requirements[$key]);
     }
+    if (isset($requirements[$key]['description'])) {
+      $requirements[$key]['description'] = drush_render($requirements[$key]['description']);
+    }
   }
   return $requirements;
 }
@@ -944,7 +951,7 @@ function drush_core_quick_drupal() {
     }
   }
   if (!drush_get_option('db-url', FALSE)) {
-    drush_set_option('db-url', 'sqlite://' . $base . '/sites/' . strtolower(drush_get_option('sites-subdir', 'default')) . "/$name.sqlite");
+    drush_set_option('db-url', 'sqlite://sites/' . strtolower(drush_get_option('sites-subdir', 'default')) . "/files/$name.sqlite");
   }
   // We have just created a site root where one did not exist before.
   // We therefore must manually reset DRUSH_SELECTED_DRUPAL_ROOT to
@@ -1196,9 +1203,8 @@ function _drush_core_eval_shebang_script($script_filename) {
   return $found;
 }
 
-
 /**
- * Process sets from the specified batch.
+ * Command callback. Process sets from the specified batch.
  *
  * This is the default batch processor that will be used if the $command parameter
  * to drush_backend_batch_process() has not been specified.
@@ -1208,7 +1214,7 @@ function drush_core_batch_process($id) {
 }
 
 /**
- * Process outstanding updates during updatedb.
+ * Command callback. Process outstanding updates during updatedb.
  *
  * This is a batch processing command that makes use of the drush_backend_invoke
  * api.
@@ -1344,11 +1350,21 @@ function drush_core_execute() {
 function drush_core_twig_compile() {
   require_once DRUSH_DRUPAL_CORE . "/themes/engines/twig/twig.engine";
   // Scan all enabled modules and themes.
-  // @todo Refactor to not reuse commandfile paths directly.
-  $boot = drush_get_bootstrap_object();
-  $searchpaths = $boot->commandfile_searchpaths(DRUSH_BOOTSTRAP_DRUPAL_FULL);
-  $searchpaths[] = drupal_get_path('theme', drush_theme_get_default());;
-  $searchpaths[] = drupal_get_path('theme', drush_theme_get_admin());
+  // @todo refactor since \Drush\Boot\DrupalBoot::commandfile_searchpaths is similar.
+  $ignored_modules = drush_get_option_list('ignored-modules', array());
+  $cid = drush_cid_install_profile();
+  if ($cached = drush_cache_get($cid)) {
+    $ignored_modules[] = $cached->data;
+  }
+  foreach (array_diff(drush_module_list(), $ignored_modules) as $module) {
+    $searchpaths[] = drupal_get_path('module', $module);
+  }
+
+  $themes = drush_theme_list();
+  foreach ($themes as $name => $theme) {
+    $searchpaths[] = $theme->getPath();
+  }
+
   foreach ($searchpaths as $searchpath) {
     foreach ($file = drush_scan_directory($searchpath, '/\.html.twig/', array('tests')) as $file) {
       $relative = str_replace(drush_get_context('DRUSH_DRUPAL_ROOT'). '/', '', $file->filename);

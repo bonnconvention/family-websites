@@ -75,6 +75,9 @@ function drush_main() {
     $bootstrap->terminate();
   }
   drush_postflight();
+  if (is_object($return)) {
+    $return = 0;
+  }
 
   // How strict are we?  If we are very strict, turn 'ok' into 'error'
   // if there are any warnings in the log.
@@ -110,7 +113,7 @@ function drush_preflight_prepare() {
     $vendor_path = $global_vendor_path;
   }
   else {
-    $msg = "Unable to load autoload.php. Run composer install to fetch dependencies and write this file (http://docs.drush.org/en/master/install-alternative/). Or if you prefer, use the drush.phar which already has depdencies included (http://docs.drush.org/en/master/install).\n";
+    $msg = "Unable to load autoload.php. Run composer install to fetch dependencies and write this file (http://docs.drush.org/en/master/install-alternative/). Or if you prefer, use the drush.phar which already has dependencies included (http://docs.drush.org/en/master/install).\n";
     fwrite(STDERR, $msg);
     return FALSE;
   }
@@ -120,6 +123,7 @@ function drush_preflight_prepare() {
   require_once DRUSH_BASE_PATH . '/includes/startup.inc';
   require_once DRUSH_BASE_PATH . '/includes/bootstrap.inc';
   require_once DRUSH_BASE_PATH . '/includes/environment.inc';
+  require_once DRUSH_BASE_PATH . '/includes/annotationcommand_adapter.inc';
   require_once DRUSH_BASE_PATH . '/includes/command.inc';
   require_once DRUSH_BASE_PATH . '/includes/drush.inc';
   require_once DRUSH_BASE_PATH . '/includes/engines.inc';
@@ -133,6 +137,7 @@ function drush_preflight_prepare() {
   require_once DRUSH_BASE_PATH . '/includes/cache.inc';
   require_once DRUSH_BASE_PATH . '/includes/filesystem.inc';
   require_once DRUSH_BASE_PATH . '/includes/dbtng.inc';
+  require_once DRUSH_BASE_PATH . '/includes/array_column.inc';
 
   // Stash our vendor path and classloader.
   drush_set_context('DRUSH_VENDOR_PATH', dirname($vendor_path));
@@ -330,6 +335,19 @@ function drush_preflight_root() {
   // Load the config options from Drupal's /drush, ../drush, and sites/all/drush directories,
   // even prior to bootstrapping the root.
   drush_load_config('drupal');
+
+  // Search for commandfiles in the root locations
+  $discovery = annotationcommand_adapter_get_discovery();
+  $searchpath = [dirname($root) . '/drush', "$root/drush", "$root/sites/all/drush"];
+
+  $drush_root_extensions = $discovery->discover($searchpath, '\Drush');
+  drush_set_context(
+    'DRUSH_ANNOTATED_COMMANDFILES',
+    array_merge(
+      drush_get_context('DRUSH_ANNOTATED_COMMANDFILES'),
+      $drush_root_extensions
+    )
+  );
 }
 
 function drush_preflight_site() {
@@ -420,13 +438,15 @@ function _drush_preflight_base_environment() {
  * On Windows in CMD and PowerShell is this exported using mode con.
  */
 function _drush_preflight_columns() {
-  if (!($columns = getenv('COLUMNS'))) {
+  if (!($columns = getenv('COLUMNS') ?: 0)) {
     // Trying to export the columns using stty.
     exec('stty size 2>&1', $columns_output, $columns_status);
-    if (!$columns_status) $columns = preg_replace('/\d+\s(\d+)/', '$1', $columns_output[0], -1, $columns_count);
-
+    $matched = FALSE;
+    if (!$columns_status && $matched = preg_match('/^\d+\s(\d+)$/', $columns_output[0], $matches, 0)) {
+        $columns = $matches[1];
+    }
     // If stty fails and Drush us running on Windows are we trying with mode con.
-    if (($columns_status || !$columns_count) && drush_is_windows()) {
+    if (($columns_status || !$matched) && drush_is_windows()) {
       $columns_output = array();
       exec('mode con', $columns_output, $columns_status);
       if (!$columns_status && is_array($columns_output)) {
@@ -510,6 +530,25 @@ function _drush_find_commandfiles_drush() {
 
   // @todo the zero parameter is a bit weird here. It's $phase.
   _drush_add_commandfiles($searchpath, 0);
+
+  // Also discover Drush's own annotation commands.
+  $discovery = annotationcommand_adapter_get_discovery();
+  $annotation_commandfiles = $discovery->discover(DRUSH_BASE_PATH . '/lib/Drush', '\Drush');
+
+  // And, finally, search for commandfiles in the $searchpath
+  $searchpath = array_map(
+    function ($item) {
+      if (strtolower(basename($item)) == 'commands') {
+        return dirname($item);
+      }
+      return $item;
+    },
+    $searchpath
+  );
+  $global_drush_extensions = $discovery->discover($searchpath, '\Drush');
+  $annotation_commandfiles += $global_drush_extensions;
+
+  drush_set_context('DRUSH_ANNOTATED_COMMANDFILES', $annotation_commandfiles);
 }
 
 /**
@@ -574,10 +613,17 @@ function drush_preflight_command_dispatch() {
     $local_drush = find_wrapper_or_launcher($root);
   }
   $is_local = drush_get_option('local');
+  $must_use_site_local = !empty($root) && !empty($local_drush) && empty($is_local);
+  // If the command sets the 'handle-remote-commands' flag, then we will short-circuit
+  // remote command dispatching and site-list command dispatching, and always let
+  // the command handler run on the local machine.
+  if (is_array($command) && !empty($command['handle-remote-commands']) && !$must_use_site_local) {
+    return FALSE;
+  }
   $values = NULL;
-  if (!empty($root) && !empty($local_drush) && empty($is_local)) {
+  if (!isset($remote_host) && !isset($site_list) && $must_use_site_local) {
     if (!drush_is_absolute_path($local_drush)) {
-      $local_drush = $root . '/' . $local_drush;
+      $local_drush = $root . DIRECTORY_SEPARATOR . $local_drush;
     }
     $local_drush = realpath($local_drush);
     $this_drush = drush_find_drush();
@@ -601,12 +647,6 @@ function drush_preflight_command_dispatch() {
       chdir($root);
       $values = drush_do_command_redispatch(is_array($command) ? $command : $command_name, $args, NULL, NULL, $local_drush, TRUE, $aditional_options);
     }
-  }
-  // If the command sets the 'handle-remote-commands' flag, then we will short-circuit
-  // remote command dispatching and site-list command dispatching, and always let
-  // the command handler run on the local machine.
-  if (is_array($command) && !empty($command['handle-remote-commands'])) {
-    return FALSE;
   }
   if (isset($remote_host)) {
     $remote_user = drush_get_option('remote-user');

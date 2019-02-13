@@ -18,11 +18,15 @@ class ComposerStaticInit17179a58ad0e5a8924756e09409da90f
         array (
             'XdgBaseDir\\' => 11,
         ),
+        'W' => 
+        array (
+            'Webmozart\\PathUtil\\' => 19,
+            'Webmozart\\Assert\\' => 17,
+        ),
         'S' => 
         array (
             'Symfony\\Polyfill\\Mbstring\\' => 26,
             'Symfony\\Polyfill\\Ctype\\' => 23,
-            'Symfony\\Contracts\\' => 18,
             'Symfony\\Component\\Yaml\\' => 23,
             'Symfony\\Component\\VarDumper\\' => 28,
             'Symfony\\Component\\Process\\' => 26,
@@ -73,8 +77,6 @@ class ComposerStaticInit17179a58ad0e5a8924756e09409da90f
             'Consolidation\\Log\\' => 18,
             'Consolidation\\Config\\' => 21,
             'Consolidation\\AnnotatedCommand\\' => 31,
-            'Composer\\Semver\\' => 16,
-            'Composer\\Installers\\' => 20,
         ),
         'B' => 
         array (
@@ -87,6 +89,14 @@ class ComposerStaticInit17179a58ad0e5a8924756e09409da90f
         array (
             0 => __DIR__ . '/..' . '/dnoegel/php-xdg-base-dir/src',
         ),
+        'Webmozart\\PathUtil\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/webmozart/path-util/src',
+        ),
+        'Webmozart\\Assert\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/webmozart/assert/src',
+        ),
         'Symfony\\Polyfill\\Mbstring\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
@@ -94,10 +104,6 @@ class ComposerStaticInit17179a58ad0e5a8924756e09409da90f
         'Symfony\\Polyfill\\Ctype\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-ctype',
-        ),
-        'Symfony\\Contracts\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/contracts',
         ),
         'Symfony\\Component\\Yaml\\' => 
         array (
@@ -203,14 +209,6 @@ class ComposerStaticInit17179a58ad0e5a8924756e09409da90f
         array (
             0 => __DIR__ . '/..' . '/consolidation/annotated-command/src',
         ),
-        'Composer\\Semver\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/composer/semver/src',
-        ),
-        'Composer\\Installers\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers',
-        ),
         'Boedah\\Robo\\Task\\Drush\\' => 
         array (
             0 => __DIR__ . '/..' . '/boedah/robo-drush/src',
@@ -227,6 +225,13 @@ class ComposerStaticInit17179a58ad0e5a8924756e09409da90f
             'Dflydev\\DotAccessData' => 
             array (
                 0 => __DIR__ . '/..' . '/dflydev/dot-access-data/src',
+            ),
+        ),
+        'C' => 
+        array (
+            'Consolidation' => 
+            array (
+                0 => __DIR__ . '/..' . '/drush/drush/lib',
             ),
         ),
     );

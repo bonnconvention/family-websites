@@ -25,7 +25,7 @@ function drush_get_modules($include_hidden = TRUE) {
   $modules = system_rebuild_module_data();
 
   foreach ($modules as $key => $module) {
-    if ((!$include_hidden) && (isset($module->info['hidden']))) {
+    if ((!$include_hidden) && (!empty($module->info['hidden']))) {
       unset($modules[$key]);
     }
     else {
@@ -249,14 +249,14 @@ function drush_module_invoke_all($hook) {
   $args = func_get_args();
   // Remove $hook from the arguments.
   array_shift($args);
-  return Drupal::moduleHandler()->invokeAll($hook, $args);
+  return \Drupal::moduleHandler()->invokeAll($hook, $args);
 }
 
 /**
  * Returns a list of enabled themes. Use drush_get_themes() if you need to rebuild
  * and include hidden as well.
  *
- * @return array
+ * @return \Drupal\Core\Extension\Extension[]
  *  A list of themes keyed by name.
  */
 function drush_theme_list() {
@@ -417,4 +417,22 @@ function drush_get_token($value = NULL) {
  */
 function drush_url($path = NULL, array $options = array()) {
   return \Drupal\Core\Url::fromUserInput('/' . $path, $options)->toString();
+}
+
+/**
+ * Output a Drupal render array, object or string as plain text.
+ *
+ * @param string $data
+ *   Data to render.
+ *
+ * @return string
+ *   The plain-text representation of the input.
+ */
+function drush_render($data) {
+  if (is_array($data)) {
+    $data = \Drupal::service('renderer')->renderRoot($data);
+  }
+
+  $data = \Drupal\Core\Mail\MailFormatHelper::htmlToText($data);
+  return $data;
 }

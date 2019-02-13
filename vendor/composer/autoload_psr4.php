@@ -7,9 +7,10 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'XdgBaseDir\\' => array($vendorDir . '/dnoegel/php-xdg-base-dir/src'),
+    'Webmozart\\PathUtil\\' => array($vendorDir . '/webmozart/path-util/src'),
+    'Webmozart\\Assert\\' => array($vendorDir . '/webmozart/assert/src'),
     'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
     'Symfony\\Polyfill\\Ctype\\' => array($vendorDir . '/symfony/polyfill-ctype'),
-    'Symfony\\Contracts\\' => array($vendorDir . '/symfony/contracts'),
     'Symfony\\Component\\Yaml\\' => array($vendorDir . '/symfony/yaml'),
     'Symfony\\Component\\VarDumper\\' => array($vendorDir . '/symfony/var-dumper'),
     'Symfony\\Component\\Process\\' => array($vendorDir . '/symfony/process'),
@@ -36,7 +37,5 @@ return array(
     'Consolidation\\Log\\' => array($vendorDir . '/consolidation/log/src'),
     'Consolidation\\Config\\' => array($vendorDir . '/consolidation/config/src'),
     'Consolidation\\AnnotatedCommand\\' => array($vendorDir . '/consolidation/annotated-command/src'),
-    'Composer\\Semver\\' => array($vendorDir . '/composer/semver/src'),
-    'Composer\\Installers\\' => array($vendorDir . '/composer/installers/src/Composer/Installers'),
     'Boedah\\Robo\\Task\\Drush\\' => array($vendorDir . '/boedah/robo-drush/src'),
 );
