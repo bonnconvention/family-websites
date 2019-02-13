@@ -1,0 +1,7 @@
+{
+    "name": "cms/cms",
+    "type": "project",
+    "require": {
+        "eaudeweb/heavy-lifter": "^1.1"
+    }
+}
