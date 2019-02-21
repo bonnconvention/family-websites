@@ -10,9 +10,9 @@ dependencies[] = domain_content
 
 core = 7.x
 
-; Information added by Drupal.org packaging script on 2014-01-04
-version = "7.x-2.7"
+; Information added by Drupal.org packaging script on 2016-07-09
+version = "7.x-2.9"
 core = "7.x"
 project = "subfolders_domain"
-datestamp = "1388874805"
+datestamp = "1468073340"
 

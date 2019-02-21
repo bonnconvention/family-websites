@@ -93,9 +93,8 @@ function event_calendar_node_update($node) {
   $node_type = variable_get('event_calendar_node_type', 'event_calendar');
   if ($node->type == $node_type) {
     $author = user_load($node->uid);
-    $send_to_admin = variable_get('event_calendar_send_email_admin', 1);
     $to = $author->mail;
-    if (!empty($to) && $send_to_admin == 1) {
+    if (!empty($to)) {
       $from = (string) variable_get('site_mail', '');
       $language = language_default();
       $subject = _event_calendar_email_text('users_subject');
@@ -132,27 +131,21 @@ function _event_calendar_email_reciepents($key) {
   $to = array();
   switch ($key) {
     case 'admin':
-      $send_to_admin = variable_get('event_calendar_send_email_admin', 1);
-      if ($send_to_admin == 1) {
-          if (in_array($admin_rid, $all_reciepents)) {
-            $to = fetch_emails($admin_rid);
-          }
-          else {
-            $to = fetch_first_emails($admin_rid);
-          }
+      if (in_array($admin_rid, $all_reciepents)) {
+        $to = fetch_emails($admin_rid);
+      }
+      else {
+        $to = fetch_first_emails($admin_rid);
       }
       break;
 
     case 'users':
-      $send_to_users = variable_get('event_calendar_send_email_user', 1);
-      if ($send_to_users == 1) {
-          if (in_array($admin_rid, $all_reciepents)) {
-            unset($all_reciepents[$admin_rid]);
-          }
-          foreach ($all_reciepents as $rid) {
-            $emails = fetch_emails($rid);
-            $to = array_merge($to, $emails);
-          }
+      if (in_array($admin_rid, $all_reciepents)) {
+        unset($all_reciepents[$admin_rid]);
+      }
+      foreach ($all_reciepents as $rid) {
+        $emails = fetch_emails($rid);
+        $to = array_merge($to, $emails);
       }
       break;
     }
@@ -261,7 +254,7 @@ function event_calendar_form_taxonomy_form_term_alter(&$form, &$form_state, $for
     'pending' => 'pending',
     'denied' => 'denied',
   );
-  if ($form['#vocabulary']->vid == $vid) {
+  if (isset($form['#vocabulary']->vid) && $form['#vocabulary']->vid == $vid) {
     if (@$form_state['values']['op'] != 'Delete' ) {
       if (in_array( $form['#term']['name'], $terms )) {
         $form['name']['#attributes']['readonly'] = 'readonly';
@@ -282,11 +275,9 @@ function event_calendar_form_taxonomy_form_vocabulary_alter(&$form, &$form_state
   $vid = db_query("SELECT vid FROM {taxonomy_vocabulary} WHERE machine_name = :machine_name",
     array  (':machine_name' => TAXONOMY_NAME))->fetchField();
   // Disable access to delete and set readonly.
-  if(isset($form['#vocabulary']->vid)) {
-    if ($form['#vocabulary']->vid == $vid) {
-      $form['machine_name']['#attributes']['readonly'] = 'readonly';
-      $form['actions']['delete']['#access'] = FALSE;
-    }
+  if (isset($form['#vocabulary']->vid) && $form['#vocabulary']->vid == $vid) {
+    $form['machine_name']['#attributes']['readonly'] = 'readonly';
+    $form['actions']['delete']['#access'] = FALSE;
   }
 }
 
@@ -308,15 +299,18 @@ function event_calendar_form_alter(&$form, &$form_state, $form_id) {
 /**
  * Callback: Events dates.
  */
-function is_event_expired($node, $key) {
+function is_event_expired($node, $key) { 
   // Collect event end date and current date.
   if ($key == 'load') {
-    $date1 = isset($node->event_calendar_date[$node->language]['0']['value'])?$node->event_calendar_date[$node->language]['0']['value']:NULL;
-    $date2 = isset($node->event_calendar_date[$node->language]['0']['value2'])?$node->event_calendar_date[$node->language]['0']['value2']:NULL;
+    $field_lang_code = field_language('node', $node, 'event_calendar_date', LANGUAGE_NONE);  
+    $date1 = isset($node->event_calendar_date[$field_lang_code]['0']['value'])?$node->event_calendar_date[$field_lang_code]['0']['value']:NULL;
+    $date2 = isset($node->event_calendar_date[$field_lang_code]['0']['value2'])?$node->event_calendar_date[$field_lang_code]['0']['value2']:NULL;
   }
   elseif ($key == 'update') {
-    $date1 = $node->original->event_calendar_date[$node->original->language]['0']['value'];
-    $date2 = $node->original->event_calendar_date[$node->original->language]['0']['value2'];
+    $dataObj = $node->original;  
+    $field_lang_code = field_language('node', $dataObj, 'event_calendar_date', LANGUAGE_NONE);
+    $date1 = $node->original->event_calendar_date[$field_lang_code]['0']['value'];
+    $date2 = $node->original->event_calendar_date[$field_lang_code]['0']['value2'];
   }
   if (!empty($date2)) {
     $event_end_time = $date2;

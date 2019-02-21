@@ -48,19 +48,12 @@ define('DOMAIN_ALL', 'DOMAIN_ALL');
 define('DOMAIN_ACTIVE', 'DOMAIN_ACTIVE');
 
 /**
- * Module setup tasks.
- *
- * 1. Adds the domain user data to the $user object.
- * 2. Ensures that our custom_url_rewrite_outbound() is loaded.
+ * Ensures that our custom_url_rewrite_outbound() is loaded.
  *
  * @link http://drupal.org/node/529026
  * @link http://drupal.org/node/820062
  */
 function domain_boot() {
-  global $user;
-  // Load domain information to the $user object.
-  $user->domain_user = domain_get_user_domains($user);
-  // Properly load custom_url_rewrite_outbound().
   include_once('settings_custom_url.inc');
 }
 
@@ -562,6 +555,19 @@ function domain_user_load($users) {
 }
 
 /**
+ * Emsures that a user object has been loaded properly.
+ *
+ * @param $account
+ *   An account object.
+ */
+function domain_user_set($account) {
+  if (!isset($account->domain_user)) {
+    $accounts = array($account->uid => $account);
+    domain_user_load($accounts);
+  }
+}
+
+/**
  * Implements hook_user_insert().
  */
 function domain_user_insert(&$edit, $account, $category) {
@@ -618,6 +624,7 @@ function domain_user_delete($account) {
  * Implements hook_user_view().
  */
 function domain_user_view($account, $view_mode) {
+  domain_user_set($account);
   // Only show on full view.
   if ($view_mode != 'full') {
     return;
@@ -700,14 +707,13 @@ function domain_form_user_form_alter(&$form, &$form_state) {
     }
     $format = domain_select_format();
 
-    $form['domain_user'] = array(
+    $form['domain'] = array(
       '#type' => 'fieldset',
       '#title' => t('Domain access'),
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
-      '#weight' => 1
     );
-    $form['domain_user']['domain_user'] = array(
+    $form['domain']['domain_user'] = array(
       '#type' => empty($format) ? 'checkboxes' : 'select',
       '#options' => $options,
       '#title' => t('Domain access settings'),
@@ -715,14 +721,16 @@ function domain_form_user_form_alter(&$form, &$form_state) {
       '#default_value' => $default
     );
     if ($format) {
-      $form['domain_user']['domain_user']['#multiple'] = TRUE;
-      $form['domain_user']['domain_user']['#size'] = count($options) > 10 ? 10 : count($options);
+      $form['domain']['domain_user']['#multiple'] = TRUE;
+      $form['domain']['domain_user']['#size'] = count($options) > 10 ? 10 : count($options);
     }
   }
   else {
-    $form['domain_user'] = array(
-      '#type' => 'value',
-      '#value' => $default
+    $form['domain'] = array(
+      'domain_user' => array(
+        '#type' => 'value',
+        '#value' => $default
+      ),
     );
   }
 }
@@ -1131,7 +1139,11 @@ function domain_lookup($domain_id = NULL, $subdomain = NULL, $reset = FALSE) {
  */
 function domain_default($reset = FALSE, $alter = TRUE) {
   $default = &drupal_static(__FUNCTION__);
+  $altered = &drupal_static(__FUNCTION__ . '_altered');
+
   if (empty($default) || $reset) {
+    $altered = FALSE;
+
     // Temporary hack for update to 7.x.3.
     if (db_table_exists('domain_export')) {
       $default = db_query("SELECT domain_id, subdomain, sitename, scheme, valid, weight, is_default, machine_name FROM {domain} WHERE is_default = 1")->fetchAssoc();
@@ -1151,11 +1163,14 @@ function domain_default($reset = FALSE, $alter = TRUE) {
         'machine_name' => domain_machine_name($default['subdomain']),
       );
     }
-    if ($alter) {
-      // Let submodules overwrite the defaults, if they wish.
-      $default = domain_api($default, $reset);
-    }
   }
+
+  // If an altered version is requested, has $default been altered before?
+  if ($alter && !$altered) {
+    // Let submodules overwrite the defaults, if they wish.
+    $default = domain_api($default, $reset);
+  }
+
   return $default;
 }
 
@@ -1464,8 +1479,16 @@ function domain_api($domain, $reset = FALSE) {
   // issues, so let's be certain to load those.
   if (!isset($modules) || $reset) {
     $modules = module_implements('domain_load');
-    $bootstrap = _domain_bootstrap_modules();
-    $modules = array_unique(array_merge($modules, $bootstrap));
+    if (function_exists('_domain_bootstrap_modules')) {
+      $bootstrap = _domain_bootstrap_modules();
+      $modules = array_unique(array_merge($modules, $bootstrap));
+    }
+    // If the function is missing, settings.php is likely not configured.
+    elseif (!variable_get('domain_hide_errors')) {
+      // Not reporting an error during install makes it easier for scripts.
+      $severity = drupal_installation_attempted() ? 'warning' : 'error';
+      drupal_set_message(t('Domain module installation is incomplete. See INSTALL.txt and check your settings.php file.'), $severity, FALSE);
+    }
   }
 
   // Now, call the hook invocations.
@@ -1866,6 +1889,56 @@ function domain_get_node_match($nid) {
 }
 
 /**
+ * Get all possible published URLs pointing to a node.
+ *
+ * @param $node
+ *   A node object.
+ *
+ * @return array
+ *   An array of absolute URLs keyed by domain_id, with the canonical id
+ *   as the first element of the array.
+ */
+function domain_get_content_urls($node) {
+  $urls = array();
+  // If not set, return normal absolute url.
+  if (empty($node->domains)) {
+    $options['absolute'] = TRUE;
+    $urls[] = url('node/' . $node->id, $options);
+  }
+  $weight = -100;
+  foreach ($node->domains as $domain_id) {
+    $domain = domain_load($domain_id);
+    if (!$domain['valid']) {
+      continue;
+    }
+    // Calculate the proper path to the node.
+    $path = drupal_get_path_alias('node/' . $node->nid, $node->language);
+    $options['language'] = $node->language;
+    domain_path($domain_id, $path, $options, $path);
+
+    $url = $domain['path'] . $path;
+    // Order domains by weight.
+    if ($domain['weight'] > $weight) {
+      $new[$domain_id] = $url;
+      $urls = $new + $urls;
+    }
+    else {
+      $urls[$domain_id] = $url;
+    }
+    $weight = $domain['weight'];
+  }
+  // Determine the canonical URL and make it the first item.
+  // This only comes into play if domain source is used.
+  // Else we assume the first item in the array is canonical.
+  if (isset($node->domain_source) && isset($urls[$node->domain_source])) {
+    $canonical[$node->domain_source] = $urls[$node->domain_source];
+    unset($urls[$node->domain_source]);
+    $urls = $canonical + $urls;
+  }
+  return $urls;
+}
+
+/**
  * Allow the lookup of path rewrites.
  *
  * Note that unlike domain_get_node_match(), this function assumes
@@ -1965,9 +2038,7 @@ function domain_node_grants($account, $op) {
 
   // In some edge cases, the $account may not have domain information loaded,
   // so get it.
-  if (!isset($account->domain_user)) {
-    $account->domain_user = domain_get_user_domains($account);
-  }
+  domain_user_set($account);
 
   // By design, all users can see content sent to all affiliates,
   // but the $_domain['site_grant'] can be set to FALSE.
@@ -1977,7 +2048,9 @@ function domain_node_grants($account, $op) {
     }
 
     // Grant based on active domain.
-    $grants['domain_id'][] = $_domain['domain_id'];
+    if (isset($_domain['domain_id'])) {
+      $grants['domain_id'][] = $_domain['domain_id'];
+    }
 
     // In special cases, we grant the ability to view all nodes.  That is,
     // we simply get out of the way of other node_access rules.
@@ -2196,6 +2269,7 @@ function domain_set_default_grant($reset = FALSE) {
  * Splits the access checks by operation.
  */
 function domain_node_access($node, $op, $account) {
+  domain_user_set($account);
   if (empty($account->domain_user)) {
     return NODE_ACCESS_IGNORE;
   }
@@ -2213,6 +2287,7 @@ function domain_node_access($node, $op, $account) {
  * @see domain_node_access().
  */
 function domain_node_access_view($type, $node, $op, $account) {
+  domain_user_set($account);
   if (!empty($node->status)) {
     return NODE_ACCESS_IGNORE;
   }
@@ -2237,6 +2312,7 @@ function domain_node_access_view($type, $node, $op, $account) {
  * @see domain_node_access().
  */
 function domain_node_access_create($type, $node, $op, $account) {
+  domain_user_set($account);
   $_domain = domain_get_domain();
   if (!isset($account->domain_user[$_domain['domain_id']])) {
     return NODE_ACCESS_IGNORE;
@@ -2257,6 +2333,7 @@ function domain_node_access_create($type, $node, $op, $account) {
  * @see domain_node_access().
  */
 function domain_node_access_update($type, $node, $op, $account) {
+  domain_user_set($account);
   // The node must be assigned to a domain to continue.
   if (empty($node->domains)) {
     return NODE_ACCESS_IGNORE;
@@ -2406,6 +2483,7 @@ function domain_form_alter(&$form, &$form_state, $form_id) {
 
   // Grab the globals we need.
   global $user;
+  domain_user_set($user);
   $_domain = domain_get_domain();
 
   // Get the default assigned domains.
@@ -2439,9 +2517,24 @@ function domain_form_alter(&$form, &$form_state, $form_id) {
       '#type' => 'fieldset',
       '#title' => t('Domain access options'),
       '#collapsible' => TRUE,
-      '#collapsed' => FALSE,
-      '#group' => variable_get('domain_vertical_tab', 0) ? 'additional_settings' : '',
+      '#collapsed' => variable_get('domain_collapse_options', 0),
     );
+    // Display in vertical tab group, if required
+    if (variable_get('domain_vertical_tab', 0)) {
+      $form['domain']['#group'] = 'additional_settings';
+      $form['domain']['#attributes'] = array(
+        'class' => array('domain-access-options-form'),
+      );
+      $form['domain']['#attached'] = array(
+        'js' => array(
+          drupal_get_path('module', 'domain') . '/domain.node.js',
+          array(
+            'data' => array('domain' => array('fieldType' => $format)),
+            'type' => 'setting',
+          ),
+        ),
+      );
+    }
     $form['domain']['domain_site'] = array(
       '#type' => 'checkbox',
       '#title' => t('Send to all affiliates'),
@@ -2527,16 +2620,32 @@ function domain_form_alter(&$form, &$form_state, $form_id) {
         case 3:
           // If the user has no available domains, then they cannot post.
           if (empty($user_options)) {
-            $form = array();
-            return drupal_access_denied();
+            drupal_access_denied();
+            drupal_exit();
           }
           $form['domain'] = array(
             '#type' => 'fieldset',
             '#title' => t('Affiliate publishing options'),
             '#collapsible' => TRUE,
-            '#collapsed' => FALSE,
-            '#group' => variable_get('domain_vertical_tab', 0) ? 'additional_settings' : '',
+            '#collapsed' => variable_get('domain_collapse_options', 0),
           );
+          // Display in vertical tab group, if required
+          if (variable_get('domain_vertical_tab', 0)) {
+            $form['domain']['#group'] = 'additional_settings';
+            $form['domain']['#attributes'] = array(
+              'class' => array('domain-access-options-form'),
+            );
+            $format = domain_select_format();
+            $form['domain']['#attached'] = array(
+              'js' => array(
+                drupal_get_path('module', 'domain') . '/domain.node.js',
+                array(
+                  'data' => array('domain' => array('fieldType' => $format)),
+                  'type' => 'setting',
+                ),
+              ),
+            );
+          }
           // We must preserve publishing options that the user cannot access, but only for
           // existing nodes.
           if (!empty($form['#node']->nid)) {
@@ -3538,6 +3647,9 @@ function domain_alter_node_query(QueryAlterableInterface $query, $type) {
  * Checks to see if the webserver returns a valid response
  * for a request to a domain.
  *
+ * If the domain_skip_domain_check variable is not 0, the response will
+ * be assumed to be valid and a warning will be set using drupal_set_message().
+ *
  * @param $domain
  *   An array containing the record from the {domain} table.
  * @param $drush
@@ -3545,25 +3657,21 @@ function domain_alter_node_query(QueryAlterableInterface $query, $type) {
  *
  * @return
  *   A translated string indicating the error message or FALSE if the response
- *   is 200 "found".
+ *   is 200 "found" or if the domain_skip_domain_check variable is not 0.
  */
 function domain_check_response($domain, $drush = FALSE) {
+  // t() function name is different whether we are using drush or not.
+  $t = empty($drush) ? 't' : 'dt';
   if (variable_get('domain_skip_domain_check', 0)) {
-    return t('Domain response checks have been disabled. Saving an incorrect domain may affect your site.');
+    drupal_set_message($t('Domain response checks have been disabled. Saving an incorrect domain may affect your site.'), 'warning', FALSE);
+    return FALSE;
   }
   $url = domain_get_path($domain) . drupal_get_path('module', 'domain') . '/tests/200.png';
   $response = drupal_http_request($url, array('method' => 'HEAD', 'absolute' => TRUE));
   if ($response->code != 200) {
-    if (empty($drush)) {
-      return t('%server is not responding as expected and may not be configured correctly at the server level. Server code !code was returned.',
-        array('%server' => $url, '!code' => $response->code)
-      );
-    }
-    else {
-      return dt('!server is not responding as expected and may not be configured correctly at the server level. Server code !code was returned.',
-        array('!server' => $url, '!code' => $response->code)
-      );
-    }
+    return $t('!server is not responding as expected and may not be configured correctly at the server level. Server code !code was returned.',
+      array('!server' => $url, '!code' => $response->code)
+    );
   }
   return FALSE;
 }
@@ -3629,7 +3737,7 @@ function domain_features_api() {
       'default_hook' => 'domain_default_domains',
       'default_file' => FEATURES_DEFAULTS_CUSTOM,
       'default_filename' => 'domains',
-      'features_source' => TRUE,
+      'feature_source' => TRUE,
       'file' => drupal_get_path('module', 'domain') . '/domain.features.inc',
     ),
   );
@@ -3650,7 +3758,7 @@ function domain_features_api() {
 function domain_machine_name_load($machine_name, $full = FALSE) {
   $domain = db_query('SELECT domain_id, subdomain, sitename, scheme, valid, weight, is_default, machine_name FROM {domain} WHERE machine_name = :machine_name', array(':machine_name' => $machine_name))->fetchAssoc();
   if ($full && !empty($domain)) {
-    domain_api($domain, TRUE);
+    $domain = domain_api($domain, TRUE);
   }
   return $domain;
 }
@@ -4100,6 +4208,15 @@ function domain_url_replace($matches) {
  */
 function domain_url_filter_tips($filter, $format, $long) {
   return t('Enter a relative URL in the format <em>[canonical-url:path/to/item]</em> to make the URL point to the canonical path.');
+}
+
+/**
+ * Implements hook_metatag_page_cache_cid_parts_alter().
+ */
+function domain_metatag_page_cache_cid_parts_alter(&$cid_parts) {
+  // Make Metatag cache domain specific.
+  $_domain = domain_get_domain();
+  $cid_parts['domain_id'] = $_domain['domain_id'];
 }
 
 /**

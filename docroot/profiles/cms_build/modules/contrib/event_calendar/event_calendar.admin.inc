@@ -38,13 +38,6 @@ function event_calendar_settings($form, $form_state) {
     '#collapsed' => TRUE,
     '#description' => t('Edit the e-mail messages sent to administrator/s. Available variables are: [site:name], [site:url], [node:author], [node:created], [node:title], [node:body], [node:url], [event_calendar:start_date], [event_calendar:end_date], [event_calendar:event_status].'),
   );
-  $form['event_calendar_email_admin']['event_calendar_send_email_admin'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Send to admin'),
-    '#return_value' => 1,
-    '#default_value' => variable_get('event_calendar_send_email_admin', 1),
-    '#description' => t('Check this if you want to send the e-mail to administrators'),
-  );
   $form['event_calendar_email_admin']['event_calendar_email_admin_subject'] = array(
     '#type' => 'textfield',
     '#title' => t('Subject'),
@@ -65,13 +58,6 @@ function event_calendar_settings($form, $form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#description' => t('Edit the e-mail messages sent to selected user roles. Available variables are: [site:name], [site:url], [node:author], [node:created], [node:title], [node:body], [node:url], [event_calendar:start_date], [event_calendar:end_date], [event_calendar:event_status].'),
-  );
-  $form['event_calendar_email_user']['event_calendar_send_email_user'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Send to User'),
-    '#return_value' => 1,
-    '#default_value' => variable_get('event_calendar_send_email_user', 1),
-    '#description' => t('Check this if you want to send the e-mail to selected user roles'),
   );
   $form['event_calendar_email_user']['event_calendar_email_user_subject'] = array(
     '#type' => 'textfield',

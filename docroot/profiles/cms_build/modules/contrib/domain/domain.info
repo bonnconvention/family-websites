@@ -6,9 +6,8 @@ configure = admin/structure/domain/settings
 files[] = domain.migrate.inc
 files[] = tests/domain.test
 
-; Information added by drupal.org packaging script on 2013-06-02
-version = "7.x-3.10"
+; Information added by Drupal.org packaging script on 2018-12-17
+version = "7.x-3.16"
 core = "7.x"
 project = "domain"
-datestamp = "1370207153"
-
+datestamp = "1545060487"
