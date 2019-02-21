@@ -69,10 +69,15 @@ function edw_healthcheck_content($type = "all") {
  * @return array
  */
 function process_data($type) {
+  if (in_array($type, ['all', 'core', 'modules'])) {
+    module_load_include('inc', 'update', 'update.fetch');
+    _update_refresh();
+  }
+
   $data = array();
   switch ($type) {
     case "all":
-      $data = array_merge(get_core_data(), get_modules_data(), get_themes_data(), get_cron_data());
+      $data = array_merge(get_core_data(), get_modules_data(), get_cron_data());
       break;
 
     case "core":
