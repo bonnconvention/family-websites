@@ -194,3 +194,10 @@ function cms_update_7005() {
       ->condition('type', 'module')
       ->execute();
 }
+
+/**
+ * refs #5832 - Persist views changes from production and updates.
+ */
+function cms_update_7006() {
+  features_revert_module('cms_views');
+}

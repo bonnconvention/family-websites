@@ -1,7 +1,7 @@
 # Sensitive information #
 #########################
 # Ignore configuration files that may contain sensitive information.
-docroot/sites/*/settings*.php
+docroot/sites/*/settings.local.php
 *.local.php
 #drush/aliases/aliases.drushrc.php
 conf/config.json
@@ -101,3 +101,5 @@ Thumbs.db
 
 #Editors files
 .idea/
+
+robo.yml
