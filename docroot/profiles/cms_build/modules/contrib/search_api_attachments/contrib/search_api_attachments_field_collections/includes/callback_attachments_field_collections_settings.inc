@@ -4,21 +4,21 @@
  * @file
  * Search API data alteration callback.
  */
-
-/**
- * {@inheritdoc}
- */
 class SearchApiAttachmentsFieldCollectionsAlterSettings extends SearchApiAttachmentsAlterSettings {
 
   /**
    * {@inheritdoc}
    */
   public function alterItems(array &$items) {
+    $exclude = array();
+    foreach (explode(' ', $this->options['excluded_extensions']) as $ext) {
+      $exclude[$ext] = file_get_mimetype('dummy.' . $ext);
+    }
     // Get the field collection bundles.
     $field_collections_instances = field_info_instances('field_collection_item');
     $field_collections = array_keys($field_collections_instances);
     if (!empty($field_collections_instances)) {
-      foreach ($items as &$item) {
+      foreach ($items as $id => &$item) {
         // Case of field collection fields.
         foreach ($field_collections as $field_collection) {
           if (isset($item->{$field_collection})) {
@@ -30,18 +30,17 @@ class SearchApiAttachmentsFieldCollectionsAlterSettings extends SearchApiAttachm
                 $file_fields[] = $field_name;
               }
             }
-            if (empty($file_fields)) {
-              return;
-            }
-            $collections = field_get_items($this->index->getEntityType(), $item, $field_collection);
+            $collections = field_get_items($this->index->item_type, $item, $field_collection);
             if ($collections) {
               $collection_item_ids = array();
               foreach ($collections as $field_collection_id) {
                 $collection_item_ids[] = $field_collection_id['value'];
               }
               $collection_items = entity_load_multiple_by_name('field_collection_item', $collection_item_ids);
+            }
 
-              // Index the files content.
+            // Index the files content.
+            if (!empty($file_fields)) {
               foreach ($file_fields as $file_field) {
                 foreach ($collection_items as $collection_item) {
                   $field_collection_name = $collection_item->field_name;
@@ -49,11 +48,11 @@ class SearchApiAttachmentsFieldCollectionsAlterSettings extends SearchApiAttachm
                     $files = field_get_items('field_collection_item', $collection_item, $file_field);
                     if (!empty($files)) {
                       // Limit to the max number of value per field.
-                      if (isset($this->options['number_indexed']) && $this->options['number_indexed'] != '0' && count($files) > $this->options['number_indexed']) {
+                      if ($this->options['number_indexed'] != '0' && count($files) > $this->options['number_indexed']) {
                         $files = array_slice($files, 0, $this->options['number_indexed']);
                       }
                       foreach ($files as $file) {
-                        if ($this->isFileIndexable($file, $item, $field_collection_name)) {
+                        if (!in_array($file['filemime'], $exclude) && !$this->is_temporary($file)) {
                           $attachments = 'attachments_' . $file_field;
                           if (isset($item->{$attachments})) {
                             $item->{$attachments} .= ' ' . $this->getFileContent($file);
@@ -79,7 +78,7 @@ class SearchApiAttachmentsFieldCollectionsAlterSettings extends SearchApiAttachm
    */
   public function propertyInfo() {
     $ret = array();
-    if ($this->index->getEntityType() == 'file') {
+    if ($this->index->item_type == 'file') {
       $ret['attachments_content'] = array(
         'label' => 'File content',
         'description' => 'File content',
@@ -111,5 +110,4 @@ class SearchApiAttachmentsFieldCollectionsAlterSettings extends SearchApiAttachm
     }
     return $ret;
   }
-
 }

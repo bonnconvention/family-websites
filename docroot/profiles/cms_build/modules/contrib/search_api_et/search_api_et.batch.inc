@@ -1,29 +1,24 @@
 <?php
 
 /**
- * @file
- * Contains functions to handle batch processing.
- */
-
-/**
  * Batch API callback for the item queueing functionality.
  *
- * @param SearchApiIndex $index
+ * @param object $index
  *   The index for which items should be queued.
- * @param integer $entity_ids
- *   The EntityIDs to be handled.
- * @param integer $step
- *   The step number.
- * @param $context
+ * @param integer $batch_size
+ *   Number of items to index per batch.
+ * @param integer $limit
+ *   Maximum number of items to index.
+ * @param array $context
  *   The batch context.
  */
-function search_api_et_batch_queue_entities($index, $entity_ids, $step, &$context) {
+function search_api_et_batch_queue_entities($index, $entity_ids, $step, array &$context) {
   // Persistent data among batch runs for results.
   if (!isset($context['results']['indexes'][$index->id])) {
     $context['results']['indexes'][$index->id] = $index;
     $context['results']['queued'][$index->id] = 0;
     if (drupal_is_cli() === TRUE) {
-      drush_log(dt('Adding items to the !index queue.', array('!index' => $index->name)), 'ok');
+      drush_log(dt("Adding items to the !index queue.", array('!index' => $index->name)), 'ok');
     }
   }
 
@@ -38,8 +33,8 @@ function search_api_et_batch_queue_entities($index, $entity_ids, $step, &$contex
   $ids = array();
   foreach ($entities_to_process as $id => $entity) {
     foreach (search_api_et_item_languages($entity, $entity_type, $index) as $lang) {
-      $item_id = SearchApiEtHelper::buildItemId($id, $lang);
-      $ids[$item_id] = $item_id;
+      $lang_id = "{$lang}_{$id}";
+      $ids[$lang_id] = $lang_id;
     }
   }
 
@@ -49,11 +44,7 @@ function search_api_et_batch_queue_entities($index, $entity_ids, $step, &$contex
 
   // Display progress message.
   $format_plural = drupal_is_cli() === TRUE ? '_search_api_drush_format_plural' : 'format_plural';
-  $context['message'] = $format_plural($context['results']['queued'][$index->id],
-    'Index "!index": successfully queued 1 item.',
-    'Index "!index": successfully queued @count items.',
-    array('!index' => $index->name)
-  );
+  $context['message'] = $format_plural($context['results']['queued'][$index->id], 'Successfully queued 1 item.', 'Successfully queued @count items.');
 }
 
 /**
@@ -115,7 +106,7 @@ function search_api_et_batch_queue_entities_finished($success, $results, $operat
       // SearchApiEntityDataSourceController.)
       if (empty($index->options['fields'])) {
         $redirect .= '/fields';
-        $drupal_set_message($t('The index was successfully created. Please set up its indexed fields now.'));
+        drupal_set_message(t('The index was successfully created. Please set up its indexed fields now.'));
       }
     }
   }

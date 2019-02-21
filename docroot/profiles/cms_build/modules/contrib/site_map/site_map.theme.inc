@@ -1,11 +1,11 @@
 <?php
-
 /**
  * @file
  * site_map.theme.inc
  *
  * Site map theme functions.
  */
+
 
 /**
  * Returns HTML for a site map feed icon legend.
@@ -68,7 +68,6 @@ function theme_site_map_box($variables) {
  * @param array $variables
  *   An associative array containing:
  *   - url: The url of the feed.
- *   - name: The name of the feed.
  *   - type: The type of feed icon.
  *
  * @return string
@@ -81,7 +80,8 @@ function theme_site_map_feed_icon($variables) {
     case 'node':
       $output = theme('image', array(
         'path' => drupal_get_path('module', 'site_map') . '/feed-small.png',
-        'alt' => t('Syndicated feed icon'),
+        'title' => t('Syndicate content'),
+        'alt' => t('Syndicate content'),
         )
       );
       break;
@@ -89,19 +89,15 @@ function theme_site_map_feed_icon($variables) {
     case 'comment':
       $output = theme('image', array(
         'path' => drupal_get_path('module', 'site_map') . '/feed-small-comment.png',
-        'alt' => t('Syndicated feed icon'),
+        'title' => t('Syndicate comments'),
+        'alt' => t('Syndicate comments'),
         )
       );
       break;
   }
 
   if (!empty($variables['url'])) {
-    $output = l($output, $variables['url'], array(
-        'attributes' => array(
-          'class' => array('feed-link'),
-          'title' => t('Syndicated feed for') . ' ' . $variables['name'],
-        ),
-        'html' => TRUE));
+    $output = l($output, $variables['url'], array('attributes' => array('class' => 'feed-link'), 'html' => TRUE));
   }
 
   return $output;

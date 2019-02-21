@@ -219,7 +219,9 @@ function menu_position_taxonomy_autocomplete($vocabulary, $tags_typed = '') {
       if (strpos($name, ',') !== FALSE || strpos($name, '"') !== FALSE) {
         $n = '"' . str_replace('"', '""', $name) . '"';
       }
-      $term_matches[$prefix . $n] = check_plain($name);
+      else {
+        $term_matches[$prefix . $n] = check_plain($name);
+      }
     }
   }
 

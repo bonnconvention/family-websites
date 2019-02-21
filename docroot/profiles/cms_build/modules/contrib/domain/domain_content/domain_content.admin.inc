@@ -42,8 +42,6 @@ function domain_content_page() {
  */
 function domain_content_list() {
   global $user;
-  domain_user_set($user);
-
   $build = array();
   $show_all = user_access('bypass node access') || user_access('review content for all domains');
 
@@ -324,7 +322,7 @@ function domain_content_form() {
   $destination = drupal_get_destination();
   $options = array();
   foreach ($nodes as $node) {
-    $l_options = (!empty($node->language) && $node->language != LANGUAGE_NONE) ? array('language' => $languages[$node->language]) : array();
+    $l_options = $node->language != LANGUAGE_NONE ? array('language' => $languages[$node->language]) : array();
     $options[$node->nid] = array(
       'title' => array(
         'data' => array(
@@ -342,7 +340,7 @@ function domain_content_form() {
       'changed' => format_date($node->changed, 'short'),
     );
     if ($multilanguage) {
-      $options[$node->nid]['language'] = (empty($node->language) || $node->language == LANGUAGE_NONE) ? t('Language neutral') : t($languages[$node->language]->name);
+      $options[$node->nid]['language'] = $node->language == LANGUAGE_NONE ? t('Language neutral') : t($languages[$node->language]->name);
     }
     // Build a list of all the accessible operations for the current node.
     $operations = array();
@@ -386,7 +384,7 @@ function domain_content_form() {
   }
   // Only use a tableselect when the current user is able to perform any
   // operations.
-  if (!empty($operations)) {
+  if ($admin_access) {
     $form['nodes'] = array(
       '#type' => 'tableselect',
       '#header' => $header,

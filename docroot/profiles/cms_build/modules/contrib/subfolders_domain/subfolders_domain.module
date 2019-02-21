@@ -188,10 +188,6 @@ function subfolders_domain_domain_load(&$domain) {
  */
 function subfolders_domain_url_outbound_alter(&$path, &$options, $original_path) {
   global $base_path;
-  $testpath = explode('/', $base_path);
-  if (isset($testpath[1]) && trim($testpath[1]) != '') {
-    $base_path = '/' . $testpath[1] . '/';
-  }
   $domain = domain_get_domain();
   // Try to modify internal links properly.
   if (isset($domain['subfolders_domain']['subfolder']) && trim($domain['subfolders_domain']['subfolder']) != '') {
@@ -203,9 +199,9 @@ function subfolders_domain_url_outbound_alter(&$path, &$options, $original_path)
       $path = $base_path . variable_get('site_frontpage', 'node');
     }
     // Handle destination=foo.
-    /* if (isset($domain['subfolders_domain']['subfolder']) && isset($options['query']['destination'])) {
+    if (isset($domain['subfolders_domain']['subfolder']) && isset($options['query']['destination'])) {
       $options['query']['destination'] = $domain['subfolders_domain']['subfolder'] . '/' . $options['query']['destination'];
-    }*/
+    }
   }
 }
 
@@ -887,7 +883,6 @@ function theme_subfolders_domain_roles_form($variables) {
  * @ingroup forms
  */
 function subfolders_domain_admin_content($form, $form_state) {
-  module_load_include('inc', 'node', 'node.admin');
   if (isset($form_state['values']['operation']) && $form_state['values']['operation'] == 'delete') {
     return node_multiple_delete_confirm($form, $form_state, array_filter($form_state['values']['nodes']));
   }
@@ -1218,19 +1213,4 @@ function subfolders_domain_create_alias() {
       }
     }
   }
-}
-
-/**
- * Implements hook_features_api().
-**/
-function subfolders_domain_features_api() {
-  return array(
-    'subfolders_domain' => array(
-      'name' => t('Subfolders domain'),
-      'default_hook' => 'subfolders_domain_features_default_domain',
-      'default_file' => FEATURES_DEFAULTS_INCLUDED,
-      'feature_source' => TRUE,
-      'file' => drupal_get_path('module', 'subfolders_domain') . '/subfolders_domain.features.inc',
-    ),
-  );
 }

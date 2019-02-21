@@ -1,0 +1,25 @@
+diff --git a/pathauto.inc b/pathauto.inc
+index 9f98eec..445de35 100644
+--- a/pathauto.inc
++++ b/pathauto.inc
+@@ -71,8 +71,18 @@ function _pathauto_alias_exists($alias, $source, $language = LANGUAGE_NONE) {
+     ':language' => $language,
+     ':language_none' => LANGUAGE_NONE,
+   ))->fetchField();
+-
+-  return !empty($pid);
++  if(!empty($pid)) {
++    return TRUE;
++  }
++  else {
++    if (module_exists('redirect')) {
++      $rid = redirect_load_by_source($alias, $language);
++      if (!empty($rid)) {
++        return TRUE;
++      }
++    }
++  }
++  return FALSE;
+ }
+ 
+ /**

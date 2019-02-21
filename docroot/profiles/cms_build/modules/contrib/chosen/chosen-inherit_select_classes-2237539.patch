@@ -1,0 +1,42 @@
+diff --git a/chosen.admin.inc b/chosen.admin.inc
+index 188c173..1731745 100644
+--- a/chosen.admin.inc
++++ b/chosen.admin.inc
+@@ -82,6 +82,12 @@ function chosen_admin_settings($form, &$form_state) {
+     '#default_value' => variable_get('chosen_use_theme', TRUE),
+     '#description' => t('Enable or disable the default chosen CSS file. Disable this option if your theme contains custom styles for Chosen replacements.'),
+   );
++  $form['options']['chosen_inherit_select_classes'] = array(
++    '#type' => 'checkbox',
++    '#title' => t('Inherit select classes'),
++    '#default_value' => variable_get('chosen_inherit_select_classes', TRUE),
++    '#description' => t('When enabled, Chosen will grab any classes on the original select field and add them to Chosen’s container div.'),
++  );
+ 
+   $form['strings'] = array(
+     '#type' => 'fieldset',
+diff --git a/chosen.install b/chosen.install
+index 71ec793..df91703 100644
+--- a/chosen.install
++++ b/chosen.install
+@@ -50,6 +50,7 @@ function chosen_uninstall() {
+   variable_del('chosen_use_theme');
+   variable_del('chosen_disable_search');
+   variable_del('chosen_disable_search_threshold');
++  variable_del('chosen_inherit_select_classes');
+ }
+ 
+ /**
+diff --git a/chosen.module b/chosen.module
+index e54378d..c51f98e 100644
+--- a/chosen.module
++++ b/chosen.module
+@@ -112,7 +112,7 @@ function chosen_library() {
+     'placeholder_text_multiple' => variable_get('chosen_placeholder_text_multiple', t('Choose some options')),
+     'placeholder_text_single' => variable_get('chosen_placeholder_text_single', t('Choose an option')),
+     'no_results_text' => variable_get('chosen_no_results_text', t('No results match')),
+-    'inherit_select_classes' => TRUE,
++    'inherit_select_classes' => (bool) variable_get('chosen_inherit_select_classes', TRUE),
+   );
+ 
+   $module_path = drupal_get_path('module', 'chosen');

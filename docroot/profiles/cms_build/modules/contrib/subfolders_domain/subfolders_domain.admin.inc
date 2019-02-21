@@ -60,10 +60,9 @@ function subfolders_domain_admin($form, &$form_state, $domain = array()) {
   }
   
   $domain_default = domain_default();
-  $path_to_language_settings = $domain_default['scheme'] . '://' . $domain_default['subdomain'] . '/admin/structure/domain/view/'.$domain['domain_id'].'/config';
+  $path_to_language_settings = $domain_default['path'] . 'admin/structure/domain/view/'.$domain['domain_id'].'/config';
   $form['subfolders_domain']['language'] = array(
     '#title' => t('Language'),
-    '#access' => module_exists('locale'),
     '#type' => 'select',
     '#options' => $options_languages,
     '#default_value' => !empty($language_default) && isset($languages[$language_default]) ? $language_default : FALSE,

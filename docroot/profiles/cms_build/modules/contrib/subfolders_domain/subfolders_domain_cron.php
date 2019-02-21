@@ -30,12 +30,7 @@
 // $drupal_root = '/var/www/drupal';
 // TODO (tobe changed).
 // Cron from Drupal installation (LINUX).
-if (isset($_SERVER['PWD']) && file_exists($_SERVER['PWD'] . "/sites/all/modules/subfolders_domain/subfolders_domain_cron.php")) {
-  $drupal_root = $_SERVER['PWD'];
-}
-if (isset($drupal_root)) {
-  define('DRUPAL_ROOT', $drupal_root);
-  include_once DRUPAL_ROOT . '/includes/bootstrap.inc';
-  drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
-  subfolders_domain_create_alias();
-}
+define('DRUPAL_ROOT', '/var/local/cms/www');
+include_once DRUPAL_ROOT . '/includes/bootstrap.inc';
+drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+subfolders_domain_create_alias();

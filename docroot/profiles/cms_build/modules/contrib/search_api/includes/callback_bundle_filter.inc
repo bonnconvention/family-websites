@@ -34,8 +34,7 @@ class SearchApiAlterBundleFilter extends SearchApiAbstractAlterCallback {
       return;
     }
 
-    $multi_entity = $this->isMultiEntityIndex();
-    if ($multi_entity) {
+    if ($this->isMultiEntityIndex()) {
       $bundle_prop = 'item_bundle';
     }
     else {
@@ -47,10 +46,6 @@ class SearchApiAlterBundleFilter extends SearchApiAbstractAlterCallback {
     $default = (bool) $this->options['default'];
 
     foreach ($items as $id => $item) {
-      // Ignore types that have no bundles.
-      if ($multi_entity && !self::hasBundles(entity_get_info($item->item_type))) {
-        continue;
-      }
       if (isset($bundles[$item->$bundle_prop]) == $default) {
         unset($items[$id]);
       }
@@ -130,6 +125,21 @@ class SearchApiAlterBundleFilter extends SearchApiAbstractAlterCallback {
    */
   protected static function hasBundles(array $entity_info) {
     return !empty($entity_info['entity keys']['bundle']) && !empty($entity_info['bundles']);
+  }
+
+  /**
+   * Determines whether the given index contains multiple types of entities.
+   *
+   * @param SearchApiIndex|null $index
+   *   (optional) The index to examine. Defaults to the index set for this
+   *   plugin.
+   *
+   * @return bool
+   *   TRUE if the index is a multi-entity index, FALSE otherwise.
+   */
+  protected function isMultiEntityIndex(SearchApiIndex $index = NULL) {
+    $index = $index ? $index : $this->index;
+    return $index->datasource() instanceof SearchApiCombinedEntityDataSourceController;
   }
 
 }

@@ -1,0 +1,158 @@
+--- scs.module	2014-06-17 19:02:30.000000000 +0300
++++ scs.module	2014-06-17 21:38:02.000000000 +0300
+@@ -53,7 +53,7 @@
+     'scs_toc' => array(
+       'variables' => array('nodes' => array()),
+       'file' => 'scs.theme.inc',
+-    ),
++    )
+   );
+ }
+ 
+@@ -125,6 +125,59 @@
+       'nodes' => $nodes,
+       'toc' => empty($form_state['input']['scs_toc']) ? FALSE : TRUE,
+     ));
++
++    global $language, $user;
++
++    $node = (object) array(
++      'language' => language_default()->language,
++      'title'    => empty($form_state['input']['scs_newsletter_title']) ? t('Untitled') : $form_state['input']['scs_newsletter_title'],
++      'type'     => variable_get('scs_node_type', 'simplenews')
++    );
++
++    node_object_prepare($node);
++
++    $node->uid = $user->uid;
++    $node->body[$node->language][0]['value'] = $form['body'][LANGUAGE_NONE][0]['#default_value'];
++    $node->body[$node->language][0]['format'] = 'full_html';
++    $node->field_simplenews_term[LANGUAGE_NONE][]['tid'] = empty($form_state['input']['scs_newsletter_category']) ? get_newsletter_default_category('newsletter') : $form_state['input']['scs_newsletter_category'];
++
++    global $language, $language_content;
++
++    $language_copy = $language;
++    $language_content_copy = $language_content;
++
++    $languages = language_list();
++
++    foreach (array_keys($form_state['input']['scs_newsletter_languages']) as $langcode) {
++      $language = $language_content = $languages[$langcode];
++
++      $nodes = node_load_multiple(array_keys($form_state['input']['nodes']), array(), TRUE);
++      $node->body[$langcode][0]['value'] = theme('scs_newsletter', array(
++        'nodes' => $nodes,
++        'toc' => empty($form_state['input']['scs_toc']) ? FALSE : TRUE
++      ));
++      $node->body[$langcode][0]['format'] = 'full_html';
++
++      $handler = entity_translation_get_handler('node', $node);
++
++      $translation = array(
++        'language'  => $langcode,
++        'source'    => $node->language,
++        'status'    => 1,
++        'translate' => 0
++      );
++
++      $handler->setTranslation($translation, $node);
++    }
++
++    $language = $language_copy;
++    $language_content = $language_content_copy;
++
++    $node = node_submit($node);
++
++    node_save($node);
++
++    drupal_goto('node/' . $node->nid . '/edit');
+   }
+ }
+ 
+@@ -134,6 +187,28 @@
+ function scs_node_sort_form($form, &$form_state) {
+   $nodes = array_filter($form_state['values']['nodes']);
+ 
++  $form['scs_newsletter_title'] = array(
++    '#type' => 'textfield',
++    '#title' => t('Newsletter title'),
++    '#description' => t('Choose a title for your english version of the newsletter.'),
++    '#required' => TRUE,
++  );
++
++  $form['scs_newsletter_category'] = array(
++    '#type' => 'radios',
++    '#title' => t('Newsletter category'),
++    '#description' => t('Choose a category for your newsletter.'),
++    '#options' => get_newsletter_categories('newsletter'),
++    '#required' => TRUE,
++  );
++
++  $form['scs_newsletter_languages'] = array(
++    '#type' => 'checkboxes',
++    '#title' => t('Newsletter languages'),
++    '#description' => t('Choose the languages for your newsletter.'),
++    '#options' => get_available_languages(),
++  );
++
+   // Checkbox for Table of contents
+   $form['scs_toc'] = array(
+     '#type' => 'checkbox',
+@@ -151,6 +226,7 @@
+       ),
+     );
+   }
++
+   $form['#theme'] = 'scs_sortable_table';
+ 
+   $form['actions']['submit'] = array(
+@@ -167,3 +243,49 @@
+ function scs_node_sort_submit(&$form, &$form_state) {
+   uasort($form_state['values']['nodes'], 'drupal_sort_weight');
+ }
++
++/**
++ * Helper function - get taxonomy term options for select widget
++ * @param $machine_name String - the machine name of the newsletter category taxonomy
++ * @return array of select options for form
++ */
++function get_newsletter_default_category($machine_name) {
++  $vid = taxonomy_vocabulary_machine_name_load($machine_name)->vid;
++  $options_source = taxonomy_get_tree($vid);
++
++  return $options_source[0]->tid;
++}
++
++/**
++ * Helper function - get taxonomy term options for select widget
++ * @param $machine_name String - the machine name of the newsletter category taxonomy
++ * @return array of select options for form
++ */
++function get_newsletter_categories($machine_name) {
++  $vid = taxonomy_vocabulary_machine_name_load($machine_name)->vid;
++  $options_source = taxonomy_get_tree($vid);
++
++  foreach ($options_source as $item) {
++    $key = $item->tid;
++    $value = $item->name;
++    $options[$key] = $value;
++  }
++
++  return $options;
++}
++
++/**
++ * Helper function - get languages names options for select widget
++ * @return array of available languages names
++ */
++function get_available_languages() {
++  $result = array();
++  $languages = language_list();
++
++  unset($languages[language_default()->language]);
++
++  foreach ($languages as $langcode => $language)
++    $result[$langcode] = $language->name;
++
++  return $result;
++}

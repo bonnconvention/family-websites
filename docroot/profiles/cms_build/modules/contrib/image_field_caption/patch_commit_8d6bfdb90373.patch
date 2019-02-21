@@ -1,0 +1,15 @@
+diff --git a/sites/all/modules/contrib/image_field_caption/image_field_caption.module b/sites/all/modules/contrib/image_field_caption/image_field_caption.module
+index 1b0b61bd8e0aedf06c9e841aa050a58dd9bc965a..f32ad4bc05f02f7330ab4bcc5019e72caba734e1 100644
+--- a/sites/all/modules/contrib/image_field_caption/image_field_caption.module
++++ b/sites/all/modules/contrib/image_field_caption/image_field_caption.module
+@@ -208,6 +208,10 @@ function image_field_caption_field_attach_update($entity_type, $entity) {
+       $items = (array) $entity->{$field_name}[$langcode];
+       $delta_count = 0;
+       foreach ($items as $delta => $item) {
++        // skip empty values
++        if(is_null($item['image_field_caption']['value']))
++          continue;
++
+         // We now know we have someting to insert.
+         $do_insert = TRUE;
+         $record = array(

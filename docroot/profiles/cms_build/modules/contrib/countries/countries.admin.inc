@@ -223,7 +223,12 @@ function countries_admin_form_submit($form, &$form_state) {
   $country = (object) $form_state['values'];
   entity_form_submit_build_entity('country', $country, $form, $form_state);
 
-  if (country_save($country) == SAVED_UPDATED) {
+  // Required to trigger an update.
+  $iso2 = isset($form['#country']) ? $form['#country']->iso2 : FALSE;
+
+  country_save($country, $iso2);
+
+  if ($iso2) {
     $message = t('The country %country has been updated.', array('%country' => $country->name));
   }
   else {
@@ -264,7 +269,7 @@ function countries_admin_delete_submit($form, &$form_state) {
   country_delete($country->iso2);
 
   drupal_set_message(t('Deleted country %country.', array('%country' => $country->name)));
-  $form_state['redirect'] = 'admin/config/regional/countries';
+  $form_state['redirect'] = 'admin/config/content/countries';
 }
 
 /**
@@ -372,11 +377,13 @@ function countries_admin_import_form_submit($form, &$form_state) {
     foreach (array_filter($form_state['values']['inserts']) as $iso2) {
       $country = $form_state['inserts'][$iso2];
       if ($duplicates = country_duplicate_field_check($country)) {
-        $skipped[] = t('Skipped @iso2 due to duplicate fields in:<br />!duplicates',
-            array('@iso2' => $iso2, '!duplicates' => implode('<br />', $duplicates)));
+        $duplicates = array_unique(drupal_array_merge_deep_array($duplicates));
+
+        $skipped[] = t('Skipped @iso2 due to duplicate fields in: @duplicates',
+            array('@iso2' => $iso2, '@duplicates' => implode(', ', $duplicates)));
       }
       else {
-        country_save($country, FALSE);
+        country_save($country);
         $inserted[] = l($country->name, 'admin/config/regional/countries/' . $country->iso2);
       }
     }
@@ -397,11 +404,12 @@ function countries_admin_import_form_submit($form, &$form_state) {
         $country->{$key} = $value;
       }
       if ($duplicates = country_duplicate_field_check($country)) {
-        $skipped[] = t('Skipped @iso2 due to duplicate fields in:<br />!duplicates',
-            array('@iso2' => $iso2, '!duplicates' => implode('<br />', $duplicates)));
+        $duplicates = array_unique(drupal_array_merge_deep_array($duplicates));
+        $skipped[] = t('Skipped @iso2 due to duplicate fields in: @duplicates',
+            array('@iso2' => $iso2, '@duplicates' => implode(', ', $duplicates)));
       }
       else {
-        country_save($country, FALSE);
+        country_save($country, $iso2);
         $updated[] = l($country->name, 'admin/config/regional/countries/' . $country->iso2);
       }
     }
@@ -412,9 +420,6 @@ function countries_admin_import_form_submit($form, &$form_state) {
 
   if (empty($inserted) && empty($updated)) {
     drupal_set_message(t('No changes to the countries database were done.'));
-  }
-  else {
-    countries_clear_caches();
   }
 
   if (!empty($skipped)) {
@@ -467,16 +472,12 @@ function countries_csv_updates($file = NULL, $defaults = array()) {
           }
         }
         elseif (empty($value) || $value == 'NULL') {
-          // Skip setting defaults until we check existing countries later.
+          // Skip setting defaults until we check existing countries latter.
         }
         elseif ($error = countries_property_invalid($key, $value)) {
           $errors[] = $error;
         }
         else {
-          if ($key == 'name' || $key == 'official_name') {
-            // Enable translation of country names during importation.
-            $value = t($value);
-          }
           $country->$key = $value;
         }
       }
@@ -506,9 +507,6 @@ function countries_csv_updates($file = NULL, $defaults = array()) {
         }
         if (!isset($country->{$key})) {
           $country->{$key} = $existing ? $existing->{$key} : $default_value;
-        }
-        if ($key == 'name' || $key == 'official_name') {
-          $existing->{$key} = t($existing->{$key});
         }
         if ((string) $existing->{$key} !== (string) $country->{$key}) {
           $updates[$country->iso2][$key] = array('new' => $country->{$key}, 'old' => $existing->{$key});
@@ -603,10 +601,10 @@ function country_duplicate_field_check($country) {
       $value = $query->execute()->fetchColumn();
       if (!empty($value)) {
         $conflict = country_load($value);
-        $duplicates[$property] = t('The <em>@value</em> is already used by <em>@country</em>',
+        $duplicates[$property] = t('The %value is already used by !country',
             array(
-              '@value' => country_property($country, $property),
-              '@country' => country_property($conflict, 'name'),
+              '%value' => $country->$property,
+              '!country' => country_property($conflict, 'name'),
             ));
       }
     }

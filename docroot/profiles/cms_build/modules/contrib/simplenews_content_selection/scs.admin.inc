@@ -19,22 +19,21 @@ function scs_admin_settings_form() {
   }
 
   $form['scs_view_mode'] = array(
-    '#type' => 'checkboxes',
+    '#type' => 'select',
     '#title' => t('View mode'),
     '#description' => t('Select the view mode to use when rendering the newsletter, default is the one provided by SCS, that you can customize in the Field UI.'),
     '#options' => $view_modes,
-    '#default_value' => variable_get('scs_view_mode', array('scs')),
+    '#default_value' => variable_get('scs_view_mode', 'scs'),
   );
 
   // Node type
-  $types = drupal_map_assoc(simplenews_get_content_types());
+  $types = simplenews_get_content_types();
   if (count($types) > 1) {
-    $type_names = node_type_get_names();
     $form['scs_node_type'] = array(
       '#type' => 'select',
       '#title' => t('Newsletter type'),
       '#description' => t('You have defined multiple content types for newsletters, check the one you want to use with SCS.'),
-      '#options' => array_intersect_key($type_names, $types),
+      '#options' => drupal_map_assoc($types),
       '#default_value' => variable_get('scs_node_type', 'simplenews'),
     );
   }

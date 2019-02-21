@@ -14,11 +14,7 @@ class MultipleEntityQueueHandler extends SimpleEntityQueueHandler {
    * {@inheritdoc}
    */
   public function subqueueForm(EntitySubqueue $subqueue, &$form_state) {
-    $values = (array) $subqueue;
-
-    if (isset($form_state['values']) && !empty($form_state['values'])) {
-      $values = $form_state['values'] + $values;
-    }
+    $values = isset($form_state['values']) ? $form_state['values'] : (array) $subqueue;
 
     $form = array();
     $form['label'] = array(

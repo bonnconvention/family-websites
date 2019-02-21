@@ -7,7 +7,7 @@
  */
 
 $plugin = array(
-  'title' => t('Entity Queue'),
+  'title' => t('Entityqueue'),
   'class' => 'EntityReference_SelectionHandler_EntityQueue',
   'weight' => 0,
 );

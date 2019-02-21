@@ -169,16 +169,8 @@ class CerHandler extends CerHandlerBase implements CerHandlerInterface {
   /**
    * Implements CerHandlerInterface::insert().
    */
-  public function insert($ids = NULL) {
-
-    if (empty($ids)) {
-      $entities = $this->getReferencedEntities();
-    }
-    else {
-      $entities = entity_load($this->remote['entity_type'], $ids);
-    }
-
-    foreach ($entities as $referenced_entity) {
+  public function insert() {
+    foreach ($this->getReferencedEntities() as $referenced_entity) {
       $this->reference($referenced_entity);
       _cer_update($this->remote['entity_type'], $referenced_entity);
     }
@@ -199,11 +191,7 @@ class CerHandler extends CerHandlerBase implements CerHandlerInterface {
       }
     }
 
-    $added = array_diff($this->getLocalReferenceIDs(), $this->getReferenceIDs($original, $this->local));
-
-    if (!empty($added)) {
-      $this->insert($added);
-    }
+    $this->insert();
   }
 
   /**
