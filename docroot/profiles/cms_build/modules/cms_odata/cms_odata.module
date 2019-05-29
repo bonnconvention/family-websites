@@ -56,33 +56,80 @@ function cms_odata_cron() {
     $focal_points = get_ldap_contacts($filters);
 
     if (!empty($focal_points)) {
+      $deleted = 0;
       // remove all the data
-      $results = entity_load('odata_focal_point');
-      $entity_ids = array_keys($results);
-      entity_delete_multiple('odata_focal_point', $entity_ids);
-
-      // add new results
-      foreach($focal_points as $fp) {
-        $entity = entity_create('odata_focal_point', array());
-        $entity->dn = $fp->dn;
-        $entity->first_name = $fp->first_name;
-        $entity->last_name = $fp->last_name;
-        $entity->position = $fp->position;
-        $entity->address = $fp->address;
-        $entity->country = $fp->country_rendered;
-        $entity->country_iso2 = $fp->country;
-        $entity->organization = $fp->organization;
-        $entity->country_post = $fp->country_post_rendered;
-        $entity->country_post_iso2 = $fp->country_post;
-        $entity->work_email = $fp->work_email;
-        $entity->telephone = $fp->telephone;
-        $entity->fax = $fp->fax;
-        $entity->instruments = $fp->instruments_rendered;
-        $entity->status_person = $fp->statusperson_rendered;
-        $entity->title = $fp->title;
-        $entity->save();
+      $existing = entity_load('odata_focal_point');
+      $obsolete_ids = [];
+      $existing_by_dn = [];
+      foreach($existing as $id => $row) {
+        $existing_by_dn[$row->dn] = $row;
+        if (!array_key_exists($row->dn, $focal_points)) {
+          $obsolete_ids[] = $id;
+        }
+      }
+      if (!empty($obsolete_ids)) {
+        $deleted = count($obsolete_ids);
+        entity_delete_multiple('odata_focal_point', $obsolete_ids);
       }
 
+      $field_mappings = array(
+        'dn' => 'dn',
+        'first_name' => 'first_name',
+        'last_name' => 'last_name',
+        'position' => 'position',
+        'address' => 'address',
+        'country' => 'country_rendered',
+        'country_iso2' => 'country',
+        'organization' => 'organization',
+        'country_post' => 'country_post_rendered',
+        'country_post_iso2' => 'country_post',
+        'work_email' => 'work_email',
+        'telephone' => 'telephone',
+        'fax' => 'fax',
+        'instruments' => 'instruments_rendered',
+        'status_person' => 'statusperson_rendered',
+        'title' => 'title'
+      );
+
+      // add new results
+      $updated = 0;
+      $new = 0;
+      foreach($focal_points as $dn => $fp) {
+        $save = FALSE;
+        $record_exists = array_key_exists($dn, $existing_by_dn);
+        if ($record_exists) {
+          $entity = $existing_by_dn[$dn];
+        }
+        else {
+          // New records always will be saved
+          $new++;
+          $save = TRUE;
+          $entity = entity_create('odata_focal_point', array());
+        }
+        // Copy destination to source and decide if needs saving
+        foreach ($field_mappings as $field_name_dest => $field_name_source) {
+          if ($record_exists && ($entity->{$field_name_dest} != $fp->{$field_name_source})) {
+            $save = TRUE;
+          }
+          $entity->{$field_name_dest} = $fp->{$field_name_source};
+        }
+        if ($save) {
+          if ($record_exists) {
+            $updated++;
+          }
+          $entity->save();
+        }
+      }
+      watchdog(
+        'cms_odata',
+        'Sync completed: @count_n created, @count_u updated and @count_d contacts deleted',
+        array(
+          '@count_n' => $new,
+          '@count_u' => $updated,
+          '@count_d' => $deleted,
+        ),
+        WATCHDOG_NOTICE
+      );
       if (module_exists('cms_varnish')) {
         $urls = array('national-focal-points');
         cms_varnish_purge_urls($urls);
