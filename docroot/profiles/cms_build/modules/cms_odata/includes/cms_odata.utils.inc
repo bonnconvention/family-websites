@@ -10,6 +10,7 @@ define ('ODATA_ASCOBANS_STATUS_PERSON', 'cn=National Coordinator,ou=Status Perso
 function get_ldap_contacts($filters) {
   $ldap = CMSContactsLDAP::get_instance();
   $users = $ldap->contacts_list_filter($filters);
+  $ret = [];
 
   foreach($users as $user) {
     $filter = "(&(objectClass=cmsContact)(uid=$user->uid))";
@@ -22,10 +23,10 @@ function get_ldap_contacts($filters) {
       $user->work_email = get_multi_valued_attribute($contact[0], 'mail');
       $user->telephone = get_multi_valued_attribute($contact[0], 'workphonenumbers');
       $user->fax = get_multi_valued_attribute($contact[0], 'faxnumbers');
+      $ret[$user->dn] = $user;
     }
   }
-
-  return $users;
+  return $ret;
 }
 
 function get_multi_valued_attribute($array, $name) {
