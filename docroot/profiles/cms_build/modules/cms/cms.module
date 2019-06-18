@@ -388,6 +388,7 @@ function cms_form_alter(&$form, &$form_state, $form_id) {
                 '#options' => $period,
                 '#description' => t('The maximum time an external cache can use an old version of a page.')
             );
+            break;
         case 'domain_conf_form':
             $period = drupal_map_assoc(array(0, 60, 180, 300, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400, 604800, 2592000, 31536000), 'format_interval');
             $period[0] = '<' . t('none') . '>';
@@ -398,6 +399,7 @@ function cms_form_alter(&$form, &$form_state, $form_id) {
                 '#options' => $period,
                 '#description' => t('Cached pages will not be re-created until at least this much time has elapsed.')
             );
+            break;
     }
 }
 
