@@ -68,25 +68,72 @@ if (!defined('IV')) {
  * Implement hook_init();
  *
  * Load Chosen library
-*/
+ */
 function cms_init() {
-    drupal_add_js(libraries_get_path('chosen') . '/chosen.jquery.min.js');
-    drupal_add_css(libraries_get_path('chosen') . '/chosen.css');
-    drupal_add_js(drupal_get_path('module', 'chosen') . '/chosen.js');
-    drupal_add_js(array(
-       'chosen' => array(
-           'selector' => variable_get('chosen_jquery_selector', 'select:visible'),
-           'minimum_single' => variable_get('chosen_minimum_single', 20),
-           'minimum_multiple' => variable_get('chosen_minimum_multiple', 20),
-           'minimum_width' => variable_get('chosen_minimum_width', 200),
-           'search_contains' => (variable_get('chosen_search_contains', FALSE)) ? TRUE : FALSE,
-           'disable_search' => (variable_get('chosen_disable_search', FALSE)) ? TRUE : FALSE,
-           'disable_search_threshold' => variable_get('chosen_disable_search_threshold', 0),
-           'placeholder_text_multiple' => variable_get('chosen_placeholder_text_multiple', t('Choose some options')),
-           'placeholder_text_single' => variable_get('chosen_placeholder_text_single', t('Choose an option')),
-           'no_results_text' => variable_get('chosen_no_results_text', t('No results match')),
-       ),
-    ), 'setting');
+  drupal_add_js(libraries_get_path('chosen') . '/chosen.jquery.min.js');
+  drupal_add_css(libraries_get_path('chosen') . '/chosen.css');
+  drupal_add_js(drupal_get_path('module', 'chosen') . '/chosen.js');
+  drupal_add_js(array(
+    'chosen' => array(
+      'selector' => variable_get('chosen_jquery_selector', 'select:visible'),
+      'minimum_single' => variable_get('chosen_minimum_single', 20),
+      'minimum_multiple' => variable_get('chosen_minimum_multiple', 20),
+      'minimum_width' => variable_get('chosen_minimum_width', 200),
+      'search_contains' => (variable_get('chosen_search_contains', FALSE)) ? TRUE : FALSE,
+      'disable_search' => (variable_get('chosen_disable_search', FALSE)) ? TRUE : FALSE,
+      'disable_search_threshold' => variable_get('chosen_disable_search_threshold', 0),
+      'placeholder_text_multiple' => variable_get('chosen_placeholder_text_multiple', t('Choose some options')),
+      'placeholder_text_single' => variable_get('chosen_placeholder_text_single', t('Choose an option')),
+      'no_results_text' => variable_get('chosen_no_results_text', t('No results match')),
+    ),
+  ), 'setting');
+
+  $domain_paths = _cms_get_domain_paths();
+  $current_path = request_uri();
+  $current_path = ltrim($current_path, '/');
+  // die(implode(',', $domain_paths));
+  $parts = explode('/', $current_path);
+  if (count($parts) >= 2) {
+    $domain_count = 0;
+    foreach ($parts as $part) {
+      if ($part == 'manage') {
+        continue;
+      }
+      if (in_array($part, $domain_paths)) {
+        $domain_count++;
+      }
+      if ($domain_count >= 2) {
+        drupal_not_found();
+        exit(0);
+      }
+    }
+  }
+}
+
+function _cms_get_domain_paths() {
+  $domain_paths = [];
+  $domains = domain_list_by_machine_name();
+  foreach ($domains as $domain => $settings) {
+    $name = explode('/', $settings['subdomain'])[1];
+    $domain_paths[] = $name;
+  }
+  return $domain_paths;
+}
+
+function cms_node_insert($node) {
+  _cms_go_to_node_source($node);
+}
+
+function cms_node_update($node) {
+  _cms_go_to_node_source($node);
+}
+
+function _cms_go_to_node_source($node) {
+  $domain = $_GET['domain'];
+  if (empty($domain)) {
+    return;
+  }
+  drupal_goto("$domain/" . current_path());
 }
 
 
@@ -247,27 +294,30 @@ function cms_domain_instrument_id($domain_id = NULL) {
  */
 function cms_node_prepare($node) {
 
-    //Redirect on node edit/add from front-end to manage (sudomain)
-    $domain = domain_get_domain();
-    $redirect_content_types = array(
-        'species', 'meeting', 'legal_instrument', 'project', 'country', 'document', 'publication',
-    );
-    if (!drupal_is_cli() && !empty($domain) && !strpos($domain['subdomain'], 'manage')) {
-        if (in_array($node->type, $redirect_content_types)) {
-            if ($cache = cache_get('cms_manage_domain_id')) {
-                $manage_domain_id = $cache->data;
-            }
-            else {
-                $manage_domain_id = db_query("SELECT domain_id FROM {domain} WHERE machine_name LIKE '%_manage' ")->fetchField();
-                cache_set('cms_manage_domain_id', $manage_domain_id, 'cache');
-            }
-            unset($_GET['destination']);
-            $manage = domain_load($manage_domain_id);
-            $path = domain_get_uri($manage);
-            drupal_goto($path);
-        }
+  //Redirect on node edit/add from front-end to manage (sudomain)
+  $domain = domain_get_domain();
+  $redirect_content_types = array(
+    'species', 'meeting', 'legal_instrument', 'project', 'country', 'document', 'publication',
+  );
+  if (!drupal_is_cli() && !empty($domain) && !strpos($domain['subdomain'], 'manage')) {
+    if (in_array($node->type, $redirect_content_types)) {
+      if ($cache = cache_get('cms_manage_domain_id')) {
+        $manage_domain_id = $cache->data;
+      }
+      else {
+        $manage_domain_id = db_query("SELECT domain_id FROM {domain} WHERE machine_name LIKE '%_manage' ")->fetchField();
+        cache_set('cms_manage_domain_id', $manage_domain_id, 'cache');
+      }
+      unset($_GET['destination']);
+      $manage = domain_load($manage_domain_id);
+      $path = domain_get_uri($manage);
+      $domain_path = explode('/', $domain['subdomain'])[1];
+      $path = str_replace("$domain_path/", '', $path);
+      drupal_goto($path, ['query' => ['domain' => $domain_path]]);
     }
+  }
 }
+
 
 /**
  * Impelments quicktabs_alter(&$quicktabs)
