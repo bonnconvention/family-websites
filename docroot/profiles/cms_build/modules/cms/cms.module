@@ -115,6 +115,9 @@ function _cms_get_domain_paths() {
   $domains = domain_list_by_machine_name();
   foreach ($domains as $domain => $settings) {
     $name = explode('/', $settings['subdomain'])[1];
+    if (empty($name)) {
+      continue;
+    }
     $domain_paths[] = $name;
   }
   return $domain_paths;
