@@ -317,13 +317,17 @@ function cms_node_prepare($node) {
       unset($_GET['destination']);
       $manage = domain_load($manage_domain_id);
       $path = domain_get_uri($manage);
-      $domain_path = explode('/', $domain['subdomain'])[1];
-      $path = str_replace("$domain_path/", '', $path);
 
+      $settings = [];
+      if ($domain['domain_id'] != 1) {
+        $domain_path = explode('/', $domain['subdomain'])[1];
+        $path = str_replace("$domain_path/", '', $path);
+        $settings = ['query' => ['domain' => $domain_path]];
+      }
       global $language;
       $langcode = $language->language;
       $path = str_replace("manage/", "manage/$langcode/", $path);
-      drupal_goto($path, ['query' => ['domain' => $domain_path]]);
+      drupal_goto($path, $settings);
     }
   }
 }
