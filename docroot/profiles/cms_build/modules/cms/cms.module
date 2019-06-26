@@ -132,6 +132,7 @@ function cms_node_update($node) {
 }
 
 function _cms_go_to_node_source($node) {
+  return;
   if (drupal_is_cli()) {
     return;
   }
@@ -300,6 +301,7 @@ function cms_domain_instrument_id($domain_id = NULL) {
  * Implements hook_node_prepare($node) called when a node is loaded for add/edit form
  */
 function cms_node_prepare($node) {
+
   //Redirect on node edit/add from front-end to manage (sudomain)
   $domain = domain_get_domain();
   $redirect_content_types = array(
@@ -317,17 +319,7 @@ function cms_node_prepare($node) {
       unset($_GET['destination']);
       $manage = domain_load($manage_domain_id);
       $path = domain_get_uri($manage);
-
-      $settings = [];
-      if ($domain['domain_id'] != 1) {
-        $domain_path = explode('/', $domain['subdomain'])[1];
-        $path = str_replace("$domain_path/", '', $path);
-        $settings = ['query' => ['domain' => $domain_path]];
-      }
-      global $language;
-      $langcode = $language->language;
-      $path = str_replace("manage/", "manage/$langcode/", $path);
-      drupal_goto($path, $settings);
+      drupal_goto($path);
     }
   }
 }
