@@ -88,23 +88,25 @@ function cms_init() {
     ),
   ), 'setting');
 
-  $domain_paths = _cms_get_domain_paths();
-  $current_path = request_uri();
-  $current_path = ltrim($current_path, '/');
-  // die(implode(',', $domain_paths));
-  $parts = explode('/', $current_path);
-  if (count($parts) >= 2) {
-    $domain_count = 0;
-    foreach ($parts as $part) {
-      if ($part == 'manage') {
-        continue;
-      }
-      if (in_array($part, $domain_paths)) {
-        $domain_count++;
-      }
-      if ($domain_count >= 2) {
-        drupal_not_found();
-        exit(0);
+  if (user_is_anonymous()) {
+    $domain_paths = _cms_get_domain_paths();
+    $current_path = request_uri();
+    $current_path = ltrim($current_path, '/');
+    // die(implode(',', $domain_paths));
+    $parts = explode('/', $current_path);
+    if (count($parts) >= 2) {
+      $domain_count = 0;
+      foreach ($parts as $part) {
+        if ($part == 'manage') {
+          continue;
+        }
+        if (in_array($part, $domain_paths)) {
+          $domain_count++;
+        }
+        if ($domain_count >= 2) {
+          drupal_not_found();
+          exit(0);
+        }
       }
     }
   }
