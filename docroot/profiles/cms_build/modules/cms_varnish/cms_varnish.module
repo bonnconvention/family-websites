@@ -18,21 +18,17 @@ function cms_varnish_node_delete($node) {
  * Implements hook_node_presave().
  */
 function cms_varnish_node_presave($node) {
-  // For documents, we need to invalidate all meetings they are linked to.
-  if ($node->type == 'document') {
-    cms_varnish_purge_related_meetings($node);
+  if (!empty($node->nid)) {
+    // For documents, we need to invalidate all meetings they are linked to.
+    if ($node->type == 'document') {
+      cms_varnish_purge_related_meetings($node);
+    }
+    $urls = ['node/' . $node->nid];
+
+    // Get url aliases.
+    $urls = array_merge($urls, cms_varnish_get_url_aliases($urls));
+    cms_varnish_purge_urls($urls);
   }
-
-  $urls = array('node/' . $node->nid);
-
-  // Get url aliases.
-  $urls = array_merge($urls, cms_varnish_get_url_aliases($urls));
-
-
-
-  cms_varnish_purge_urls($urls);
-
-
   cms_varnish_purge_related_views($node);
 }
 
