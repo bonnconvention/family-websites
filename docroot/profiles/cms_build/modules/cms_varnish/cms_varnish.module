@@ -18,16 +18,20 @@ function cms_varnish_node_delete($node) {
  * Implements hook_node_presave().
  */
 function cms_varnish_node_presave($node) {
-  $urls = array('node/' . $node->nid);
-
   // For documents, we need to invalidate all meetings they are linked to.
   if ($node->type == 'document') {
     cms_varnish_purge_related_meetings($node);
   }
 
+  $urls = array('node/' . $node->nid);
+
   // Get url aliases.
   $urls = array_merge($urls, cms_varnish_get_url_aliases($urls));
+
+
+
   cms_varnish_purge_urls($urls);
+
 
   cms_varnish_purge_related_views($node);
 }
@@ -45,7 +49,7 @@ function cms_varnish_purge_related_meetings($node) {
       }
     }
   }
-
+  $urls = array_merge($urls, cms_varnish_get_url_aliases($urls));
   cms_varnish_purge_urls($urls);
 }
 
@@ -92,24 +96,28 @@ function cms_varnish_get_document_meetings($node) {
 
 function cms_varnish_get_url_aliases($urls) {
   $url_aliases = array();
-  foreach ($urls as $url) {
-    $paths = explode('/', drupal_get_path_alias($url));
-    if ($paths) {
-      foreach ($paths as $key => $path) {
-        // Format the path to be compatible with Varnish.
-        $paths[$key] = urlencode($path);
+  $languages = language_list();
+  // Compute the aliases in all languages
+  if ($languages) {
+    foreach ($languages as $language => $l) {
+      foreach ($urls as $url) {
+        $paths = explode('/', drupal_get_path_alias($url, $language));
+        if ($paths) {
+          foreach ($paths as $key => $path) {
+            // Format the path to be compatible with Varnish.
+            $paths[$key] = urlencode($path);
+          }
+          $url_aliases[] = implode('/', $paths);
+        }
       }
-      $url_aliases[] = implode('/', $paths);
     }
   }
-
   return $url_aliases;
 }
 
 function cms_varnish_purge_urls($urls) {
   $output_urls = array();
   $languages = language_list();
-  $host = _varnish_get_host();
   if ($languages) {
     foreach ($urls as $url) {
       cms_varnish_purge($url);
