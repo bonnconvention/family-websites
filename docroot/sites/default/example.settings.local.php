@@ -15,12 +15,6 @@ $conf['theme_debug'] = TRUE;
 $conf['file_temporary_path'] = '/tmp';
 $conf['file_private_path'] = '/path/to/files/private';
 
-#$conf['search_api_server_host'] = '127.0.0.1';
-#$conf['search_api_server_port'] = 8983;
-#$conf['search_api_server_path'] = '/solr/informea';
-#$conf['search_api_server_user'] = 'TODO';
-#$conf['search_api_server_pass'] = 'TODO';
-
 $update_free_access = FALSE;
 
 $conf['base_email_url'] = 'http://cms.local';
