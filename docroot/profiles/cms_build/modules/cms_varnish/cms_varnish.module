@@ -18,6 +18,17 @@ function cms_varnish_node_delete($node) {
  * Implements hook_node_update().
  */
 function cms_varnish_node_update($node) {
+  _cms_varnish_purge_node($node);
+}
+
+/**
+ * Implements hook_node_insert().
+ */
+function cms_varnish_node_insert($node) {
+  _cms_varnish_purge_node($node);
+}
+
+function _cms_varnish_purge_node($node) {
   // For documents, we need to invalidate all meetings they are linked to.
   if ($node->type == 'document') {
     cms_varnish_purge_related_meetings($node);
