@@ -49,7 +49,7 @@ function cms_varnish_purge_related_meetings($node) {
   $document_meetings = cms_varnish_get_document_meetings($node);
   if (!empty($document_meetings)) {
     foreach ($document_meetings as $document_meeting) {
-      $urls[] = 'node/' . $document_meeting->nid;
+      $urls[] = 'node/' . $document_meeting;
     }
   }
   $urls = array_merge($urls, cms_varnish_get_url_aliases($urls));
@@ -91,10 +91,16 @@ function cms_varnish_get_document_meetings($node) {
     ->fieldCondition('field_meeting_document', 'target_id', $nid);
 
   $result = $query->execute();
-  if (!empty($result['node'])) {
-    return $result['node'];
+  $meetings = [];
+  if (!empty($node->field_document_meeting[LANGUAGE_NONE])) {
+    $meetings = array_column($node->field_document_meeting[LANGUAGE_NONE], 'target_id');
   }
-  return NULL;
+  if (!empty($result['node'])) {
+    foreach ($result['node'] as $data) {
+      $meetings[] = $data->nid;
+    }
+  }
+  return array_unique($meetings);
 }
 
 function cms_varnish_get_url_aliases($urls) {
