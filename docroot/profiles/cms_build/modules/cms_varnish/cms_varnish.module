@@ -33,12 +33,17 @@ function _cms_varnish_purge_node($node) {
   if ($node->type == 'document') {
     cms_varnish_purge_related_meetings($node);
   }
+  cms_varnish_purge_related_views($node);
+
+  if (empty($node->nid)) {
+    return;
+  }
+
   $urls = ['node/' . $node->nid];
 
   // Get url aliases.
   $urls = array_merge($urls, cms_varnish_get_url_aliases($urls));
   cms_varnish_purge_urls($urls);
-  cms_varnish_purge_related_views($node);
 }
 
 function cms_varnish_purge_related_meetings($node) {
