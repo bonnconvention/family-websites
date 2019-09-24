@@ -262,10 +262,8 @@ function cms_varnish_purge($urls) {
   $drupal_full_urls = [];
   $varnish_full_urls = [];
   foreach ($urls as $url) {
-    $drupal_full_urls = [
-      "https://$host/$url/",
-      "http://$host/$url/",
-    ];
+    $drupal_full_urls[] = "https://$host/$url/";
+    $drupal_full_urls[] = "http://$host/$url/";
     if ($url == '') {
       $varnish_full_urls[] = '/';
     }
@@ -275,7 +273,7 @@ function cms_varnish_purge($urls) {
   }
   // Clear drupal cache.
   db_delete('cache_page')
-    ->condition('cid', $drupal_full_urls, 'IN')
+    ->condition('cid', ['https://test.cms.int/saiga/'], 'IN')
     ->execute();
   cache_clear_all($drupal_full_urls, 'cache_page');
 
