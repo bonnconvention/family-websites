@@ -43,6 +43,9 @@ function _cms_varnish_purge_node($node) {
 
   // Get url aliases.
   $urls = array_merge($urls, cms_varnish_get_url_aliases($urls));
+  // Get all homepages
+  $urls[] = '';
+
   cms_varnish_purge_urls($urls);
 }
 
@@ -129,22 +132,42 @@ function cms_varnish_get_url_aliases($urls) {
   return $url_aliases;
 }
 
+function _cms_varnish_get_domain_paths() {
+  $domain_paths = [];
+  $domains = domain_list_by_machine_name();
+  foreach ($domains as $domain => $settings) {
+    $name = explode('/', $settings['subdomain']);
+    if (empty($name[1])) {
+      continue;
+    }
+    $domain_paths[] = $name[1];
+  }
+  return $domain_paths;
+}
+
 function cms_varnish_purge_urls($urls) {
   $output_urls = array();
   $languages = language_list();
-  if ($languages) {
-    foreach ($urls as $url) {
+  $subdomains = _cms_varnish_get_domain_paths() + ['base' => ''];
+  foreach ($urls as $url) {
+    foreach ($subdomains as $subdomain) {
+      if ($subdomain != '') {
+        $url = "$subdomain/$url";
+      }
       cms_varnish_purge($url);
-      $output_urls[] = t('URL: @url', array('@url' => check_url($url)));
-      foreach ($languages as $language => $l) {
-        // Build urls for all languages.
-        $purge_url = "$language/$url";
-        cms_varnish_purge($purge_url);
-        // Build log details.
-        $output_urls[] = t('URL: @url', array('@url' => check_url($purge_url)));
+      $output_urls[] = t('URL: @url', ['@url' => check_url($url)]);
+      if ($languages) {
+        foreach ($languages as $language => $l) {
+          // Build urls for all languages.
+          $purge_url = "$language/$url";
+          cms_varnish_purge($purge_url);
+          // Build log details.
+          $output_urls[] = t('URL: @url', ['@url' => check_url($purge_url)]);
+        }
       }
     }
   }
+
 
   if ($output_urls) {
     // Log debug message in watchdog.
