@@ -262,12 +262,14 @@ function cms_varnish_purge($urls) {
   $drupal_full_urls = [];
   $varnish_full_urls = [];
   foreach ($urls as $url) {
-    $drupal_full_urls[] = "https://$host/$url/";
-    $drupal_full_urls[] = "http://$host/$url/";
     if ($url == '') {
+      $drupal_full_urls[] = "https://$host/";
+      $drupal_full_urls[] = "http://$host/";
       $varnish_full_urls[] = '/';
     }
     else {
+      $drupal_full_urls[] = "https://$host/$url/";
+      $drupal_full_urls[] = "http://$host/$url/";
       $varnish_full_urls[] = "/$url/";
     }
   }
