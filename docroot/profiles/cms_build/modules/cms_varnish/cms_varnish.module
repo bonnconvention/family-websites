@@ -151,15 +151,16 @@ function cms_varnish_purge_urls($urls) {
   $subdomains = _cms_varnish_get_domain_paths() + ['base' => ''];
   foreach ($urls as $url) {
     foreach ($subdomains as $subdomain) {
+      $subdomain_url = $url;
       if ($subdomain != '') {
-        $url = "$subdomain/$url";
+        $subdomain_url = "$subdomain/$url";
       }
-      cms_varnish_purge($url);
-      $output_urls[] = t('URL: @url', ['@url' => check_url($url)]);
+      cms_varnish_purge($subdomain_url);
+      $output_urls[] = t('URL: @url', ['@url' => check_url($subdomain_url)]);
       if ($languages) {
         foreach ($languages as $language => $l) {
           // Build urls for all languages.
-          $purge_url = "$language/$url";
+          $purge_url = "$subdomain/$language/$url";
           cms_varnish_purge($purge_url);
           // Build log details.
           $output_urls[] = t('URL: @url', ['@url' => check_url($purge_url)]);
