@@ -6,12 +6,11 @@
 
 include_once 'cms_varnish.features.inc';
 
-
+/**
+ * Implements hook_node_delete().
+ */
 function cms_varnish_node_delete($node) {
-  if ($node->type == 'document') {
-    cms_varnish_purge_related_meetings($node);
-  }
-  cms_varnish_purge_related_views($node);
+  _cms_varnish_purge_node($node, TRUE);
 }
 
 /**
@@ -28,14 +27,20 @@ function cms_varnish_node_insert($node) {
   _cms_varnish_purge_node($node);
 }
 
-function _cms_varnish_purge_node($node) {
+/**
+ * Purge all pages for a node.
+ *
+ * @param $node
+ * @param bool $deleted
+ */
+function _cms_varnish_purge_node($node, $deleted = FALSE) {
   // For documents, we need to invalidate all meetings they are linked to.
   if ($node->type == 'document') {
     cms_varnish_purge_related_meetings($node);
   }
   cms_varnish_purge_related_views($node);
 
-  if (empty($node->nid)) {
+  if (empty($node->nid) || $deleted) {
     return;
   }
 
@@ -43,12 +48,18 @@ function _cms_varnish_purge_node($node) {
 
   // Get url aliases.
   $urls = array_merge($urls, cms_varnish_get_url_aliases($urls));
-  // Get all homepages
+
+  // Add homepage.
   $urls[] = '';
 
   cms_varnish_purge_urls($urls);
 }
 
+/**
+ * Purge meeting pages.
+ *
+ * @param $node
+ */
 function cms_varnish_purge_related_meetings($node) {
   if ($node->type != 'document') {
     return;
@@ -64,6 +75,11 @@ function cms_varnish_purge_related_meetings($node) {
   cms_varnish_purge_urls($urls);
 }
 
+/**
+ * Purge the views in which the node appears.
+ *
+ * @param $node
+ */
 function cms_varnish_purge_related_views($node) {
   $views = array(
     'meeting' => ['front_end_meetings', 'event_and_meetings_lists'],
@@ -83,6 +99,8 @@ function cms_varnish_purge_related_views($node) {
     $views['legal_instrument'] = 'legal_instrument_listing';
   }
 
+  $urls = [];
+
   if (!empty($views[$node->type])) {
     $urls = cms_varnish_get_display_urls($views[$node->type]);
   }
@@ -90,6 +108,13 @@ function cms_varnish_purge_related_views($node) {
   cms_varnish_purge_urls($urls);
 }
 
+/**
+ * Get all meetings for a document.
+ *
+ * @param $node
+ *
+ * @return array
+ */
 function cms_varnish_get_document_meetings($node) {
   $nid = $node->nid;
   $query = new EntityFieldQuery();
@@ -111,6 +136,13 @@ function cms_varnish_get_document_meetings($node) {
   return array_unique($meetings);
 }
 
+/**
+ * Get all url aliases for a list of paths.
+ *
+ * @param $urls
+ *
+ * @return array
+ */
 function cms_varnish_get_url_aliases($urls) {
   $url_aliases = array();
   $languages = language_list();
@@ -132,6 +164,11 @@ function cms_varnish_get_url_aliases($urls) {
   return $url_aliases;
 }
 
+/**
+ * Get all subdomains.
+ *
+ * @return array
+ */
 function _cms_varnish_get_domain_paths() {
   $domain_paths = [];
   $domains = domain_list_by_machine_name();
@@ -145,8 +182,16 @@ function _cms_varnish_get_domain_paths() {
   return $domain_paths;
 }
 
+/**
+ * Purge a list of urls.
+ *
+ * @param $urls
+ *
+ * @throws \Exception
+ */
 function cms_varnish_purge_urls($urls) {
-  $output_urls = array();
+  $output_urls = [];
+  $purge_urls = [];
   $languages = language_list();
   $subdomains = _cms_varnish_get_domain_paths() + ['base' => ''];
   foreach ($urls as $url) {
@@ -155,7 +200,7 @@ function cms_varnish_purge_urls($urls) {
       if ($subdomain != '') {
         $subdomain_url = "$subdomain/$url";
       }
-      cms_varnish_purge($subdomain_url);
+      $purge_urls[] = $subdomain_url;
       $output_urls[] = t('URL: @url', ['@url' => check_url($subdomain_url)]);
       if ($languages) {
         foreach ($languages as $language => $l) {
@@ -164,7 +209,7 @@ function cms_varnish_purge_urls($urls) {
           if ($subdomain != '') {
             $purge_url = "$subdomain/$language/$url";
           }
-          cms_varnish_purge($purge_url);
+          $purge_urls[] = $purge_url;
           // Build log details.
           $output_urls[] = t('URL: @url', ['@url' => check_url($purge_url)]);
         }
@@ -173,13 +218,22 @@ function cms_varnish_purge_urls($urls) {
   }
 
 
-  if ($output_urls) {
+  if ($purge_urls) {
+    cms_varnish_purge($purge_urls);
+
     // Log debug message in watchdog.
     $message = t('Expiration was executed for the next URLs: !urls', array('!urls' => theme('item_list', array('items' => $output_urls))));
     watchdog('cms_varnish_purger', $message, array(), WATCHDOG_DEBUG);
   }
 }
 
+/**
+ * Get the url of a view.
+ *
+ * @param $view_ids
+ *
+ * @return array
+ */
 function cms_varnish_get_display_urls($view_ids) {
   if (!is_array($view_ids)) {
     $view_ids = [$view_ids];
@@ -197,21 +251,62 @@ function cms_varnish_get_display_urls($view_ids) {
   return $urls;
 }
 
-function cms_varnish_purge($url) {
+/**
+ * Purge a list of urls.
+ *
+ * @param $urls
+ */
+function cms_varnish_purge($urls) {
   $host = _varnish_get_host();
-  // Clear drupal cache.
-  $full_urls = [
-    "https://$host/$url",
-    "http://$host/$url",
-  ];
-  foreach ($full_urls as $full_url) {
-    db_delete('cache_page')
-      ->condition('cid', $full_url)
-      ->execute();
-    cache_clear_all($full_url, 'cache_page');
+
+  $drupal_full_urls = [];
+  $varnish_full_urls = [];
+  foreach ($urls as $url) {
+    if ($url == '') {
+      $drupal_full_urls[] = "https://$host/";
+      $drupal_full_urls[] = "http://$host/";
+      $varnish_full_urls[] = '/';
+    }
+    else {
+      $drupal_full_urls[] = "https://$host/$url/";
+      $drupal_full_urls[] = "http://$host/$url/";
+      $varnish_full_urls[] = "/$url/";
+    }
   }
+  // Clear drupal cache.
+  db_delete('cache_page')
+    ->condition('cid', ['https://test.cms.int/saiga/'], 'IN')
+    ->execute();
+  cache_clear_all($drupal_full_urls, 'cache_page');
+
   // Clear varnish cache.
-  varnish_purge($host, "/$url");
+  _cms_varnish_purge_paths($host, $varnish_full_urls);
+}
+
+
+/**
+ * Purge varnish cache.
+ *
+ * @param $host
+ * @param array $paths
+ */
+function _cms_varnish_purge_paths($host, array $paths) {
+  // Subtract the hostname length from the global length limit.
+  // Note we use strlen() because we're counting bytes, not characters.
+  $length_limit = variable_get('varnish_cmdlength_limit', 7500) - strlen($host);
+  while (!empty($paths)) {
+    // Construct patterns and send them to the server when they're full.
+    $purge_pattern = '^';
+    while (strlen($purge_pattern) < $length_limit && !empty($paths)) {
+      $purge_pattern .= array_shift($paths) . '$|^';
+    }
+    // Chop the final "|^" off the string, leaving "$".
+    $purge_pattern = substr($purge_pattern, 0, -2);
+    // Remove extra slashes in beginning of URL.
+    $purge_pattern = preg_replace('#/+#', '/', $purge_pattern);
+    // Submit this purge chunk.
+    varnish_purge($host, $purge_pattern);
+  }
 }
 
 /**
