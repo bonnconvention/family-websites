@@ -206,14 +206,12 @@ function cms_varnish_purge($urls) {
   $host = _varnish_get_host();
 
   $drupal_full_urls = [];
-  $varnish_full_urls = [];
   // Clear drupal cache.
   foreach ($urls as $url) {
     $drupal_full_urls = [
       "https://$host/$url",
       "http://$host/$url",
     ];
-    $varnish_full_urls[] = "/$url";
   }
   db_delete('cache_page')
     ->condition('cid', $drupal_full_urls, 'IN')
@@ -221,7 +219,7 @@ function cms_varnish_purge($urls) {
   cache_clear_all($drupal_full_urls, 'cache_page');
 
   // Clear varnish cache.
-  varnish_purge_paths($host, $varnish_full_urls);
+  varnish_purge_paths($host, $urls);
 }
 
 /**
