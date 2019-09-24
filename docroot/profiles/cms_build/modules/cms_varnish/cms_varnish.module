@@ -213,7 +213,7 @@ function cms_varnish_purge($urls) {
       "https://$host/$url",
       "http://$host/$url",
     ];
-    $varnish_full_urls[] = "$url/";
+    $varnish_full_urls[] = "$url";
   }
   db_delete('cache_page')
     ->condition('cid', $drupal_full_urls, 'IN')
@@ -221,7 +221,27 @@ function cms_varnish_purge($urls) {
   cache_clear_all($drupal_full_urls, 'cache_page');
 
   // Clear varnish cache.
-  varnish_purge_paths($host, $varnish_full_urls);
+  _cms_varnish_purge_paths($host, $varnish_full_urls);
+}
+
+
+function _cms_varnish_purge_paths($host, array $paths) {
+  // Subtract the hostname length from the global length limit.
+  // Note we use strlen() because we're counting bytes, not characters.
+  $length_limit = variable_get('varnish_cmdlength_limit', 7500) - strlen($host);
+  while (!empty($paths)) {
+    // Construct patterns and send them to the server when they're full.
+    $purge_pattern = '^';
+    while (strlen($purge_pattern) < $length_limit && !empty($paths)) {
+      $purge_pattern .= array_shift($paths) . '$|^';
+    }
+    // Chop the final "|^" off the string, leaving "$".
+    $purge_pattern = substr($purge_pattern, 0, -2);
+    // Remove extra slashes in beginning of URL.
+    $purge_pattern = preg_replace('#/+#', '/', $purge_pattern);
+    // Submit this purge chunk.
+    varnish_purge($host, $purge_pattern);
+  }
 }
 
 /**
