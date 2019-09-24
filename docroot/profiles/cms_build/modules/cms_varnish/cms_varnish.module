@@ -263,8 +263,8 @@ function cms_varnish_purge($urls) {
   $varnish_full_urls = [];
   foreach ($urls as $url) {
     $drupal_full_urls = [
-      "https://$host/$url",
-      "http://$host/$url",
+      "https://$host/$url/",
+      "http://$host/$url/",
     ];
     if ($url == '') {
       $varnish_full_urls[] = '/';
