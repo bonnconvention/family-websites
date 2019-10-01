@@ -205,9 +205,20 @@ function cms_varnish_purge_urls($urls) {
       if ($languages) {
         foreach ($languages as $language => $l) {
           // Build urls for all languages.
-          $purge_url = "$language/$url";
+          if ($url == '') {
+            $purge_url = $language;
+          }
+          else {
+            $purge_url = "$language/$url";
+          }
+
           if ($subdomain != '') {
-            $purge_url = "$subdomain/$language/$url";
+            if ($url == '') {
+              $purge_url = "$subdomain/$language";
+            }
+            else {
+              $purge_url = "$subdomain/$language/$url";
+            }
           }
           $purge_urls[] = $purge_url;
           // Build log details.
