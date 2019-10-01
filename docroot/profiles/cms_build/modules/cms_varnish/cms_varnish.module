@@ -275,7 +275,7 @@ function cms_varnish_purge($urls) {
   }
   // Clear drupal cache.
   db_delete('cache_page')
-    ->condition('cid', ['https://test.cms.int/saiga/'], 'IN')
+    ->condition('cid', $drupal_full_urls, 'IN')
     ->execute();
   cache_clear_all($drupal_full_urls, 'cache_page');
 
