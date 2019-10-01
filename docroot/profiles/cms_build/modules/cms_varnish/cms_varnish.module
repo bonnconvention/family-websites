@@ -271,6 +271,7 @@ function cms_varnish_purge($urls) {
       $drupal_full_urls[] = "https://$host/$url/";
       $drupal_full_urls[] = "http://$host/$url/";
       $varnish_full_urls[] = "/$url/";
+      $varnish_full_urls[] = "/$url";
     }
   }
   // Clear drupal cache.
