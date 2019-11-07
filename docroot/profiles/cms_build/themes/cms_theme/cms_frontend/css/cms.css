@@ -90,7 +90,7 @@ background: url("../images/cms_news_hover.png") no-repeat;
 .ui-tabs-nav li.ui-state-active,
 .ui-tabs-nav li.ui-state-active:hover,
 .block-quicktabs .ui-accordion-header.ui-state-active {
-border-top: 4px solid #FFD116;
+border-top: 4px solid #003871;
 }
 
 .ui-tabs .ui-state-default:hover {
@@ -210,13 +210,20 @@ color: #5E9732;
 /* homepage right column */
 #block-menu-block-3,
 .right-column section {
-padding-bottom: 30px;
+margin-bottom: 30px;
+border-bottom: 1px dotted #dfdfdf;
 }
 
 #block-block-9 {
 padding-bottom: 5px;
 }
 
+/* cms block title */
+.block-title {
+color: #003871;
+border-left: 5px solid;
+padding-left:10px;
+}
 
 /* print website's URL */
 @media print {
