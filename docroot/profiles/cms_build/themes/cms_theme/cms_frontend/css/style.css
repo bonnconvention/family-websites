@@ -6756,3 +6756,24 @@ td.radio {
 #edit-field-leo-tags-und-powertagging-language-error {
   display: none;
 }
+
+.download-document-files {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #b94a48;
+}
+
+.download-document-files .download-document-files-title {
+  margin: 0 5px;
+}
+
+.download-document-files .link-wrapper:not(:last-child) {
+  margin-right: 4px;
+}
+
+.download-document-files .link-wrapper:not(:last-child):after {
+  content: ' | ';
+}

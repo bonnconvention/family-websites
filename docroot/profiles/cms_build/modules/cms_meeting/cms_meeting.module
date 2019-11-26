@@ -91,9 +91,9 @@ function cms_meeting_menu() {
         'file' => 'cms_meeting.api.inc',
     );
 
-    $items['meeting/download-all-files/%'] = array(
+    $items['meeting/download-all-files/%/%/%'] = array(
         'page callback' => 'cms_meeting_download_all_files',
-        'page arguments' => array(2),
+        'page arguments' => array(2, 3, 4),
         'access arguments' => array('access content'),
         'type' => MENU_CALLBACK,
     );
@@ -609,6 +609,33 @@ function cms_meeting_download_all_files_cache_reset($nid) {
 }
 
 /**
+ * Implements hook_preprocess_node().
+ */
+function cms_meeting_preprocess_node(&$variables) {
+  if ($variables['type'] != 'meeting') {
+    return;
+  }
+  $document_languages = _cms_meeting_get_all_document_languages($variables['node']);
+  $document_type_languages = [];
+  if (!empty($document_languages)) {
+    $languages = [];
+    foreach ($document_languages as $document_type => $languages) {
+      foreach ($languages as $language) {
+        $language = taxonomy_term_load($language);
+        $label = $language->name;
+        if (empty(!$language->field_iso2[LANGUAGE_NONE][0]['value'])) {
+          $label = $language->field_iso2[LANGUAGE_NONE][0]['value'];
+        }
+        $document_type_languages[$document_type][$language->tid] = strtoupper($label);
+      }
+      ksort($document_type_languages[$document_type]);
+    }
+  }
+
+  $variables['document_type_languages'] = $document_type_languages;
+}
+
+/**
  * Callback function for menu item from hook_menu
  * Function used to download all the documents files related to a meeting
  *
@@ -616,7 +643,7 @@ function cms_meeting_download_all_files_cache_reset($nid) {
  * @param $nid - Meeting node id
  */
 
-function cms_meeting_download_all_files($nid) {
+function cms_meeting_download_all_files($nid, $language = 'all', $document_type = 'all') {
 
     $node = node_load($nid);
     if (empty($node) || $node->type != 'meeting') {
@@ -627,12 +654,13 @@ function cms_meeting_download_all_files($nid) {
     $slug = CMSBase::slug($node->title, 50, '-');
 
     $archive_download_name= 'Meeting_'.$slug.'_Documents';
-    $archive_server_name  = 'meeting_documents_archive_'.$nid;
+    $global_cache_name = "meeting_documents_archive_{$nid}";
+    $archive_server_name  = "meeting_documents_archive_{$nid}_{$language}_{$document_type}";
     $archive_file_name = $archive_server_name.'.zip';
     $folder_path = 'public://downloads/meeting_documents';
 
-    //check for cache of the path
-    if($cached = cache_get($archive_server_name, 'cache'))  {
+    // check for cache of the path
+    if($cached = cache_get($archive_server_name, 'cache') && cache_get($global_cache_name, 'cache'))  {
         $archive_realpath = $cached->data;
     }
 
@@ -654,33 +682,24 @@ function cms_meeting_download_all_files($nid) {
 
         //get results from view
         $view = views_get_view('meeting_documents_list_reorder');
-        $view_display = 'download_meeting_doc';
+
+        $view_display = 'download_meeting_doc_langtype';
         if ($view && $view->access($view_display)) {
             $view->set_display($view_display);
-            $view->set_arguments(array($nid));
+            $view->set_arguments(array($nid, $language, $document_type));
             $view->execute();
 
             $results = $view->result;
 
             $fids = array();
             foreach ($results as $result) {
-                $field_ids = array();
-
-                foreach ($result->_field_data['nid']['entity']->field_document_files as $fields) {
-                    foreach($fields as $field) {
-                        if (!empty($field['value'])) {
-                            $field_ids []= $field['value'];
-                        }
-                    }
-                }
-                if (!empty($field_ids)) {
-                    $result_files = db_query('SELECT * FROM {field_data_field_document_file} f WHERE f.entity_id IN (:ids)', array(':ids' => $field_ids));
-                    //get the files ids
-                    foreach ($result_files as $record) {
-                        $fids []= $record->field_document_file_fid;
-                    }
-                }
+                $fids[] = $result->field_field_document_file[0]['raw']['fid'];
             }
+
+            if (!empty($fids)) {
+              $fids = array_unique($fids);
+            }
+
             //Create the archive
             $archive = new PclZip($archive_realpath);
             $files = array();
@@ -704,6 +723,7 @@ function cms_meeting_download_all_files($nid) {
             //Set the path in cache
             //TODO Cron to remove old files
             cache_set($archive_server_name, $archive_realpath, 'cache', 60*1440); //1 day
+            cache_set($global_cache_name, $archive_realpath, 'cache', 60*1440); //1 day
         } else {
             //if the view wasn't found
             drupal_set_message(t('There was an error exporting the files!'), 'error');
@@ -993,4 +1013,35 @@ function _cms_meeting_get_all_documents_data() {
 
   $result = db_query($query);
   return $result->fetchAllAssoc('nid');
+}
+
+function _cms_meeting_get_all_document_languages($node) {
+  $nid = $node->nid;
+  if (!is_numeric($nid)) {
+    return [];
+  }
+
+  $query = "
+    SELECT d.field_document_type_tid, GROUP_CONCAT(DISTINCT(c.field_document_file_language_tid)) as languages
+    FROM field_data_field_meeting_document a
+    JOIN field_data_field_document_files b ON a.field_meeting_document_target_id = b.entity_id
+    JOIN field_data_field_document_file_language c ON b.field_document_files_value = c.entity_id
+    JOIN field_data_field_document_type d ON a.field_meeting_document_target_id = d.entity_id
+    WHERE a.entity_id = {$nid}
+    GROUP BY d.field_document_type_tid;
+  ";
+
+  $result = db_query($query);
+  $result = $result->fetchAllAssoc('field_document_type_tid');
+
+  if (empty($result)) {
+    return [];
+  }
+
+  $languages = [];
+  foreach ($result as $idx => $data) {
+    $languages[$idx] = explode(',', $data->languages);
+  }
+
+  return $languages;
 }

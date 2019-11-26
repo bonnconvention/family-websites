@@ -107,3 +107,42 @@ function cms_meeting_update_7008() {
       ))->execute();
   }
 }
+
+/**
+ * Add the field_iso2 field and set its values.
+ */
+function cms_meeting_update_7009() {
+  $field_example = array(
+    'field_name' => 'field_iso2',
+    'cardinality' => 1,
+    'type' => 'text',
+  );
+  field_create_field($field_example);
+
+  $field_example_instance = array(
+    'field_name' => 'field_iso2',
+    'label' => st('ISO2'),
+    'bundle' => 'languages',
+    'entity_type' => 'taxonomy_term',
+    'widget' => array(
+      'type' => 'text_textfield',
+    ),
+  );
+  field_create_instance($field_example_instance);
+
+  $iso2_json = file_get_contents(drupal_get_path('module', 'cms_meeting') . '/data/language-codes-3b2_json.json');
+  $iso2_json = json_decode($iso2_json, TRUE);
+  foreach ($iso2_json as $data) {
+    $name = $data['English'];
+    $name = explode('; ', $name);
+    $name = trim($name[0]);
+    $term = taxonomy_get_term_by_name($name, 'languages');
+    if (empty($term)) {
+      continue;
+    }
+
+    $term = reset($term);
+    $term->field_iso2[LANGUAGE_NONE][0]['value'] = $data['alpha2'];
+    taxonomy_term_save($term);
+  }
+}
