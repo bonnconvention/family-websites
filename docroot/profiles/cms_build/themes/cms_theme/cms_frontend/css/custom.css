@@ -594,6 +594,7 @@ height: 25px;
 .disclaimers h2 {
 font-size: 13px;
 margin-top: 0px;
+color:#fff;
 }
 
 .simplenews-subscribe label {
@@ -641,7 +642,7 @@ z-index: 10;
 
 /* NEWS slideshow, skin Default */
 .front .center-column {
-margin-top: 5px;
+margin-top: 15px;
 }
 
 #block-views-news-slideshow-block {
@@ -1263,7 +1264,7 @@ font-size: 22px;
 
 .front .region-sidebar-second.well,
 .front .region-sidebar-first.well {
-margin-top: 5px;
+margin-top: 15px;
 }
 
 .region-sidebar-second ul,
