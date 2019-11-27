@@ -6764,6 +6764,7 @@ td.radio {
   margin-bottom: 10px;
   font-weight: bold;
   color: #b94a48;
+  flex-wrap: wrap;
 }
 
 .download-document-files .download-document-files-title {
@@ -6776,4 +6777,13 @@ td.radio {
 
 .download-document-files .link-wrapper:not(:last-child):after {
   content: ' | ';
+}
+
+.download-document-files-header {
+  display: flex;
+  align-items: center;
+}
+
+.download-document-files .links-wrapper {
+  display: flex;
 }

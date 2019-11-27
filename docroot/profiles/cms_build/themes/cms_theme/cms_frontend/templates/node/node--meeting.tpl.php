@@ -137,15 +137,19 @@
                                 <div class="panel-body">
                                   <?php if (!empty($document_type_languages[$type_term->tid])): ?>
                                     <div class="download-document-files">
-                                      <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
-                                      <div class="download-document-files-title">
-                                        <?php print t('Download all files of this section in'); ?>
-                                      </div>
-                                      <?php foreach ($document_type_languages[$type_term->tid] as $language_tid => $label): ?>
-                                        <div class="link-wrapper">
-                                          <a href="/meeting/download-all-files/<?php echo $node->nid; ?>/<?php echo $language_tid; ?>/<?php echo $type_term->tid; ?>" target="_blank"><?php echo $label; ?></a>
+                                      <div class="download-document-files-header">
+                                        <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+                                        <div class="download-document-files-title">
+                                          <?php print t('Download all files of this section in'); ?>
                                         </div>
-                                      <?php endforeach; ?>
+                                      </div>
+                                      <div class="links-wrapper">
+                                        <?php foreach ($document_type_languages[$type_term->tid] as $language_tid => $label): ?>
+                                          <div class="link-wrapper">
+                                            <a href="/meeting/download-all-files/<?php echo $node->nid; ?>/<?php echo $language_tid; ?>/<?php echo $type_term->tid; ?>" target="_blank"><?php echo $label; ?></a>
+                                          </div>
+                                        <?php endforeach; ?>
+                                      </div>
                                     </div>
                                   <?php endif; ?>
                                     <?php print views_embed_view('meeting_documents_list_reorder','m_d_list_fe', $node->nid, $type_term->tid); ?>
