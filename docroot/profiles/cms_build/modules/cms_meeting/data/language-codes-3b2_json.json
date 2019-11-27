@@ -918,5 +918,115 @@
     "English": "Zulu",
     "alpha2": "zu",
     "alpha3-b": "zul"
+  },
+  {
+    "English": "Asturian",
+    "alpha2": "ast",
+    "alpha3-b": "ast"
+  },
+  {
+    "English": "Avar",
+    "alpha2": "av",
+    "alpha3-b": "ava"
+  },
+  {
+    "English": "Bhutani",
+    "alpha2": "dz",
+    "alpha3-b": "dzo"
+  },
+  {
+    "English": "Cambodian",
+    "alpha2": "km",
+    "alpha3-b": "khm"
+  },
+  {
+    "English": "Chinese, Simplified",
+    "alpha2": "zh-hans",
+    "alpha3-b": "zh-hans"
+  },
+  {
+    "English": "Chinese, Traditional",
+    "alpha2": "zh-hant",
+    "alpha3-b": "zh-hant"
+  },
+  {
+    "English": "English, British",
+    "alpha2": "en-GB",
+    "alpha3-b": "en-GB"
+  },
+  {
+    "English": "Filipino",
+    "alpha2": "fil",
+    "alpha3-b": "fil"
+  },
+  {
+    "English": "Greenlandic",
+    "alpha2": "kl",
+    "alpha3-b": "kal"
+  },
+  {
+    "English": "Kirundi",
+    "alpha2": "rn",
+    "alpha3-b": "run"
+  },
+  {
+    "English": "Luganda",
+    "alpha2": "lg",
+    "alpha3-b": "lug"
+  },
+  {
+    "English": "Maldivian",
+    "alpha2": "dv",
+    "alpha3-b": "div"
+  },
+  {
+    "English": "Maldivian",
+    "alpha2": "mo",
+    "alpha3-b": "mol"
+  },
+  {
+    "English": "Pashto",
+    "alpha2": "ps",
+    "alpha3-b": "pus"
+  },
+  {
+    "English": "Portuguese, Brazil",
+    "alpha2": "pt-BR",
+    "alpha3-b": "pt-BR"
+  },
+  {
+    "English": "Portuguese, Portugal",
+    "alpha2": "pt-PT",
+    "alpha3-b": "pt-PT"
+  },
+  {
+    "English": "Scots",
+    "alpha2": "sco",
+    "alpha3-b": "sco"
+  },
+  {
+    "English": "Scots Gaelic",
+    "alpha2": "gd",
+    "alpha3-b": "gla"
+  },
+  {
+    "English": "Serbo-Croatian",
+    "alpha2": "sh",
+    "alpha3-b": "hbs"
+  },
+  {
+    "English": "Setswana",
+    "alpha2": "tn",
+    "alpha3-b": "tsn"
+  },
+  {
+    "English": "Setswana",
+    "alpha2": "ss",
+    "alpha3-b": "ssw"
+  },
+  {
+    "English": "Swiss German",
+    "alpha2": "gsp",
+    "alpha3-b": "gsw"
   }
 ]
