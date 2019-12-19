@@ -51,18 +51,18 @@ define('CMS_INSTRUMENT_STATUS_ORGANIZATION', 'cmsInstrumentStatusOrganization');
  */
 define('ROLE_CONTENT_MANAGER', 'content manager');
 
-/**
- * Define mcrypt IV value
- *
- * Creates an initialization vector (IV) from a random source.
- * The IV is only meant to give an alternative seed to the encryption routines.
- * This IV does not need to be secret at all, though it can be desirable.
- */
-if (!defined('IV')) {
-    $TD = mcrypt_module_open('tripledes', '', 'ecb', '');
-    $IV = mcrypt_create_iv (mcrypt_enc_get_iv_size($TD), MCRYPT_RAND);
-    define('IV', $IV);
-}
+///**
+// * Define mcrypt IV value
+// *
+// * Creates an initialization vector (IV) from a random source.
+// * The IV is only meant to give an alternative seed to the encryption routines.
+// * This IV does not need to be secret at all, though it can be desirable.
+// */
+//if (!defined('IV')) {
+//    $TD = mcrypt_module_open('tripledes', '', 'ecb', '');
+//    $IV = mcrypt_create_iv (mcrypt_enc_get_iv_size($TD), MCRYPT_RAND);
+//    define('IV', $IV);
+//}
 
 /**
  * Implement hook_init();
@@ -1434,7 +1434,6 @@ class CMSBase {
             $node->{$field_name}[$langcode][0]['target_id'] = $data[$field_name];
         }
     }
-
 
     /**
      * Retrieve the multi-valued field from a Drupal node. "target_id" attribute of field

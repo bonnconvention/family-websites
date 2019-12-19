@@ -4,24 +4,24 @@
  * Created: 201405121812
  */
 
-
-/**
- * Encrypt string using tripledes algorithm. Decrypt using <code>cms_contacts_decrypt_string</code>.
- * @param string $str String to encrypt
- * @return string Encrypted string, '' if $str is empty
- */
-function cms_contacts_encrypt_string($str) {
-    $ret = '';
-    if(!empty($str)) {
-        $hash = substr(drupal_get_hash_salt(), 0, 24);
-        $td = mcrypt_module_open('tripledes', '', 'ecb', '');
-        mcrypt_generic_init($td, $hash, IV);
-        $ret = mcrypt_generic($td, $str);
-        mcrypt_generic_deinit($td);
-        mcrypt_module_close($td);
-    }
-    return $ret;
-}
+//
+///**
+// * Encrypt string using tripledes algorithm. Decrypt using <code>cms_contacts_decrypt_string</code>.
+// * @param string $str String to encrypt
+// * @return string Encrypted string, '' if $str is empty
+// */
+//function cms_contacts_encrypt_string($str) {
+//    $ret = '';
+//    if(!empty($str)) {
+//        $hash = substr(drupal_get_hash_salt(), 0, 24);
+//        $td = mcrypt_module_open('tripledes', '', 'ecb', '');
+//        mcrypt_generic_init($td, $hash, IV);
+//        $ret = mcrypt_generic($td, $str);
+//        mcrypt_generic_deinit($td);
+//        mcrypt_module_close($td);
+//    }
+//    return $ret;
+//}
 
 
 /**
@@ -30,6 +30,7 @@ function cms_contacts_encrypt_string($str) {
  * @return string Decrypted string
  */
 function cms_contacts_decrypt_string($str) {
+  return $str;
     if(!empty($str)) {
         $td = mcrypt_module_open('tripledes', '', 'ecb', '');
         $key = substr(drupal_get_hash_salt(), 0, 24);
