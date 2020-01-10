@@ -119,18 +119,7 @@ function cms_contacts_admin_validate($form, &$form_state) {
     cms_contacts_validate_dn($values[LDAP_PEOPLE_DN], $base_dn, 'People DN');
     cms_contacts_validate_dn($values[LDAP_ORGANIZATION_DN], $base_dn, 'Organization DN');
     cms_contacts_validate_dn($values[LDAP_DEPARTMENT_DN], $base_dn, 'Department DN');
-
-    $hash = substr(drupal_get_hash_salt(), 0, 24);
-    if(!empty($values[LDAP_PASSWORD])) {
-        $td = mcrypt_module_open('tripledes', '', 'ecb', '');
-        mcrypt_generic_init($td, $hash, IV);
-        $form_state['values'][LDAP_PASSWORD] = mcrypt_generic($td, $values[LDAP_PASSWORD]);
-        mcrypt_generic_deinit($td);
-        mcrypt_module_close($td);
-    } else {
-        unset($form_state['values'][LDAP_PASSWORD]);
-    }
-    $password = cms_contacts_decrypt_string($form_state['values'][LDAP_PASSWORD]);
+    $password = $form_state['values'][LDAP_PASSWORD];
     cms_contacts_validate_ldap_connection(
         $values[LDAP_ADDRESS], $values[LDAP_BIND_RDN], $password, $values[LDAP_PORT]
     );
