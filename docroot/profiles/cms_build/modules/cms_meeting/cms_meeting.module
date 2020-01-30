@@ -644,6 +644,7 @@ function cms_meeting_preprocess_node(&$variables) {
  */
 
 function cms_meeting_download_all_files($nid, $language = 'all', $document_type = 'all') {
+
     $node = node_load($nid);
     if (empty($node) || $node->type != 'meeting') {
         drupal_set_message(t('Meeting not found'), 'error');
@@ -655,7 +656,6 @@ function cms_meeting_download_all_files($nid, $language = 'all', $document_type 
     $archive_download_name= 'Meeting_'.$slug.'_Documents';
     $global_cache_name = "meeting_documents_archive_{$nid}";
     $archive_server_name  = "meeting_documents_archive_{$nid}_{$language}_{$document_type}";
-
     $archive_file_name = $archive_server_name.'.zip';
     $folder_path = 'public://downloads/meeting_documents';
 
@@ -667,24 +667,6 @@ function cms_meeting_download_all_files($nid, $language = 'all', $document_type 
 
     //if no path cached or the path cached is invalid - create the Archive
     if(empty($cached->data) || !file_exists($cached->data)) {
-        $flag_name = 'cms_meeting_download_files_flag';
-        $flags = variable_get($flag_name, []);
-
-        $max_execution_time = ini_get('max_execution_time') ?: 300;
-        // If there are some flags set more than MAX_EXECUTION_TIME seconds ago, they need to be deleted.
-        foreach ($flags as $key => $time) {
-            if ($time + $max_execution_time <= time()) {
-              unset($flags[$key]);
-            }
-        }
-
-
-        if (!empty($flags[$archive_server_name]) || count($flags) >= variable_get('cms_meeting_download_files_limit',4)) {
-            drupal_set_message(t('Due to heavy load, the archive could not be generated at this time. Please try again later.'), 'error');
-            drupal_goto("node/$nid");
-            return;
-        }
-
         //check destination folder
         if (!file_prepare_directory($folder_path, FILE_CREATE_DIRECTORY)) {
             drupal_set_message(t('There was an error exporting the files!'), 'error');
@@ -719,9 +701,7 @@ function cms_meeting_download_all_files($nid, $language = 'all', $document_type 
               $fids = array_unique($fids);
             }
 
-            // Create the archive
-            $flags[$archive_server_name] = time();
-            variable_set($flag_name, $flags);
+            //Create the archive
             $archive = new PclZip($archive_realpath);
             $files = array();
             foreach ($fids as $fid) {
@@ -745,8 +725,6 @@ function cms_meeting_download_all_files($nid, $language = 'all', $document_type 
             //TODO Cron to remove old files
             cache_set($archive_server_name, $archive_realpath, 'cache', 60*1440); //1 day
             cache_set($global_cache_name, $archive_realpath, 'cache', 60*1440); //1 day
-            unset($flags[$archive_server_name]);
-            variable_set($flag_name, $flags);
         } else {
             //if the view wasn't found
             drupal_set_message(t('There was an error exporting the files!'), 'error');
