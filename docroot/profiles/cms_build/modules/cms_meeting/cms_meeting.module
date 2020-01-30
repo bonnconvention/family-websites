@@ -660,7 +660,8 @@ function cms_meeting_download_all_files($nid, $language = 'all', $document_type 
     $folder_path = 'public://downloads/meeting_documents';
 
     // check for cache of the path
-    if($cached = cache_get($archive_server_name, 'cache') && cache_get($global_cache_name, 'cache'))  {
+    $cached = cache_get($archive_server_name);
+    if ($cached && cache_get($global_cache_name, 'cache'))  {
         $archive_realpath = $cached->data;
     }
 
