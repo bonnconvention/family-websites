@@ -716,7 +716,7 @@ function cms_meeting_download_all_files($nid, $language = 'all', $document_type 
                 watchdog('error', "Error when exporting documents of meeting $nid : No documents writable found!");
                 drupal_goto(url('node/'.$nid, array ('absolute' => TRUE)));
             }
-            if (!$archive->add($files, PCLZIP_OPT_REMOVE_ALL_PATH, PCLZIP_OPT_TEMP_FILE_THRESHOLD, 10)){
+            if (!$archive->add($files, PCLZIP_OPT_NO_COMPRESSION, PCLZIP_OPT_REMOVE_ALL_PATH, PCLZIP_OPT_TEMP_FILE_THRESHOLD, 10)){
                 drupal_set_message(t('There was an error exporting the files!'), 'error');
                 watchdog('error', "PCLZIP error when exporting documents of meeting $nid : $archive->error_string, $archive->error_code ");
                 drupal_goto(url('node/'.$nid, array ('absolute' => TRUE)));
