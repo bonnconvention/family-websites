@@ -657,6 +657,8 @@ function cms_meeting_download_all_files($nid, $language = 'all', $document_type 
     $global_cache_name = "meeting_documents_archive_{$nid}";
     $archive_server_name  = "meeting_documents_archive_{$nid}_{$language}_{$document_type}";
     $archive_file_name = $archive_server_name.'.zip';
+    $uniqid = uniqid();
+    $tmp_archive_file_name = $archive_server_name . $uniqid . '.zip';
     $folder_path = 'public://downloads/meeting_documents';
 
     // check for cache of the path
@@ -675,10 +677,11 @@ function cms_meeting_download_all_files($nid, $language = 'all', $document_type 
         }
 
         $archive_realpath = drupal_realpath($folder_path) ._DS_. $archive_file_name;
+        $tmp_archive_realpath = drupal_realpath($folder_path) ._DS_. $tmp_archive_file_name;
 
         //remove old file if exists (when cache expired)
-        if (file_exists($archive_realpath)) {
-            file_unmanaged_delete($archive_realpath);
+        if (file_exists($tmp_archive_realpath)) {
+            file_unmanaged_delete($tmp_archive_realpath);
         }
 
         //get results from view
@@ -694,6 +697,9 @@ function cms_meeting_download_all_files($nid, $language = 'all', $document_type 
 
             $fids = array();
             foreach ($results as $result) {
+                if (empty($result->field_field_document_file[0]['raw']['fid'])) {
+                   continue;
+                }
                 $fids[] = $result->field_field_document_file[0]['raw']['fid'];
             }
 
@@ -702,7 +708,7 @@ function cms_meeting_download_all_files($nid, $language = 'all', $document_type 
             }
 
             //Create the archive
-            $archive = new PclZip($archive_realpath);
+            $archive = new PclZip($tmp_archive_realpath);
             $files = array();
             foreach ($fids as $fid) {
                 $file = file_load($fid);
@@ -725,6 +731,8 @@ function cms_meeting_download_all_files($nid, $language = 'all', $document_type 
             //TODO Cron to remove old files
             cache_set($archive_server_name, $archive_realpath, 'cache', 60*1440); //1 day
             cache_set($global_cache_name, $archive_realpath, 'cache', 60*1440); //1 day
+            file_unmanaged_delete($archive_realpath);
+            file_unmanaged_move($tmp_archive_realpath, $archive_realpath);
         } else {
             //if the view wasn't found
             drupal_set_message(t('There was an error exporting the files!'), 'error');
