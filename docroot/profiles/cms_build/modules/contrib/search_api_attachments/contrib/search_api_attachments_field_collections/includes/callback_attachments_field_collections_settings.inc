@@ -42,6 +42,9 @@ class SearchApiAttachmentsFieldCollectionsAlterSettings extends SearchApiAttachm
             // Index the files content.
             if (!empty($file_fields)) {
               foreach ($file_fields as $file_field) {
+                if (empty($collection_items)) {
+                  continue;
+                }
                 foreach ($collection_items as $collection_item) {
                   $field_collection_name = $collection_item->field_name;
                   if (isset($item->{$field_collection_name}) && !empty($item->{$field_collection_name})) {
