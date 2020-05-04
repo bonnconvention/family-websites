@@ -93,6 +93,10 @@ function cms_document_csv_import() {
       $node->field_instrument[LANGUAGE_NONE][0]['target_id'] = $row['CMS Instrument'];
     }
 
+    $node->domains = ['1' => '1', '20' => '20'];
+    $node->domain_source = '1';
+    $node->subdomains = ['CMS', 'Manage'];
+    $node->path['pathauto'] = 1;
     node_save($node);
 
     foreach (['fr', 'es'] as $language) {
