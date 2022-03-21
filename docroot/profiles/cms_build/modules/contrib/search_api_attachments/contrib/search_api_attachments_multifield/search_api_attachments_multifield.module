@@ -8,9 +8,9 @@
 /**
  * Implements hook_help().
  */
-function search_api_attachments_field_collections_help($path, $arg) {
+function search_api_attachments_multifield_help($path, $arg) {
   switch ($path) {
-    case 'admin/help#search_api_attachments_field_collections':
+    case 'admin/help#search_api_attachments_multifield':
 
       $filepath = dirname(__FILE__) . '/README.md';
       if (file_exists($filepath)) {
@@ -47,11 +47,11 @@ function search_api_attachments_field_collections_help($path, $arg) {
 /**
  * Implements hook_search_api_alter_callback_info().
  */
-function search_api_attachments_field_collections_search_api_alter_callback_info() {
-  $callbacks['search_api_attachments_field_collections_alter_settings'] = array(
-    'name' => t('File attachments Field collections'),
-    'description' => t('Extract the content of attached files of a field collection item and index it.'),
-    'class' => 'SearchApiAttachmentsFieldCollectionsAlterSettings',
+function search_api_attachments_multifield_search_api_alter_callback_info() {
+  $callbacks['search_api_attachments_multifield_alter_settings'] = array(
+    'name' => t('File attachments Multifield'),
+    'description' => t('Extract the content of attached files of a multifield item and index it.'),
+    'class' => 'SearchApiAttachmentsMultifieldAlterSettings',
   );
   return $callbacks;
 }

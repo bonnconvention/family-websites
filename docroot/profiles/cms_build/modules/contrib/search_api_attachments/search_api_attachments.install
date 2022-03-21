@@ -1,9 +1,8 @@
 <?php
 
-
 /**
  * @file
- * Module install
+ * Module install file.
  */
 
 /**
@@ -36,7 +35,7 @@ function search_api_attachments_requirements($phase) {
 
     // Test if php-iconv is enabled on the server.
     $requirements['search_api_attachments_iconv'] = array(
-      'title'       => $t('iconv php function'),
+      'title' => $t('iconv php function'),
       'description' => $t('Test if iconv php function is known. You will have an error when trying to index .txt files with search API attachments if this function is not present.'),
     );
 
@@ -79,4 +78,34 @@ function search_api_attachments_update_7101() {
     $schema = search_api_attachments_schema();
     db_create_table('cache_search_api_attachments', $schema['cache_search_api_attachments']);
   }
+}
+
+/**
+ * Set excluded_private to FALSE for existing websites to preserve behavior.
+ */
+function search_api_attachments_update_7102() {
+  $search_api_indexes = db_select('search_api_index')
+    ->fields('search_api_index', array('machine_name'))
+    ->execute()
+    ->fetchCol();
+
+  $indexes = search_api_index_load_multiple($search_api_indexes);
+
+  if (!empty($indexes)) {
+    foreach ($indexes as $index) {
+      if (isset($index->options['data_alter_callbacks']['search_api_attachments_alter_settings']) && isset($index->options['data_alter_callbacks']['search_api_attachments_alter_settings']['settings'])) {
+        $index->options['data_alter_callbacks']['search_api_attachments_alter_settings']['settings']['excluded_private'] = 0;
+
+        entity_save('search_api_index', $index);
+      }
+    }
+  }
+}
+
+/**
+ * Clear the menu cache so the updated permissions will be recognized.
+ */
+function search_api_attachments_update_7103() {
+  variable_set('menu_rebuild_needed', TRUE);
+  drupal_set_message(t('A new permission was added for configuring the Search API Attachments module, please add it to the appropriate administrative roles.'));
 }
