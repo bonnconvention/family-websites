@@ -253,9 +253,11 @@ function cms_varnish_get_display_urls($view_ids) {
   foreach ($view_ids as $view_id) {
     $view = views_get_view($view_id);
     $displays = $view->display;
-    foreach ($displays as $display) {
-      if (!empty($display->display_options['path'])) {
-        $urls[] = $display->display_options['path'];
+    if (!empty($displays)) {
+      foreach ($displays as $display) {
+        if (!empty($display->display_options['path'])) {
+          $urls[] = $display->display_options['path'];
+        }
       }
     }
   }
